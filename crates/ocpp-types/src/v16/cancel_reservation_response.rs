@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CancelReservationResponse {
-    pub status: Status,
+    pub status: CancelReservationResponseStatus,
 }
 impl crate::Action for CancelReservationResponse {
     const ACTION: &'static str = "CancelReservation";

@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RemoteStartTransactionResponse {
-    pub status: Status,
+    pub status: RemoteStartTransactionResponseStatus,
 }
 impl crate::Action for RemoteStartTransactionResponse {
     const ACTION: &'static str = "RemoteStartTransaction";

@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReserveNowResponse {
-    pub status: Status,
+    pub status: ReserveNowResponseStatus,
 }
 impl crate::Action for ReserveNowResponse {
     const ACTION: &'static str = "ReserveNow";

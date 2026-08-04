@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FirmwareStatusNotificationRequest {
-    pub status: Status,
+    pub status: FirmwareStatusNotificationRequestStatus,
 }
 impl crate::Action for FirmwareStatusNotificationRequest {
     const ACTION: &'static str = "FirmwareStatusNotification";

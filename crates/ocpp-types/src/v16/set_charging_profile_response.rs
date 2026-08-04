@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetChargingProfileResponse {
-    pub status: Status,
+    pub status: SetChargingProfileResponseStatus,
 }
 impl crate::Action for SetChargingProfileResponse {
     const ACTION: &'static str = "SetChargingProfile";

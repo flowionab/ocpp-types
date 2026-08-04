@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriggerMessageResponse {
-    pub status: Status,
+    pub status: TriggerMessageResponseStatus,
 }
 impl crate::Action for TriggerMessageResponse {
     const ACTION: &'static str = "TriggerMessage";

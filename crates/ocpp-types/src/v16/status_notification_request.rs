@@ -12,7 +12,7 @@ pub struct StatusNotificationRequest {
     pub error_code: ErrorCode,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub info: Option<heapless::String<50usize>>,
-    pub status: Status,
+    pub status: StatusNotificationRequestStatus,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<alloc::string::String>,
     #[cfg_attr(feature = "serde", serde(rename = "vendorErrorCode"))]
@@ -38,7 +38,7 @@ pub struct StatusNotificationRequest<
     pub error_code: ErrorCode,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub info: Option<heapless::String<50usize>>,
-    pub status: Status,
+    pub status: StatusNotificationRequestStatus,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<heapless::String<STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "vendorErrorCode"))]

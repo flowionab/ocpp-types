@@ -9,7 +9,7 @@ pub struct BootNotificationResponse {
     #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
     pub current_time: alloc::string::String,
     pub interval: i64,
-    pub status: Status,
+    pub status: BootNotificationResponseStatus,
 }
 #[cfg(feature = "alloc")]
 impl crate::Action for BootNotificationResponse {
@@ -24,7 +24,7 @@ pub struct BootNotificationResponse<
     #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
     pub current_time: heapless::String<BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP>,
     pub interval: i64,
-    pub status: Status,
+    pub status: BootNotificationResponseStatus,
 }
 #[cfg(not(feature = "alloc"))]
 impl<const BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP: usize> crate::Action

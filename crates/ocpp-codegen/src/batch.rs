@@ -24,8 +24,19 @@ pub fn generate_batch(schemas: &[Value], version: OcppVersion) -> anyhow::Result
     let mut pool = TypePool::new();
     let mut parsed_messages = Vec::with_capacity(schemas.len());
 
+    // Cross-file collisions (1.6j's `status`/`type`/`unit` meaning
+    // different things on different messages) can only be detected by
+    // looking at every schema in the batch up front -- see
+    // `find_ambiguous_inline_enum_names`.
+    let ambiguous_inline_enum_names = crate::schema::find_ambiguous_inline_enum_names(schemas);
+
     for schema in schemas {
-        parsed_messages.push(SchemaParser::parse_with_pool(schema, &mut pool, version)?);
+        parsed_messages.push(SchemaParser::parse_with_pool_ambiguous(
+            schema,
+            &mut pool,
+            version,
+            &ambiguous_inline_enum_names,
+        )?);
     }
 
     // Computed only after every schema file has registered its types, since

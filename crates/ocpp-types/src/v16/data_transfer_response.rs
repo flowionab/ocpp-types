@@ -8,7 +8,7 @@ use super::common::*;
 pub struct DataTransferResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub data: Option<alloc::string::String>,
-    pub status: Status,
+    pub status: DataTransferResponseStatus,
 }
 #[cfg(feature = "alloc")]
 impl crate::Action for DataTransferResponse {
@@ -22,7 +22,7 @@ pub struct DataTransferResponse<
 > {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub data: Option<heapless::String<DATA_TRANSFER_RESPONSE_DATA_CAP>>,
-    pub status: Status,
+    pub status: DataTransferResponseStatus,
 }
 #[cfg(not(feature = "alloc"))]
 impl<const DATA_TRANSFER_RESPONSE_DATA_CAP: usize> crate::Action

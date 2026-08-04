@@ -10,7 +10,98 @@ use crate::model::RustVariant;
 use crate::pool::TypePool;
 use serde_json::Map;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::collections::HashSet;
+
+/// Scans every schema in a batch for inline (`$ref`-less) string enums --
+/// 1.6j's `status`, `type`, `unit`, etc. -- and returns the set of
+/// pascal-cased field names that mean *different* things (different value
+/// sets) on different messages, e.g. `status` on `SendLocalListResponse`
+/// (`Accepted`/`Failed`/`NotSupported`/`VersionMismatch`) vs. on
+/// `ReserveNowResponse` (`Accepted`/`Faulted`/`Occupied`/`Rejected`/
+/// `Unavailable`).
+///
+/// Naming a generated type purely from the field name (see
+/// [`crate::naming::pascal_case`]) would otherwise collapse every one of
+/// these into a single shared type, silently keeping whichever message's
+/// variants happened to be generated first and leaving the rest with the
+/// wrong shape. Names in the returned set must be qualified with their
+/// owning message/struct name instead; names *not* in the set are safe to
+/// share under their bare field name, since every message that uses them
+/// means the same thing (e.g. `idTagInfo`).
+pub fn find_ambiguous_inline_enum_names(schemas: &[Value]) -> HashSet<String> {
+    let mut signatures: HashMap<String, HashSet<Vec<String>>> = HashMap::new();
+
+    for schema in schemas {
+        let definitions = schema["definitions"].as_object().cloned().unwrap_or_default();
+        let mut visited = HashSet::new();
+        collect_inline_enum_signatures(schema, &definitions, &mut visited, &mut signatures);
+    }
+
+    signatures
+        .into_iter()
+        .filter_map(|(name, sigs)| (sigs.len() > 1).then_some(name))
+        .collect()
+}
+
+fn collect_inline_enum_signatures(
+    object_schema: &Value,
+    definitions: &Map<String, Value>,
+    visited: &mut HashSet<String>,
+    signatures: &mut HashMap<String, HashSet<Vec<String>>>,
+) {
+    let Some(properties) = object_schema["properties"].as_object() else {
+        return;
+    };
+
+    for (field_name, property) in properties {
+        visit_property_for_signatures(field_name, property, definitions, visited, signatures);
+    }
+}
+
+fn visit_property_for_signatures(
+    field_name: &str,
+    property: &Value,
+    definitions: &Map<String, Value>,
+    visited: &mut HashSet<String>,
+    signatures: &mut HashMap<String, HashSet<Vec<String>>>,
+) {
+    if let Some(reference) = property["$ref"].as_str() {
+        if let Some(def_name) = reference.strip_prefix("#/definitions/") {
+            if visited.insert(def_name.to_string()) {
+                if let Some(def_schema) = definitions.get(def_name) {
+                    collect_inline_enum_signatures(def_schema, definitions, visited, signatures);
+                }
+            }
+        }
+        return;
+    }
+
+    match property["type"].as_str() {
+        Some("string") if property["enum"].is_array() => {
+            let mut variants: Vec<String> = property["enum"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect();
+            variants.sort();
+
+            signatures
+                .entry(crate::naming::pascal_case(field_name))
+                .or_default()
+                .insert(variants);
+        }
+        Some("object") if property["properties"].is_object() => {
+            collect_inline_enum_signatures(property, definitions, visited, signatures);
+        }
+        Some("array") => {
+            let item_field_name = format!("{field_name}Item");
+            visit_property_for_signatures(&item_field_name, &property["items"], definitions, visited, signatures);
+        }
+        _ => {}
+    }
+}
 
 /// Default capacity for a `heapless::String<N>` backing a field with no
 /// spec-given `maxLength`, when the caller doesn't override the const
@@ -33,6 +124,11 @@ pub struct SchemaParser<'a> {
     /// `pool`, which tracks types that are already fully generated
     /// (possibly by an earlier schema file).
     in_progress: HashSet<String>,
+    /// Pascal-cased inline-enum field names that must be qualified with
+    /// their owning struct name rather than shared bare, per
+    /// [`find_ambiguous_inline_enum_names`]. Empty unless the caller
+    /// pre-scanned a whole batch for cross-file collisions.
+    ambiguous_inline_enum_names: &'a HashSet<String>,
 }
 
 impl<'a> SchemaParser<'a> {
@@ -56,10 +152,30 @@ impl<'a> SchemaParser<'a> {
     /// multiple schema files is what gives cross-file deduplication: a
     /// definition already registered by an earlier file is reused instead
     /// of being generated again.
+    ///
+    /// Inline enum collisions across files (see
+    /// [`find_ambiguous_inline_enum_names`]) aren't caught by this method on
+    /// its own, since it only sees one schema at a time -- use
+    /// [`Self::parse_with_pool_ambiguous`] with a batch-wide pre-scan when
+    /// that matters (as [`crate::batch::generate_batch`] does).
     pub fn parse_with_pool(
         value: &Value,
         pool: &mut TypePool,
         version: OcppVersion,
+    ) -> anyhow::Result<RustStruct> {
+        Self::parse_with_pool_ambiguous(value, pool, version, &HashSet::new())
+    }
+
+    /// Same as [`Self::parse_with_pool`], but qualifies any inline enum
+    /// whose field name is in `ambiguous_inline_enum_names` with its owning
+    /// struct name instead of sharing it bare, so cross-file collisions
+    /// (like 1.6j's `status` meaning something different on every response)
+    /// don't collapse into one wrong shared type.
+    pub fn parse_with_pool_ambiguous(
+        value: &Value,
+        pool: &mut TypePool,
+        version: OcppVersion,
+        ambiguous_inline_enum_names: &HashSet<String>,
     ) -> anyhow::Result<RustStruct> {
         let definitions = value["definitions"]
             .as_object()
@@ -71,6 +187,7 @@ impl<'a> SchemaParser<'a> {
             pool,
             version,
             in_progress: HashSet::new(),
+            ambiguous_inline_enum_names,
         };
 
         let name = Self::message_name(value)?;
@@ -191,8 +308,21 @@ impl<'a> SchemaParser<'a> {
             // `chargingProfilePurpose`. 2.x always defines enums via `$ref`
             // instead, but 1.6j frequently inlines them, so without this
             // they'd otherwise be treated as plain (unbounded) strings.
+            //
+            // The bare field name is ambiguous when the same name means
+            // different things on different messages (1.6j's `status`,
+            // `type`, `unit`, ...) -- qualify those with the owning struct
+            // name so each message gets its own correctly-shaped enum
+            // instead of silently sharing (or overwriting) another
+            // message's.
             Some("string") if schema["enum"].is_array() => {
-                self.resolve_named_type(crate::naming::pascal_case(field_name), schema)?
+                let candidate = crate::naming::pascal_case(field_name);
+                let rust_name = if self.ambiguous_inline_enum_names.contains(&candidate) {
+                    format!("{owner}{candidate}")
+                } else {
+                    candidate
+                };
+                self.resolve_named_type(rust_name, schema)?
             }
 
             // A `heapless::String<N>` needs a capacity. When the spec
@@ -277,6 +407,13 @@ impl<'a> SchemaParser<'a> {
     /// entirely -- returning a reference to it either way. Shared by
     /// `$ref` resolution ([`Self::resolve_ref`]) and inline (`$ref`-less)
     /// object/enum schemas (in [`Self::resolve_type`]).
+    ///
+    /// Callers are responsible for qualifying `rust_name` up front (see
+    /// [`find_ambiguous_inline_enum_names`]) when the same candidate name
+    /// could mean different things on different messages -- this method
+    /// itself just registers-or-reuses whatever name it's given, and still
+    /// errors loudly (via [`TypePool::register`]) if two truly distinct
+    /// shapes ever do land on the same name.
     fn resolve_named_type(&mut self, rust_name: String, schema: &Value) -> anyhow::Result<RustType> {
         if self.pool.contains(&rust_name) || !self.in_progress.insert(rust_name.clone()) {
             return Ok(RustType::Local(rust_name));
@@ -1016,6 +1153,108 @@ mod tests {
             .types()
             .iter()
             .filter(|t| matches!(t, GeneratedType::Struct(s) if s.name == "IdTagInfo"))
+            .count();
+
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn inline_enum_with_same_field_name_but_different_values_is_qualified_per_message() {
+        // Real 1.6j bug: `SendLocalListResponse.status` and
+        // `ReserveNowResponse.status` are both inline enums, but with
+        // completely different value sets. Naming the generated type purely
+        // from the field name (`Status`) would collapse them into one type,
+        // silently keeping whichever message's variants were seen first.
+        let send_local_list = json!({
+            "title": "SendLocalListResponse",
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": ["Accepted", "Failed", "NotSupported", "VersionMismatch"]
+                }
+            },
+            "required": ["status"]
+        });
+        let reserve_now = json!({
+            "title": "ReserveNowResponse",
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": ["Accepted", "Faulted", "Occupied", "Rejected", "Unavailable"]
+                }
+            },
+            "required": ["status"]
+        });
+
+        let ambiguous = find_ambiguous_inline_enum_names(&[send_local_list.clone(), reserve_now.clone()]);
+        let mut pool = TypePool::new();
+
+        let first =
+            SchemaParser::parse_with_pool_ambiguous(&send_local_list, &mut pool, OcppVersion::V16, &ambiguous)
+                .unwrap();
+        let second =
+            SchemaParser::parse_with_pool_ambiguous(&reserve_now, &mut pool, OcppVersion::V16, &ambiguous).unwrap();
+
+        assert!(matches!(
+            &first.fields[0].ty,
+            RustType::Local(name) if name == "SendLocalListResponseStatus"
+        ));
+        assert!(matches!(
+            &second.fields[0].ty,
+            RustType::Local(name) if name == "ReserveNowResponseStatus"
+        ));
+
+        let first_enum = pool
+            .types()
+            .iter()
+            .find_map(|t| match t {
+                GeneratedType::Enum(e) if e.name == "SendLocalListResponseStatus" => Some(e),
+                _ => None,
+            })
+            .expect("SendLocalListResponseStatus enum should be generated");
+        assert_eq!(first_enum.variants.len(), 4);
+
+        let second_enum = pool
+            .types()
+            .iter()
+            .find_map(|t| match t {
+                GeneratedType::Enum(e) if e.name == "ReserveNowResponseStatus" => Some(e),
+                _ => None,
+            })
+            .expect("ReserveNowResponseStatus enum should be generated");
+        assert_eq!(second_enum.variants.len(), 5);
+    }
+
+    #[test]
+    fn inline_enum_with_same_field_name_and_same_values_is_shared_across_messages() {
+        fn schema_with_status(title: &str) -> Value {
+            json!({
+                "title": title,
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": ["Accepted", "Rejected"]
+                    }
+                },
+                "required": ["status"]
+            })
+        }
+
+        let foo = schema_with_status("FooResponse");
+        let bar = schema_with_status("BarResponse");
+        let ambiguous = find_ambiguous_inline_enum_names(&[foo.clone(), bar.clone()]);
+        let mut pool = TypePool::new();
+
+        SchemaParser::parse_with_pool_ambiguous(&foo, &mut pool, OcppVersion::V16, &ambiguous).unwrap();
+        SchemaParser::parse_with_pool_ambiguous(&bar, &mut pool, OcppVersion::V16, &ambiguous).unwrap();
+
+        let count = pool
+            .types()
+            .iter()
+            .filter(|t| matches!(t, GeneratedType::Enum(e) if e.name == "Status"))
             .count();
 
         assert_eq!(count, 1);

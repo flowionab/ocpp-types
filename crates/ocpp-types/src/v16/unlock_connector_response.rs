@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnlockConnectorResponse {
-    pub status: Status,
+    pub status: UnlockConnectorResponseStatus,
 }
 impl crate::Action for UnlockConnectorResponse {
     const ACTION: &'static str = "UnlockConnector";

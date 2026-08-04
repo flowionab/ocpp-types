@@ -15,7 +15,7 @@ pub struct GetCompositeScheduleResponse {
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub schedule_start: Option<alloc::string::String>,
-    pub status: Status,
+    pub status: GetCompositeScheduleResponseStatus,
 }
 #[cfg(feature = "alloc")]
 impl crate::Action for GetCompositeScheduleResponse {
@@ -45,7 +45,7 @@ pub struct GetCompositeScheduleResponse<
     pub schedule_start: Option<
         heapless::String<GET_COMPOSITE_SCHEDULE_RESPONSE_SCHEDULE_START_CAP>,
     >,
-    pub status: Status,
+    pub status: GetCompositeScheduleResponseStatus,
 }
 #[cfg(not(feature = "alloc"))]
 impl<

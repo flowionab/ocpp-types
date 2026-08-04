@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResetRequest {
-    pub r#type: Type,
+    pub r#type: ResetRequestType,
 }
 impl crate::Action for ResetRequest {
     const ACTION: &'static str = "Reset";

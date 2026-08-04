@@ -3,7 +3,7 @@
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Status {
+pub enum IdTagInfoStatus {
     Accepted,
     Blocked,
     Expired,
@@ -20,7 +20,7 @@ pub struct IdTagInfo {
     #[cfg_attr(feature = "serde", serde(rename = "parentIdTag"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub parent_id_tag: Option<heapless::String<20usize>>,
-    pub status: Status,
+    pub status: IdTagInfoStatus,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,13 +32,47 @@ pub struct IdTagInfo<const ID_TAG_INFO_EXPIRY_DATE_CAP: usize = 1024usize> {
     #[cfg_attr(feature = "serde", serde(rename = "parentIdTag"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub parent_id_tag: Option<heapless::String<20usize>>,
-    pub status: Status,
+    pub status: IdTagInfoStatus,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Type {
+pub enum BootNotificationResponseStatus {
+    Accepted,
+    Pending,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum CancelReservationResponseStatus {
+    Accepted,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ChangeAvailabilityRequestType {
     Inoperative,
     Operative,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ChangeAvailabilityResponseStatus {
+    Accepted,
+    Rejected,
+    Scheduled,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ChangeConfigurationResponseStatus {
+    Accepted,
+    Rejected,
+    RebootRequired,
+    NotSupported,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ClearCacheResponseStatus {
+    Accepted,
+    Rejected,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -46,6 +80,39 @@ pub enum ChargingProfilePurpose {
     ChargePointMaxProfile,
     TxDefaultProfile,
     TxProfile,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ClearChargingProfileResponseStatus {
+    Accepted,
+    Unknown,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum DataTransferResponseStatus {
+    Accepted,
+    Rejected,
+    UnknownMessageId,
+    UnknownVendorId,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum DiagnosticsStatusNotificationRequestStatus {
+    Idle,
+    Uploaded,
+    UploadFailed,
+    Uploading,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum FirmwareStatusNotificationRequestStatus {
+    Downloaded,
+    DownloadFailed,
+    Downloading,
+    Idle,
+    InstallationFailed,
+    Installing,
+    Installed,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -102,6 +169,12 @@ pub struct ChargingSchedule<
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub start_schedule: Option<heapless::String<CHARGING_SCHEDULE_START_SCHEDULE_CAP>>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GetCompositeScheduleResponseStatus {
+    Accepted,
+    Rejected,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -209,7 +282,7 @@ pub enum Phase {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Unit {
+pub enum SampledValueItemUnit {
     Wh,
     #[cfg_attr(feature = "serde", serde(rename = "kWh"))]
     KWh,
@@ -250,7 +323,7 @@ pub struct SampledValueItem {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub phase: Option<Phase>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub unit: Option<Unit>,
+    pub unit: Option<SampledValueItemUnit>,
     pub value: alloc::string::String,
 }
 #[cfg(not(feature = "alloc"))]
@@ -268,7 +341,7 @@ pub struct SampledValueItem<const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usiz
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub phase: Option<Phase>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub unit: Option<Unit>,
+    pub unit: Option<SampledValueItemUnit>,
     pub value: heapless::String<SAMPLED_VALUE_ITEM_VALUE_CAP>,
 }
 #[cfg(feature = "alloc")]
@@ -369,6 +442,39 @@ pub struct ChargingProfile<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<heapless::String<CHARGING_PROFILE_VALID_TO_CAP>>,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum RemoteStartTransactionResponseStatus {
+    Accepted,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum RemoteStopTransactionResponseStatus {
+    Accepted,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ReserveNowResponseStatus {
+    Accepted,
+    Faulted,
+    Occupied,
+    Rejected,
+    Unavailable,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ResetRequestType {
+    Hard,
+    Soft,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ResetResponseStatus {
+    Accepted,
+    Rejected,
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -396,6 +502,14 @@ pub struct LocalAuthorizationListItem<
 pub enum UpdateType {
     Differential,
     Full,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SendLocalListResponseStatus {
+    Accepted,
+    Failed,
+    NotSupported,
+    VersionMismatch,
 }
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
@@ -461,6 +575,13 @@ pub struct CsChargingProfiles<
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SetChargingProfileResponseStatus {
+    Accepted,
+    Rejected,
+    NotSupported,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ErrorCode {
     ConnectorLockFailure,
     EVCommunicationError,
@@ -478,6 +599,19 @@ pub enum ErrorCode {
     UnderVoltage,
     OverVoltage,
     WeakSignal,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum StatusNotificationRequestStatus {
+    Available,
+    Preparing,
+    Charging,
+    SuspendedEVSE,
+    SuspendedEV,
+    Finishing,
+    Reserved,
+    Unavailable,
+    Faulted,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -526,4 +660,18 @@ pub enum RequestedMessage {
     Heartbeat,
     MeterValues,
     StatusNotification,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum TriggerMessageResponseStatus {
+    Accepted,
+    Rejected,
+    NotImplemented,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum UnlockConnectorResponseStatus {
+    Unlocked,
+    UnlockFailed,
+    NotSupported,
 }

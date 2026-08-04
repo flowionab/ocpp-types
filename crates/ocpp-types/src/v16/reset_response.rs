@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResetResponse {
-    pub status: Status,
+    pub status: ResetResponseStatus,
 }
 impl crate::Action for ResetResponse {
     const ACTION: &'static str = "Reset";

@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClearCacheResponse {
-    pub status: Status,
+    pub status: ClearCacheResponseStatus,
 }
 impl crate::Action for ClearCacheResponse {
     const ACTION: &'static str = "ClearCache";

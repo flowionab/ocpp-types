@@ -7,7 +7,7 @@ use super::common::*;
 pub struct ChangeAvailabilityRequest {
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     pub connector_id: i64,
-    pub r#type: Type,
+    pub r#type: ChangeAvailabilityRequestType,
 }
 impl crate::Action for ChangeAvailabilityRequest {
     const ACTION: &'static str = "ChangeAvailability";

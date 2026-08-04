@@ -5,7 +5,7 @@ use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendLocalListResponse {
-    pub status: Status,
+    pub status: SendLocalListResponseStatus,
 }
 impl crate::Action for SendLocalListResponse {
     const ACTION: &'static str = "SendLocalList";
