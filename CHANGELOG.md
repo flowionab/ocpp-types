@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2]
+
+### Fixed
+
+- `alloc` feature: spec-bounded array fields above 64 items (e.g.
+  `ChargingSchedule.chargingSchedulePeriod`, `maxItems: 1024`) still rendered as an inline
+  `heapless::Vec<T, N>` even in the `alloc` build, instead of switching to a heap-allocated
+  `alloc::Vec<T>` the way genuinely unbounded fields already did. This made 2.0.1/2.1's
+  `ChargingProfile` ~80MB by value, easily overflowing the stack for any caller that holds one
+  across an `.await` in a boxed future (e.g. an OCPP client's `RequestStartTransactionRequest`
+  handler). `ocpp-codegen` now switches any bounded `Vec`/array field above that size threshold to
+  `alloc::Vec<T>` under the `alloc` feature, cutting `ChargingProfile` from ~80MB down to ~55KB.
+  The `no_std`/non-`alloc` build is unaffected — those fields stay `heapless`, sized to the spec's
+  stated limit, as intended for stack-only embedded use.
+
 ## [0.1.1]
 
 ### Fixed
@@ -65,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   codes, unbounded-field capacities, WebSocket envelopes), each verified to actually run, not just
   compile.
 
-[Unreleased]: https://github.com/flowionab/ocpp-types/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/flowionab/ocpp-types/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/flowionab/ocpp-types/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/flowionab/ocpp-types/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/flowionab/ocpp-types/releases/tag/v0.1.0

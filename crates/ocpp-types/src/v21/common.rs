@@ -2638,7 +2638,7 @@ pub struct AbsolutePriceSchedule {
     #[cfg_attr(feature = "serde", serde(rename = "priceAlgorithm"))]
     pub price_algorithm: heapless::String<2000usize>,
     #[cfg_attr(feature = "serde", serde(rename = "priceRuleStacks"))]
-    pub price_rule_stacks: heapless::Vec<PriceRuleStack, 1024usize>,
+    pub price_rule_stacks: alloc::vec::Vec<PriceRuleStack>,
     /// Description of the price schedule.
     #[cfg_attr(feature = "serde", serde(rename = "priceScheduleDescription"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -2739,7 +2739,7 @@ pub struct PriceLevelSchedule {
     #[cfg_attr(feature = "serde", serde(rename = "numberOfPriceLevels"))]
     pub number_of_price_levels: i64,
     #[cfg_attr(feature = "serde", serde(rename = "priceLevelScheduleEntries"))]
-    pub price_level_schedule_entries: heapless::Vec<PriceLevelScheduleEntry, 100usize>,
+    pub price_level_schedule_entries: alloc::vec::Vec<PriceLevelScheduleEntry>,
     /// Description of the price schedule.
     #[cfg_attr(feature = "serde", serde(rename = "priceScheduleDescription"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -2839,6 +2839,29 @@ pub struct SalesTariffEntry {
     #[cfg_attr(feature = "serde", serde(rename = "relativeTimeInterval"))]
     pub relative_time_interval: RelativeTimeInterval,
 }
+#[cfg(feature = "alloc")]
+/// A SalesTariff provided by a Mobility Operator (EMSP) .
+/// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SalesTariff {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomData>,
+    /// SalesTariff identifier used to identify one sales tariff. An SAID remains a unique identifier for one schedule throughout a charging session.
+    pub id: i64,
+    /// Defines the overall number of distinct price levels used across all provided SalesTariff elements.
+    #[cfg_attr(feature = "serde", serde(rename = "numEPriceLevels"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub num_e_price_levels: Option<i64>,
+    /// A human readable title/short description of the sales tariff e.g. for HMI display purposes.
+    #[cfg_attr(feature = "serde", serde(rename = "salesTariffDescription"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub sales_tariff_description: Option<heapless::String<32usize>>,
+    #[cfg_attr(feature = "serde", serde(rename = "salesTariffEntry"))]
+    pub sales_tariff_entry: alloc::vec::Vec<SalesTariffEntry>,
+}
+#[cfg(not(feature = "alloc"))]
 /// A SalesTariff provided by a Mobility Operator (EMSP) .
 /// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
 #[derive(Debug, Clone, PartialEq)]
@@ -2874,7 +2897,7 @@ pub struct ChargingSchedule {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
-    pub charging_schedule_period: heapless::Vec<ChargingSchedulePeriod, 1024usize>,
+    pub charging_schedule_period: alloc::vec::Vec<ChargingSchedulePeriod>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,
@@ -3752,9 +3775,8 @@ pub struct EVAbsolutePriceSchedule {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,
     #[cfg_attr(feature = "serde", serde(rename = "evAbsolutePriceScheduleEntries"))]
-    pub ev_absolute_price_schedule_entries: heapless::Vec<
+    pub ev_absolute_price_schedule_entries: alloc::vec::Vec<
         EVAbsolutePriceScheduleEntry,
-        1024usize,
     >,
     /// ISO 15118-20 URN of price algorithm: Power, PeakPower, StackedEnergy.
     #[cfg_attr(feature = "serde", serde(rename = "priceAlgorithm"))]
@@ -3808,7 +3830,7 @@ pub struct EVPowerSchedule {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,
     #[cfg_attr(feature = "serde", serde(rename = "evPowerScheduleEntries"))]
-    pub ev_power_schedule_entries: heapless::Vec<EVPowerScheduleEntry, 1024usize>,
+    pub ev_power_schedule_entries: alloc::vec::Vec<EVPowerScheduleEntry>,
     /// The time that defines the starting point for the EVEnergyOffer.
     #[cfg_attr(feature = "serde", serde(rename = "timeAnchor"))]
     pub time_anchor: alloc::string::String,

@@ -1334,6 +1334,36 @@ pub struct SalesTariffEntry {
     #[cfg_attr(feature = "serde", serde(rename = "relativeTimeInterval"))]
     pub relative_time_interval: RelativeTimeInterval,
 }
+#[cfg(feature = "alloc")]
+/// Sales_ Tariff
+/// urn:x-oca:ocpp:uid:2:233272
+/// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SalesTariff {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomData>,
+    /// Identified_ Object. MRID. Numeric_ Identifier
+    /// urn:x-enexis:ecdm:uid:1:569198
+    /// SalesTariff identifier used to identify one sales tariff. An SAID remains a unique identifier for one schedule throughout a charging session.
+    pub id: i64,
+    /// Sales_ Tariff. Num_ E_ Price_ Levels. Counter
+    /// urn:x-oca:ocpp:uid:1:569284
+    /// Defines the overall number of distinct price levels used across all provided SalesTariff elements.
+    #[cfg_attr(feature = "serde", serde(rename = "numEPriceLevels"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub num_e_price_levels: Option<i64>,
+    /// Sales_ Tariff. Sales. Tariff_ Description
+    /// urn:x-oca:ocpp:uid:1:569283
+    /// A human readable title/short description of the sales tariff e.g. for HMI display purposes.
+    #[cfg_attr(feature = "serde", serde(rename = "salesTariffDescription"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub sales_tariff_description: Option<heapless::String<32usize>>,
+    #[cfg_attr(feature = "serde", serde(rename = "salesTariffEntry"))]
+    pub sales_tariff_entry: alloc::vec::Vec<SalesTariffEntry>,
+}
+#[cfg(not(feature = "alloc"))]
 /// Sales_ Tariff
 /// urn:x-oca:ocpp:uid:2:233272
 /// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
@@ -1372,7 +1402,7 @@ pub struct ChargingSchedule {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
-    pub charging_schedule_period: heapless::Vec<ChargingSchedulePeriod, 1024usize>,
+    pub charging_schedule_period: alloc::vec::Vec<ChargingSchedulePeriod>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,

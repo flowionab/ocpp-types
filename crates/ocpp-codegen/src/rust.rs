@@ -18,6 +18,16 @@ fn with_generated_banner(code: String) -> String {
     format!("{GENERATED_FILE_BANNER}{code}")
 }
 
+/// A spec-bounded `Vec` above this capacity stops being stack-friendly (a
+/// `heapless::Vec<T, N>` is `N * size_of::<T>()` bytes inline, so a large
+/// `N` can blow up a struct -- and, transitively, any future holding it
+/// across an `.await` -- to tens of megabytes). Above this size, the
+/// `alloc` build switches it to a heap-allocated `alloc::Vec<T>` instead,
+/// same as a genuinely unbounded field; the `heapless` capacity is still
+/// enforced in the `no_std`/no-`alloc` build, where there's no heap to fall
+/// back to.
+const MAX_STACK_VEC_CAPACITY: usize = 64;
+
 pub fn generate(schema: ParsedSchema) -> String {
     let eq_by_name = compute_eq_derivable(&schema.types);
     let const_params = crate::generics::compute_const_params(&schema.types);
@@ -133,7 +143,19 @@ fn generate_struct(
     eq_by_name: &HashMap<String, bool>,
     const_params: &HashMap<String, Vec<ConstParam>>,
 ) -> proc_macro2::TokenStream {
-    if own_params.is_empty() {
+    // An oversized bounded `Vec` (see `MAX_STACK_VEC_CAPACITY`) needs the
+    // alloc/no_alloc split too, even with no caller-chosen params anywhere
+    // in the struct -- otherwise the alloc build never gets a chance to
+    // switch it away from a giant inline `heapless::Vec`. Unlike an
+    // `UnboundedVec`'s param, this doesn't propagate to callers of `Local`
+    // fields: the capacity is fixed by the spec, not chosen by the caller,
+    // so only the struct that directly owns the field needs to know.
+    let has_oversized_vec = model
+        .fields
+        .iter()
+        .any(|f| matches!(&f.ty, RustType::Vec(_, capacity) if *capacity > MAX_STACK_VEC_CAPACITY));
+
+    if own_params.is_empty() && !has_oversized_vec {
         return generate_struct_body(model, eq_by_name, const_params, false, &[], &quote! {});
     }
 
@@ -372,8 +394,12 @@ fn rust_type(
         }
 
         RustType::Vec(inner, capacity) => {
-            let inner = rust_type(inner, alloc_mode, const_params);
-            quote! { heapless::Vec<#inner, #capacity> }
+            let inner_ty = rust_type(inner, alloc_mode, const_params);
+            if alloc_mode && *capacity > MAX_STACK_VEC_CAPACITY {
+                quote! { alloc::vec::Vec<#inner_ty> }
+            } else {
+                quote! { heapless::Vec<#inner_ty, #capacity> }
+            }
         }
 
         RustType::UnboundedString(param) => {
@@ -787,5 +813,57 @@ mod tests {
 
         assert!(code.contains("PartialEq"));
         assert!(!code.contains("PartialEq, Eq"));
+    }
+
+    #[test]
+    fn oversized_bounded_vec_renders_as_alloc_vec_under_alloc_mode() {
+        let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 1024);
+
+        let tokens = rust_type(&ty, true, &HashMap::new());
+
+        let inner = quote! { heapless::String<10usize> };
+        let expected = quote! { alloc::vec::Vec<#inner> };
+        assert_eq!(tokens.to_string(), expected.to_string());
+    }
+
+    #[test]
+    fn oversized_bounded_vec_stays_heapless_without_alloc_mode() {
+        let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 1024);
+
+        let tokens = rust_type(&ty, false, &HashMap::new());
+
+        assert_eq!(
+            tokens.to_string(),
+            quote! { heapless::Vec<heapless::String<10usize>, 1024usize> }.to_string()
+        );
+    }
+
+    #[test]
+    fn small_bounded_vec_stays_heapless_even_under_alloc_mode() {
+        let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 5);
+
+        let tokens = rust_type(&ty, true, &HashMap::new());
+
+        assert_eq!(
+            tokens.to_string(),
+            quote! { heapless::Vec<heapless::String<10usize>, 5usize> }.to_string()
+        );
+    }
+
+    #[test]
+    fn a_lone_oversized_bounded_vec_still_splits_into_alloc_and_no_alloc_variants() {
+        // No `UnboundedString`/`UnboundedVec` field anywhere -- normally
+        // that means a single struct definition. An oversized *bounded*
+        // `Vec` must force the alloc/no_alloc split too, or the alloc build
+        // never gets a chance to switch it to `alloc::Vec`.
+        let mut schema = sample_schema();
+        schema.message.fields[0].ty =
+            RustType::Vec(Box::new(RustType::BoundedString(10)), 1024);
+
+        let code = generate(schema);
+
+        assert!(code.contains("cfg (feature = \"alloc\")") || code.contains("cfg(feature = \"alloc\")"));
+        assert!(code.contains("alloc :: vec :: Vec") || code.contains("alloc::vec::Vec"));
+        assert!(code.contains("heapless :: Vec") || code.contains("heapless::Vec"));
     }
 }
