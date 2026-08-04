@@ -42,5 +42,15 @@ Not yet published to crates.io.
 - Cargo publish metadata (`description`, `license`, `repository`, `keywords`, `categories`,
   `readme`) and a crate-level doc comment for the docs.rs landing page.
 - CI: build/test across all feature combinations, plus the generated-types drift check.
+- OCPP-J WebSocket envelopes (with `serde`): `Call<T>`/`CallResult<T>`/`CallError<E, D>` model the
+  array-based `CALL`/`CALLRESULT`/`CALLERROR` wrapper every message travels in, generic over the
+  payload/error-code type so one definition covers every version. `CallResultError`/`SendMessage`
+  cover OCPP 2.1's additional `CALLRESULTERROR`/`SEND` message types. `Call`'s wire `Action` is
+  validated against the payload type's `Action::ACTION` on deserialize rather than trusted.
+  `MessageId` (max 36 chars, identical across all three versions) and `EmptyPayload` (for the
+  spec-undefined `errorDetails`, default `{}`) round out the primitives.
+- `crates/ocpp-types/examples/`: five runnable examples (basic usage, serialization, RPC error
+  codes, unbounded-field capacities, WebSocket envelopes), each verified to actually run, not just
+  compile.
 
 [Unreleased]: https://github.com/flowionab/ocpp-types/commits/main

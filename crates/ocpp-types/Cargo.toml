@@ -38,3 +38,7 @@ name = "rpc_error_codes"
 
 [[example]]
 name = "unbounded_fields"
+
+[[example]]
+name = "envelope"
+required-features = ["serde"]

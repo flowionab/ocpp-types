@@ -74,12 +74,24 @@
 //! Each version also exposes an `RpcErrorCode` enum covering the
 //! `CALLERROR` codes defined by that version's OCPP-J specification (e.g.
 //! [`v16::RpcErrorCode`]), implementing [`core::error::Error`].
+//!
+//! # WebSocket envelopes
+//!
+//! With `serde`, `Call`/`CallResult`/`CallError` model the OCPP-J
+//! array-based envelope every message travels in (`[2, messageId, action,
+//! payload]`, etc.) -- generic over the payload type, so no per-version
+//! duplication is needed. `CallResultError`/`SendMessage` cover 2.1's
+//! additional `CALLRESULTERROR`/`SEND` message types (the shapes work for
+//! any version; whether a given deployment actually uses them is a
+//! protocol-level concern, not something the types enforce). See
+//! `examples/envelope.rs`.
 #![no_std]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
 mod action;
+mod envelope;
 
 #[cfg(test)]
 mod generics_test;
@@ -89,6 +101,9 @@ pub mod v201;
 pub mod v21;
 
 pub use action::Action;
+#[cfg(feature = "serde")]
+pub use envelope::{Call, CallError, CallResult, CallResultError, EmptyPayload, SendMessage};
+pub use envelope::MessageId;
 
 #[cfg(test)]
 mod tests {

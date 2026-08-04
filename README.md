@@ -1,4 +1,4 @@
-# ocpp-types
+# OCPP Types
 
 [![Crates.io](https://img.shields.io/crates/v/ocpp-types.svg)](https://crates.io/crates/ocpp-types)
 [![Documentation](https://docs.rs/ocpp-types/badge.svg)](https://docs.rs/ocpp-types)
@@ -65,6 +65,7 @@ cargo run -p ocpp-types --example serialization --features serde
 cargo run -p ocpp-types --example rpc_error_codes
 cargo run -p ocpp-types --example unbounded_fields              # const-generic capacity
 cargo run -p ocpp-types --example unbounded_fields --features alloc  # alloc collections instead
+cargo run -p ocpp-types --example envelope --features serde
 ```
 
 ---
@@ -132,6 +133,35 @@ println!("{error}"); // "Requested Action is not known by receiver"
 
 ---
 
+## WebSocket envelopes
+
+With the `serde` feature, `Call`/`CallResult`/`CallError` model the OCPP-J array-based envelope
+every message travels in — generic over the payload type, so there's one definition covering every
+version rather than one per version:
+
+```rust
+use ocpp_types::v16::{AuthorizeRequest, IdTag};
+use ocpp_types::{Call, MessageId};
+
+let call = Call {
+    message_id: MessageId::try_from("19223201")?,
+    payload: AuthorizeRequest {
+        id_tag: IdTag::try_from("ABC123")?,
+    },
+};
+
+let mut buf = [0u8; 256];
+let len = serde_json_core::to_slice(&call, &mut buf)?;
+// [2,"19223201","Authorize",{"idTag":"ABC123"}]
+```
+
+The wire's `"Action"` string comes from `AuthorizeRequest::ACTION`, not a redundant stored field —
+and is validated against it when parsing a `Call<T>` back, so a `Call<AuthorizeRequest>` you get out
+really is one. `CallResultError`/`SendMessage` cover OCPP 2.1's additional `CALLRESULTERROR`/`SEND`
+message types. See [`crates/ocpp-types/examples/envelope.rs`](crates/ocpp-types/examples/envelope.rs).
+
+---
+
 ## Feature flags
 
 | Feature | Default | Effect                                                                             |
@@ -147,14 +177,15 @@ Without any features, the crate has exactly one dependency: [`heapless`](https:/
 
 - OCPP request/response types for 1.6J, 2.0.1, and 2.1
 - Common/shared data structures and enums, deduplicated per version
-- `serde` serialization, including OCPP-J `CALLERROR` error codes
+- `serde` serialization, including OCPP-J `CALLERROR` error codes and the `CALL`/`CALLRESULT`/
+  `CALLERROR` (and 2.1's `CALLRESULTERROR`/`SEND`) WebSocket envelopes
 - Doc comments carried over from the spec's own field/message descriptions
 
 ## What this crate does NOT do
 
 This crate intentionally does **not** implement:
 
-- WebSockets or the OCPP-J RPC framing (`CALL`/`CALLRESULT`/`CALLERROR` envelopes)
+- The actual WebSocket transport (opening/maintaining the connection, framing, reconnects)
 - Message routing, charge point state machines, or CSMS logic
 - Smart charging algorithms
 
@@ -170,22 +201,21 @@ model that other crates build transport, state machines, and application logic o
 ```text
                      ocpp-types
                           │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-   ocpp-transport   ocpp-charge-point   ocpp-csms
-        │                 │                 │
-        └──────────────┬──┘─────────────────┘
-                       │
-                Applications
+              ┌───────────┴───────────┐
+              │                       │
+        ocpp-transport         ocpp-charge-point
+              │                       │
+              └───────────┬───────────┘
+                          │
+                   Applications
 ```
 
-| Crate              | Purpose                                     | Status     |
-| ------------------ | -------------------------------------------- | ---------- |
-| `ocpp-types`        | Protocol data model                         | ✅ This crate |
-| `ocpp-transport`     | Message framing and transport abstractions  | 📋 Planned |
-| `ocpp-charge-point`  | Charge Point implementation                 | 📋 Planned |
-| `ocpp-csms`          | CSMS implementation                         | 📋 Planned |
-| `ocpp-simulator`     | OCPP testing and simulation tools           | 📋 Planned |
+| Crate                     | Purpose                                     | Status     |
+| ------------------------- | -------------------------------------------- | ---------- |
+| `ocpp-types`               | Protocol data model                         | ✅ This crate |
+| `ocpp-transport`           | Message framing and transport abstractions  | 📋 Planned |
+| `ocpp-charge-point`        | Charge Point implementation                 | 📋 Planned |
+| `charge-point-simulator`   | OCPP testing and simulation tools           | 📋 Planned |
 
 ### Related projects
 
