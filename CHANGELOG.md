@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Not yet published to crates.io.
+## [0.1.1]
+
+### Fixed
+
+- 1.6J: anonymous inline JSON-schema enums (`status`, `type`, `unit`) were named purely from their
+  property name, so distinct messages sharing a property name silently collapsed onto one shared
+  generated type — most notably `status`, where 14 response types (`SendLocalListResponse`,
+  `ReserveNowResponse`, `BootNotificationResponse`, and 11 others) each define their own distinct
+  status values but all landed on `IdTagInfo`'s 5-value status enum. `ocpp-codegen` now detects
+  when a property name means different things across messages and qualifies the generated type
+  with its owning message name instead, so each response gets its own correctly-shaped enum.
+
+## [0.1.0]
 
 ### Added
 
@@ -53,4 +65,6 @@ Not yet published to crates.io.
   codes, unbounded-field capacities, WebSocket envelopes), each verified to actually run, not just
   compile.
 
-[Unreleased]: https://github.com/flowionab/ocpp-types/commits/main
+[Unreleased]: https://github.com/flowionab/ocpp-types/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/flowionab/ocpp-types/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/flowionab/ocpp-types/releases/tag/v0.1.0
