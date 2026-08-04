@@ -2,7 +2,6 @@
 
 [![Crates.io](https://img.shields.io/crates/v/ocpp-types.svg)](https://crates.io/crates/ocpp-types)
 [![Documentation](https://docs.rs/ocpp-types/badge.svg)](https://docs.rs/ocpp-types)
-[![License](https://img.shields.io/crates/l/ocpp-types)](#license)
 
 A strongly typed Rust implementation of the Open Charge Point Protocol (OCPP) message model.
 
