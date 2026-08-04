@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --workspace
+      - run: cargo test --workspace
+      - run: cargo build -p ocpp-types --features alloc
+      - run: cargo test -p ocpp-types --features serde
+      - run: cargo test -p ocpp-types --features alloc
+      # The alloc+serde combination has caught real bugs the other configs
+      # didn't (cfg-gating that only conflicts once both const-generic and
+      # alloc code paths are compiled together), so it's covered on its own.
+      - run: cargo test -p ocpp-types --features serde,alloc
+
+  generated-types-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: ./scripts/generate.sh
+      - name: Fail if generated types differ from what's committed
+        run: |
+          if ! git diff --exit-code -- crates/ocpp-types/src/v16 crates/ocpp-types/src/v201 crates/ocpp-types/src/v21; then
+            echo
+            echo "Generated types are out of date. Run ./scripts/generate.sh and commit the result."
+            exit 1
+          fi

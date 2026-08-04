@@ -1,0 +1,40 @@
+[package]
+name = "ocpp-types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = true
+description = "Strongly typed OCPP 1.6J, 2.0.1, and 2.1 message types for Rust. no_std, no alloc, embedded-friendly."
+readme = "../../README.md"
+keywords = ["ocpp", "ev-charging", "charging-station", "embedded", "no-std"]
+categories = ["embedded", "no-std", "encoding", "network-programming"]
+
+[dependencies]
+heapless = "0.8"
+serde = { version = "1", default-features = false, features = ["derive"], optional = true }
+serde-json-core = { version = "0.6", optional = true }
+
+[features]
+default = []
+serde = ["dep:serde", "dep:serde-json-core", "heapless/serde"]
+# Fields with no spec-given bound (no `maxLength`/`maxItems`) use
+# `alloc::string::String`/`alloc::vec::Vec<T>` when this is enabled, instead
+# of a `heapless` collection sized by a caller-chosen const generic.
+# `serde?/alloc` is a weak dependency feature: it only turns on serde's own
+# `alloc` support (needed for `Serialize`/`Deserialize` on those types) when
+# the `serde` feature is *also* enabled, without pulling serde in on its own.
+alloc = ["serde?/alloc"]
+
+[[example]]
+name = "basic_usage"
+
+[[example]]
+name = "serialization"
+required-features = ["serde"]
+
+[[example]]
+name = "rpc_error_codes"
+
+[[example]]
+name = "unbounded_fields"
