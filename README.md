@@ -1,5 +1,6 @@
 # OCPP Types
 
+[![CI](https://github.com/flowionab/ocpp-types/actions/workflows/ci.yml/badge.svg)](https://github.com/flowionab/ocpp-types/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/ocpp-types.svg)](https://crates.io/crates/ocpp-types)
 [![Documentation](https://docs.rs/ocpp-types/badge.svg)](https://docs.rs/ocpp-types)
 
@@ -266,4 +267,5 @@ at your option.
 
 Contributions are welcome — implementing new message types, fixing specification inconsistencies,
 adding tests, or improving documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-workflow, since types are generated rather than hand-written.
+workflow, since types are generated rather than hand-written. Participation is governed by our
+[Code of Conduct](CODE_OF_CONDUCT.md). Found a security issue? See [SECURITY.md](SECURITY.md).
