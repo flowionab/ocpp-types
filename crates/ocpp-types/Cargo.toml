@@ -11,7 +11,7 @@ keywords = ["ocpp", "ev-charging", "charging-station", "embedded", "no-std"]
 categories = ["embedded", "no-std", "encoding", "network-programming"]
 
 [dependencies]
-heapless = "0.8"
+heapless = "0.9"
 serde = { version = "1", default-features = false, features = ["derive"], optional = true }
 serde-json-core = { version = "0.6", optional = true }
 
