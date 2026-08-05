@@ -12,5 +12,5 @@ color-eyre = "0.6"
 anyhow = "1"
 quote = "1"
 proc-macro2 = "1"
-prettyplease = "0.2"
-syn = { version = "2", features = ["full"] }
+prettyplease = "0.3"
+syn = { version = "3", features = ["full"] }

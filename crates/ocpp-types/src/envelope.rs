@@ -21,7 +21,9 @@ impl TryFrom<&str> for MessageId {
     type Error = ();
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        heapless::String::try_from(value).map(Self)
+        // See `v16::primitives::IdTag`: `heapless` 0.9's `CapacityError`
+        // is deliberately not part of this crate's public API.
+        heapless::String::try_from(value).map(Self).map_err(|_| ())
     }
 }
 
@@ -642,5 +644,21 @@ mod tests {
     fn message_id_accepts_exactly_36_bytes() {
         let exactly_36 = "a".repeat(36);
         assert!(MessageId::try_from(exactly_36.as_str()).is_ok());
+    }
+
+    /// `heapless` 0.9 changes `String::try_from`'s error from `()` to
+    /// `CapacityError`. `MessageId`'s own error type must not follow it:
+    /// that's this crate's public API, and changing it would break every
+    /// downstream `match`/`map_err`. The bound is the assertion -- this
+    /// stops compiling if the associated type ever drifts.
+    #[test]
+    fn message_id_error_type_stays_unit_regardless_of_the_heapless_version() {
+        fn assert_unit_error<T>()
+        where
+            for<'a> T: TryFrom<&'a str, Error = ()>,
+        {
+        }
+
+        assert_unit_error::<MessageId>();
     }
 }

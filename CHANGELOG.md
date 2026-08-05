@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `ocpp-codegen` (dev-time only, not part of the published crate): updated to `prettyplease` 0.3 /
+  `syn` 3. Generated output is byte-identical, so no `ocpp-types` source changed.
+- `heapless` deliberately stays at 0.8. `serde-json-core` 0.6 — the latest — still depends on
+  heapless 0.8, so taking 0.9 would link *two* copies of heapless into any downstream binary using
+  the `serde` feature. The `IdTag`/`MessageId` `TryFrom<&str>` impls no longer let heapless's error
+  type surface in this crate's public API (0.9 returns `CapacityError` where 0.8 returned `()`), so
+  the bump is a one-line change once `serde-json-core` follows.
+
 ## [0.1.3]
 
 ### Fixed

@@ -162,6 +162,20 @@ mod tests {
         assert!(v16::IdTag::try_from(too_long.as_str()).is_err());
     }
 
+    /// See `envelope::tests::message_id_error_type_stays_unit_...`: the
+    /// wrapper's `Error` is this crate's public API and must not track
+    /// whatever `heapless::String::try_from` happens to return.
+    #[test]
+    fn id_tag_error_type_stays_unit_regardless_of_the_heapless_version() {
+        fn assert_unit_error<T>()
+        where
+            for<'a> T: TryFrom<&'a str, Error = ()>,
+        {
+        }
+
+        assert_unit_error::<v16::IdTag>();
+    }
+
     struct DummyRequest;
 
     impl Action for DummyRequest {
