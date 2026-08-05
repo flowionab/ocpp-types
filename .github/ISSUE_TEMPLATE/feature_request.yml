@@ -1,0 +1,38 @@
+name: Feature request
+description: Request a new message type, OCPP feature, or crate capability.
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: ocpp-version
+    attributes:
+      label: OCPP version
+      multiple: true
+      options:
+        - 1.6J
+        - 2.0.1
+        - 2.1
+        - Not version-specific
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What do you need?
+      description: E.g. a missing message type, a new feature profile, alloc/no_std interop, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec-ref
+    attributes:
+      label: Spec reference
+      description: >
+        Link or citation to the relevant OCPP specification / schema section, so the type can be
+        generated correctly rather than reinterpreted by hand.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds considered
+      description: Anything you're doing today in place of this, if applicable.

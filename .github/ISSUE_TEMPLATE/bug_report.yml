@@ -1,0 +1,59 @@
+name: Bug report
+description: Something is wrong with a generated type, schema, or the codegen tool.
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: crate
+    attributes:
+      label: Where does this occur?
+      options:
+        - ocpp-types (generated output)
+        - ocpp-codegen (generator)
+        - schemas (JSON schema itself)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ocpp-version
+    attributes:
+      label: OCPP version
+      multiple: true
+      options:
+        - 1.6J
+        - 2.0.1
+        - 2.1
+        - Not version-specific
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's wrong?
+      description: >
+        E.g. a field has the wrong type/bound, serialization doesn't round-trip, a message is
+        missing, generated output doesn't match the schema/spec.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Code snippet, schema excerpt, or `cargo run -p ocpp-codegen -- ...` command that shows the issue.
+      render: rust
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead, ideally with a reference to the OCPP spec/schema.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: ocpp-types version
+      placeholder: "0.1.2"
