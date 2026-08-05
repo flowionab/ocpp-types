@@ -265,6 +265,5 @@ at your option.
 ## Contributing
 
 Contributions are welcome — implementing new message types, fixing specification inconsistencies,
-adding tests, or improving documentation. Since types are generated, changes usually belong in
-`ocpp-codegen` or `schemas/` rather than in `crates/ocpp-types/src` directly. Feel free to open an
-issue or a pull request.
+adding tests, or improving documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+workflow, since types are generated rather than hand-written.
