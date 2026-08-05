@@ -40,6 +40,44 @@
 //! generic disappears entirely -- useful on targets with a real allocator
 //! (a CSMS backend, a simulator) that would rather not pick a bound at all.
 //!
+//! # Fields the spec leaves untyped
+//!
+//! 2.0.1 and 2.1's `DataTransfer` carries a `data` field the specification
+//! deliberately gives no type at all -- "open to implementation", agreed
+//! between the two parties. There's no single Rust type for arbitrary JSON
+//! without an allocator, so the payload type is the caller's to pick, as a
+//! type parameter defaulting to `()` (i.e. "this deployment sends no
+//! data"):
+//!
+//! ```
+//! use ocpp_types::v201::DataTransferRequest;
+//!
+//! // Whatever this vendor agreed on; add `serde::Serialize`/`Deserialize`
+//! // to send it on the wire.
+//! #[derive(Debug, Clone, PartialEq)]
+//! struct VendorPayload {
+//!     session_id: u32,
+//! }
+//!
+//! let request: DataTransferRequest<VendorPayload> = DataTransferRequest {
+//!     custom_data: None,
+//!     data: Some(VendorPayload { session_id: 42 }),
+//!     message_id: None,
+//!     vendor_id: heapless::String::try_from("com.example").unwrap(),
+//! };
+//!
+//! // Or, sending no vendor payload at all, the default:
+//! let plain: DataTransferRequest = DataTransferRequest {
+//!     custom_data: None,
+//!     data: None,
+//!     message_id: None,
+//!     vendor_id: heapless::String::try_from("com.example").unwrap(),
+//! };
+//! ```
+//!
+//! 1.6J's `DataTransfer.data` is a plain string in that version's schema,
+//! so it stays `Option<heapless::String<N>>` and needs no parameter.
+//!
 //! # Example
 //!
 //! ```
@@ -95,6 +133,9 @@ mod envelope;
 
 #[cfg(test)]
 mod generics_test;
+
+#[cfg(test)]
+mod untyped_data_test;
 
 pub mod v16;
 pub mod v201;

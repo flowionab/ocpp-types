@@ -4,13 +4,13 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DataTransferRequest {
+pub struct DataTransferRequest<DataTransferRequestData = ()> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,
     /// Data without specified length or format. This needs to be decided by both parties (Open to implementation).
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub data: Option<()>,
+    pub data: Option<DataTransferRequestData>,
     /// May be used to indicate a specific message or implementation.
     #[cfg_attr(feature = "serde", serde(rename = "messageId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -19,6 +19,7 @@ pub struct DataTransferRequest {
     #[cfg_attr(feature = "serde", serde(rename = "vendorId"))]
     pub vendor_id: heapless::String<255usize>,
 }
-impl crate::Action for DataTransferRequest {
+impl<DataTransferRequestData> crate::Action
+for DataTransferRequest<DataTransferRequestData> {
     const ACTION: &'static str = "DataTransfer";
 }

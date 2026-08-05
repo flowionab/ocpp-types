@@ -73,6 +73,19 @@ pub struct ConstParam {
     pub default: usize,
 }
 
+/// A generic *type* parameter a struct exposes for a schema property that
+/// declares no type at all -- 2.0.1/2.1's `DataTransfer.data`, which the
+/// spec deliberately leaves "open to implementation". There is no single
+/// Rust type that models arbitrary JSON in a `no_std`, non-`alloc` crate,
+/// so the payload type is the caller's to choose (defaulting to `()`, i.e.
+/// "this deployment sends no data"). Named from the (owning struct, field)
+/// pair, e.g. `DataTransferRequestData`, on the same rationale as
+/// [`ConstParam`].
+#[derive(Debug, Clone, PartialEq)]
+pub struct TypeParam {
+    pub name: String,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum RustType {
     Bool,
@@ -107,5 +120,14 @@ pub enum RustType {
     /// [`RustType::UnboundedString`].
     UnboundedVec(Box<RustType>, ConstParam),
 
+    /// A property the schema gives no type for, rendered as the caller-
+    /// chosen type parameter described by this [`TypeParam`] (owned by the
+    /// struct this field lives on, or forwarded from further down).
+    Any(TypeParam),
+
+    /// A `$ref` that couldn't be resolved at all -- rendered as `()`, since
+    /// there's nothing to generate. Distinct from [`RustType::Any`]: that's
+    /// a property the schema deliberately leaves open, this is a schema the
+    /// generator failed to make sense of.
     Unknown,
 }

@@ -116,6 +116,34 @@ allocator (a CSMS backend, a simulator) that would rather not pick a bound at al
 
 ---
 
+## Fields the spec leaves untyped
+
+2.0.1 and 2.1's `DataTransfer` carries a `data` field the specification gives no type at all —
+"open to implementation", agreed between the two parties. There's no single Rust type for arbitrary
+JSON without an allocator, so the payload type is yours to pick, as a type parameter defaulting to
+`()` ("this deployment sends no data"):
+
+```rust
+use ocpp_types::v201::DataTransferRequest;
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+struct VendorPayload {
+    session_id: u32,
+}
+
+let request: DataTransferRequest<VendorPayload> = DataTransferRequest {
+    custom_data: None,
+    data: Some(VendorPayload { session_id: 42 }),
+    message_id: None,
+    vendor_id: heapless::String::try_from("com.example")?,
+};
+```
+
+1.6J's `DataTransfer.data` is a plain string in that version's schema, so it stays
+`Option<heapless::String<N>>` and needs no parameter.
+
+---
+
 ## RPC errors
 
 Each version also exposes an `RpcErrorCode` enum covering the `CALLERROR` codes defined by that

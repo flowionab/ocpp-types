@@ -4,18 +4,19 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DataTransferResponse {
+pub struct DataTransferResponse<DataTransferResponseData = ()> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomData>,
     /// Data without specified length or format, in response to request.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub data: Option<()>,
+    pub data: Option<DataTransferResponseData>,
     pub status: DataTransferStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub status_info: Option<StatusInfo>,
 }
-impl crate::Action for DataTransferResponse {
+impl<DataTransferResponseData> crate::Action
+for DataTransferResponse<DataTransferResponseData> {
     const ACTION: &'static str = "DataTransfer";
 }

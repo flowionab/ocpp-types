@@ -28,18 +28,60 @@ fn with_generated_banner(code: String) -> String {
 /// back to.
 const MAX_STACK_VEC_CAPACITY: usize = 64;
 
+/// The generic parameters every named type in scope requires, computed over
+/// the whole type graph by [`crate::generics`]. Carried around together
+/// because rendering any field that references a named type needs both: a
+/// `Local` reference has to forward exactly the params its target declares.
+#[derive(Clone, Copy)]
+struct GenericPool<'a> {
+    const_params: &'a HashMap<String, Vec<ConstParam>>,
+    type_params: &'a HashMap<String, Vec<TypeParam>>,
+}
+
+/// The subset of [`GenericPool`] a single struct exposes on itself.
+#[derive(Clone, Copy)]
+struct OwnGenerics<'a> {
+    const_params: &'a [ConstParam],
+    type_params: &'a [TypeParam],
+}
+
 pub fn generate(schema: ParsedSchema) -> String {
     let eq_by_name = compute_eq_derivable(&schema.types);
     let const_params = crate::generics::compute_const_params(&schema.types);
+    let type_params = crate::generics::compute_type_params(&schema.types);
     let message_params = crate::generics::params_for_fields(&schema.message.fields, &const_params);
+    let message_type_params =
+        crate::generics::type_params_for_fields(&schema.message.fields, &type_params);
 
-    let mut tokens = generate_struct(&schema.message, &message_params, &eq_by_name, &const_params);
+    let pool = GenericPool {
+        const_params: &const_params,
+        type_params: &type_params,
+    };
+
+    let mut tokens = generate_struct(
+        &schema.message,
+        OwnGenerics {
+            const_params: &message_params,
+            type_params: &message_type_params,
+        },
+        &eq_by_name,
+        pool,
+    );
 
     for ty in &schema.types {
         tokens.extend(match ty {
             GeneratedType::Struct(s) => {
                 let own = const_params.get(&s.name).cloned().unwrap_or_default();
-                generate_struct(s, &own, &eq_by_name, &const_params)
+                let own_types = type_params.get(&s.name).cloned().unwrap_or_default();
+                generate_struct(
+                    s,
+                    OwnGenerics {
+                        const_params: &own,
+                        type_params: &own_types,
+                    },
+                    &eq_by_name,
+                    pool,
+                )
             }
             GeneratedType::Enum(e) => generate_enum(e),
         });
@@ -62,9 +104,22 @@ pub fn generate_message(
     message: &RustStruct,
     eq_by_name: &HashMap<String, bool>,
     const_params: &HashMap<String, Vec<ConstParam>>,
+    type_params: &HashMap<String, Vec<TypeParam>>,
 ) -> String {
     let own_params = crate::generics::params_for_fields(&message.fields, const_params);
-    let struct_tokens = generate_struct(message, &own_params, eq_by_name, const_params);
+    let own_type_params = crate::generics::type_params_for_fields(&message.fields, type_params);
+    let struct_tokens = generate_struct(
+        message,
+        OwnGenerics {
+            const_params: &own_params,
+            type_params: &own_type_params,
+        },
+        eq_by_name,
+        GenericPool {
+            const_params,
+            type_params,
+        },
+    );
 
     // Only pull in `common` when a field actually needs a bare name from
     // it (a `Local` type, possibly through a `Vec`) -- otherwise the import
@@ -96,13 +151,27 @@ fn references_local(ty: &RustType) -> bool {
 pub fn generate_common(types: &[GeneratedType]) -> String {
     let eq_by_name = compute_eq_derivable(types);
     let const_params = crate::generics::compute_const_params(types);
+    let type_params = crate::generics::compute_type_params(types);
+    let pool = GenericPool {
+        const_params: &const_params,
+        type_params: &type_params,
+    };
     let mut tokens = proc_macro2::TokenStream::new();
 
     for ty in types {
         tokens.extend(match ty {
             GeneratedType::Struct(s) => {
                 let own = const_params.get(&s.name).cloned().unwrap_or_default();
-                generate_struct(s, &own, &eq_by_name, &const_params)
+                let own_types = type_params.get(&s.name).cloned().unwrap_or_default();
+                generate_struct(
+                    s,
+                    OwnGenerics {
+                        const_params: &own,
+                        type_params: &own_types,
+                    },
+                    &eq_by_name,
+                    pool,
+                )
             }
             GeneratedType::Enum(e) => generate_enum(e),
         });
@@ -139,9 +208,9 @@ fn doc_attrs(description: &Option<String>) -> proc_macro2::TokenStream {
 /// don't need to specify them).
 fn generate_struct(
     model: &RustStruct,
-    own_params: &[ConstParam],
+    own: OwnGenerics,
     eq_by_name: &HashMap<String, bool>,
-    const_params: &HashMap<String, Vec<ConstParam>>,
+    pool: GenericPool,
 ) -> proc_macro2::TokenStream {
     // An oversized bounded `Vec` (see `MAX_STACK_VEC_CAPACITY`) needs the
     // alloc/no_alloc split too, even with no caller-chosen params anywhere
@@ -155,8 +224,22 @@ fn generate_struct(
         .iter()
         .any(|f| matches!(&f.ty, RustType::Vec(_, capacity) if *capacity > MAX_STACK_VEC_CAPACITY));
 
-    if own_params.is_empty() && !has_oversized_vec {
-        return generate_struct_body(model, eq_by_name, const_params, false, &[], &quote! {});
+    // A *type* param needs no split: a caller-chosen payload type means the
+    // same thing with and without `alloc`, so it's carried into both bodies
+    // below (and, when it's the only generic here, into the single
+    // ungated one).
+    if own.const_params.is_empty() && !has_oversized_vec {
+        return generate_struct_body(
+            model,
+            eq_by_name,
+            pool,
+            false,
+            OwnGenerics {
+                const_params: &[],
+                type_params: own.type_params,
+            },
+            &quote! {},
+        );
     }
 
     // `#[cfg(...)] #tokens` only ever gates the single item immediately
@@ -170,9 +253,18 @@ fn generate_struct(
     let alloc_cfg = quote! { #[cfg(feature = "alloc")] };
     let no_alloc_cfg = quote! { #[cfg(not(feature = "alloc"))] };
 
-    let alloc_body = generate_struct_body(model, eq_by_name, const_params, true, &[], &alloc_cfg);
-    let no_alloc_body =
-        generate_struct_body(model, eq_by_name, const_params, false, own_params, &no_alloc_cfg);
+    let alloc_body = generate_struct_body(
+        model,
+        eq_by_name,
+        pool,
+        true,
+        OwnGenerics {
+            const_params: &[],
+            type_params: own.type_params,
+        },
+        &alloc_cfg,
+    );
+    let no_alloc_body = generate_struct_body(model, eq_by_name, pool, false, own, &no_alloc_cfg);
 
     quote! {
         #alloc_body
@@ -183,19 +275,19 @@ fn generate_struct(
 fn generate_struct_body(
     model: &RustStruct,
     eq_by_name: &HashMap<String, bool>,
-    const_params: &HashMap<String, Vec<ConstParam>>,
+    pool: GenericPool,
     alloc_mode: bool,
-    own_params: &[ConstParam],
+    own: OwnGenerics,
     cfg_gate: &proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
     let name = ident(&model.name);
     let struct_doc = doc_attrs(&model.description);
-    let struct_generics = generic_params_with_defaults(own_params);
+    let struct_generics = generic_params_with_defaults(own.type_params, own.const_params);
 
     let fields = model.fields.iter().map(|field| {
         let rust_name = crate::naming::rust_name(&field.name);
         let fname = field_ident(&rust_name);
-        let ftype = rust_type(&field.ty, alloc_mode, const_params);
+        let ftype = rust_type(&field.ty, alloc_mode, pool);
         let ftype = if field.optional {
             quote! { Option<#ftype> }
         } else {
@@ -242,8 +334,8 @@ fn generate_struct_body(
         // `impl<const N: usize = 8> ...` isn't legal -- defaults are only
         // allowed on the type definition itself, so the impl header
         // repeats the same params without them.
-        let impl_generics = generic_params_without_defaults(own_params);
-        let type_generics = generic_args(own_params);
+        let impl_generics = generic_params_without_defaults(own.type_params, own.const_params);
+        let type_generics = generic_args(own.type_params, own.const_params);
         quote! {
             #cfg_gate
             impl #impl_generics crate::Action for #name #type_generics {
@@ -311,12 +403,24 @@ fn field_ident(name: &str) -> proc_macro2::Ident {
     }
 }
 
-/// `<const P1: usize = D1, const P2: usize = D2>`, or empty when `params`
-/// is empty. Defaults are only legal here, on the type definition itself.
-fn generic_params_with_defaults(params: &[ConstParam]) -> proc_macro2::TokenStream {
-    if params.is_empty() {
+/// `<T1 = (), const P1: usize = D1>`, or empty when both lists are empty.
+/// Defaults are only legal here, on the type definition itself. Type params
+/// come first: Rust requires every const param to follow the type params in
+/// a declaration. A type param defaults to `()` -- "this deployment sends
+/// nothing here" -- so existing call sites that never populated the field
+/// keep compiling.
+fn generic_params_with_defaults(
+    type_params: &[TypeParam],
+    params: &[ConstParam],
+) -> proc_macro2::TokenStream {
+    if type_params.is_empty() && params.is_empty() {
         return quote! {};
     }
+
+    let type_decls = type_params.iter().map(|p| {
+        let name = ident(&p.name);
+        quote! { #name = () }
+    });
 
     let decls = params.iter().map(|p| {
         let name = ident(&p.name);
@@ -324,42 +428,44 @@ fn generic_params_with_defaults(params: &[ConstParam]) -> proc_macro2::TokenStre
         quote! { const #name: usize = #default }
     });
 
-    quote! { < #(#decls),* > }
+    quote! { < #(#type_decls,)* #(#decls),* > }
 }
 
 /// Same as [`generic_params_with_defaults`], but without the `= default`
 /// part -- for `impl<...>` headers, which don't allow defaults.
-fn generic_params_without_defaults(params: &[ConstParam]) -> proc_macro2::TokenStream {
-    if params.is_empty() {
+fn generic_params_without_defaults(
+    type_params: &[TypeParam],
+    params: &[ConstParam],
+) -> proc_macro2::TokenStream {
+    if type_params.is_empty() && params.is_empty() {
         return quote! {};
     }
+
+    let type_decls = type_params.iter().map(|p| ident(&p.name));
 
     let decls = params.iter().map(|p| {
         let name = ident(&p.name);
         quote! { const #name: usize }
     });
 
-    quote! { < #(#decls),* > }
+    quote! { < #(#type_decls,)* #(#decls),* > }
 }
 
-/// `<P1, P2>`, or empty when `params` is empty -- for applying a set of
-/// params as arguments (e.g. `impl<...> Action for Foo<P1, P2>`, or a field
-/// referencing a generic `Local` type by its own required params).
-fn generic_args(params: &[ConstParam]) -> proc_macro2::TokenStream {
-    if params.is_empty() {
+/// `<T1, P1, P2>`, or empty when both lists are empty -- for applying a set
+/// of params as arguments (e.g. `impl<...> Action for Foo<T1, P1>`, or a
+/// field referencing a generic `Local` type by its own required params).
+fn generic_args(type_params: &[TypeParam], params: &[ConstParam]) -> proc_macro2::TokenStream {
+    if type_params.is_empty() && params.is_empty() {
         return quote! {};
     }
 
+    let type_names = type_params.iter().map(|p| ident(&p.name));
     let names = params.iter().map(|p| ident(&p.name));
 
-    quote! { < #(#names),* > }
+    quote! { < #(#type_names,)* #(#names),* > }
 }
 
-fn rust_type(
-    ty: &RustType,
-    alloc_mode: bool,
-    const_params: &HashMap<String, Vec<ConstParam>>,
-) -> proc_macro2::TokenStream {
+fn rust_type(ty: &RustType, alloc_mode: bool, pool: GenericPool) -> proc_macro2::TokenStream {
     match ty {
         RustType::Bool => quote! { bool },
 
@@ -378,23 +484,25 @@ fn rust_type(
 
         RustType::Local(name) => {
             let ident = ident(name);
-            // In `alloc` mode every generic-affected type has already
-            // collapsed to a concrete (non-generic) definition, so it's
-            // always referenced bare there. Otherwise it needs whichever
-            // subset of *this* struct's own params it requires -- which
-            // are in scope under the same names, since they were threaded
-            // up from exactly this reference in the first place.
-            if alloc_mode {
-                quote! { #ident }
+            // In `alloc` mode every *const*-generic-affected type has
+            // already collapsed to a concrete definition, so only its type
+            // params (which survive both modes) are applied there.
+            // Otherwise it needs whichever subset of *this* struct's own
+            // params it requires -- which are in scope under the same
+            // names, since they were threaded up from exactly this
+            // reference in the first place.
+            let owned_type_params = pool.type_params.get(name).map(Vec::as_slice).unwrap_or(&[]);
+            let owned_const_params = if alloc_mode {
+                &[][..]
             } else {
-                let params = const_params.get(name).map(Vec::as_slice).unwrap_or(&[]);
-                let args = generic_args(params);
-                quote! { #ident #args }
-            }
+                pool.const_params.get(name).map(Vec::as_slice).unwrap_or(&[])
+            };
+            let args = generic_args(owned_type_params, owned_const_params);
+            quote! { #ident #args }
         }
 
         RustType::Vec(inner, capacity) => {
-            let inner_ty = rust_type(inner, alloc_mode, const_params);
+            let inner_ty = rust_type(inner, alloc_mode, pool);
             if alloc_mode && *capacity > MAX_STACK_VEC_CAPACITY {
                 quote! { alloc::vec::Vec<#inner_ty> }
             } else {
@@ -412,13 +520,18 @@ fn rust_type(
         }
 
         RustType::UnboundedVec(inner, param) => {
-            let inner_ty = rust_type(inner, alloc_mode, const_params);
+            let inner_ty = rust_type(inner, alloc_mode, pool);
             if alloc_mode {
                 quote! { alloc::vec::Vec<#inner_ty> }
             } else {
                 let p = ident(&param.name);
                 quote! { heapless::Vec<#inner_ty, #p> }
             }
+        }
+
+        RustType::Any(param) => {
+            let p = ident(&param.name);
+            quote! { #p }
         }
 
         RustType::Unknown => quote! { () },
@@ -444,6 +557,103 @@ mod tests {
             },
             types: Vec::new(),
         }
+    }
+
+    /// A pool with no named types in it -- for the `rust_type` unit tests,
+    /// which only render types that reference nothing by name. Takes the
+    /// (empty) maps by reference so the caller owns them for the call.
+    fn empty_pool<'a>(
+        const_params: &'a HashMap<String, Vec<ConstParam>>,
+        type_params: &'a HashMap<String, Vec<TypeParam>>,
+    ) -> GenericPool<'a> {
+        GenericPool {
+            const_params,
+            type_params,
+        }
+    }
+
+    fn any_field(name: &str, param: &str) -> RustField {
+        RustField {
+            name: name.to_string(),
+            ty: RustType::Any(TypeParam {
+                name: param.to_string(),
+            }),
+            optional: true,
+            description: None,
+        }
+    }
+
+    #[test]
+    fn untyped_field_becomes_a_type_param_defaulting_to_unit() {
+        let mut schema = sample_schema();
+        schema.message.fields.push(any_field("data", "AuthorizeRequestData"));
+
+        let code = generate(schema);
+
+        assert!(
+            code.contains("pub struct AuthorizeRequest<AuthorizeRequestData = ()>"),
+            "{code}"
+        );
+        assert!(code.contains("pub data: Option<AuthorizeRequestData>"), "{code}");
+    }
+
+    #[test]
+    fn action_impl_forwards_the_type_param() {
+        let mut schema = sample_schema();
+        schema.message.fields.push(any_field("data", "AuthorizeRequestData"));
+
+        let code = generate(schema);
+
+        assert!(
+            code.contains(
+                "impl<AuthorizeRequestData> crate::Action for AuthorizeRequest<AuthorizeRequestData>"
+            ),
+            "{code}"
+        );
+    }
+
+    #[test]
+    fn a_type_param_alone_does_not_split_the_struct_across_alloc_modes() {
+        // Unlike a const param, a caller-chosen *type* means the same thing
+        // with and without `alloc`, so there's nothing to gate.
+        let mut schema = sample_schema();
+        schema.message.fields.push(any_field("data", "AuthorizeRequestData"));
+
+        let code = generate(schema);
+
+        assert!(!code.contains("feature = \"alloc\""), "{code}");
+    }
+
+    #[test]
+    fn type_params_are_declared_before_const_params() {
+        let mut schema = sample_schema();
+        schema.message.fields.push(any_field("data", "AuthorizeRequestData"));
+        schema.message.fields.push(RustField {
+            name: "note".to_string(),
+            ty: RustType::UnboundedString(ConstParam {
+                name: "AUTHORIZE_REQUEST_NOTE_CAP".to_string(),
+                default: 1024,
+            }),
+            optional: false,
+            description: None,
+        });
+
+        let code = generate(schema);
+
+        // Line wrapping is prettyplease's business, so compare on a
+        // whitespace-collapsed copy.
+        let flat = code.split_whitespace().collect::<Vec<_>>().join(" ");
+        assert!(
+            flat.contains(
+                "pub struct AuthorizeRequest< AuthorizeRequestData = (), const AUTHORIZE_REQUEST_NOTE_CAP: usize = 1024usize, >"
+            ),
+            "{code}"
+        );
+        // The `alloc` body keeps the type param but drops the const param.
+        assert!(
+            code.contains("pub struct AuthorizeRequest<AuthorizeRequestData = ()>"),
+            "{code}"
+        );
     }
 
     #[test]
@@ -528,7 +738,7 @@ mod tests {
             fields: Vec::new(),
         };
 
-        let code = generate_message(&message, &HashMap::new(), &HashMap::new());
+        let code = generate_message(&message, &HashMap::new(), &HashMap::new(), &HashMap::new());
 
         assert!(code.starts_with("// @generated"));
     }
@@ -643,7 +853,7 @@ mod tests {
             }],
         };
 
-        let code = generate_message(&message, &HashMap::new(), &HashMap::new());
+        let code = generate_message(&message, &HashMap::new(), &HashMap::new(), &HashMap::new());
 
         assert!(code.contains("use super::common::*"));
         assert!(code.contains("pub struct AuthorizeRequest"));
@@ -660,7 +870,7 @@ mod tests {
             fields: Vec::new(),
         };
 
-        let code = generate_message(&message, &HashMap::new(), &HashMap::new());
+        let code = generate_message(&message, &HashMap::new(), &HashMap::new(), &HashMap::new());
 
         assert!(!code.contains("use super::common"));
     }
@@ -679,7 +889,7 @@ mod tests {
             }],
         };
 
-        let code = generate_message(&message, &HashMap::new(), &HashMap::new());
+        let code = generate_message(&message, &HashMap::new(), &HashMap::new(), &HashMap::new());
 
         assert!(code.contains("use super::common::*"));
     }
@@ -819,7 +1029,7 @@ mod tests {
     fn oversized_bounded_vec_renders_as_alloc_vec_under_alloc_mode() {
         let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 1024);
 
-        let tokens = rust_type(&ty, true, &HashMap::new());
+        let tokens = rust_type(&ty, true, empty_pool(&HashMap::new(), &HashMap::new()));
 
         let inner = quote! { heapless::String<10usize> };
         let expected = quote! { alloc::vec::Vec<#inner> };
@@ -830,7 +1040,7 @@ mod tests {
     fn oversized_bounded_vec_stays_heapless_without_alloc_mode() {
         let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 1024);
 
-        let tokens = rust_type(&ty, false, &HashMap::new());
+        let tokens = rust_type(&ty, false, empty_pool(&HashMap::new(), &HashMap::new()));
 
         assert_eq!(
             tokens.to_string(),
@@ -842,7 +1052,7 @@ mod tests {
     fn small_bounded_vec_stays_heapless_even_under_alloc_mode() {
         let ty = RustType::Vec(Box::new(RustType::BoundedString(10)), 5);
 
-        let tokens = rust_type(&ty, true, &HashMap::new());
+        let tokens = rust_type(&ty, true, empty_pool(&HashMap::new(), &HashMap::new()));
 
         assert_eq!(
             tokens.to_string(),

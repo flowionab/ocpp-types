@@ -2,6 +2,7 @@ use crate::model::ConstParam;
 use crate::model::GeneratedType;
 use crate::model::RustField;
 use crate::model::RustType;
+use crate::model::TypeParam;
 use std::collections::HashMap;
 
 /// For every struct in `types`, computes the full set of const generic
@@ -87,6 +88,84 @@ fn collect_params(ty: &RustType, params: &HashMap<String, Vec<ConstParam>>, out:
 }
 
 fn push_unique(out: &mut Vec<ConstParam>, param: ConstParam) {
+    if !out.iter().any(|existing| existing.name == param.name) {
+        out.push(param);
+    }
+}
+
+/// The [`compute_const_params`] fixed point, for generic *type* parameters
+/// ([`RustType::Any`] -- properties the schema leaves untyped) instead of
+/// const ones. Kept as a separate pass rather than folded into the const
+/// one because the two are rendered differently: type params exist in both
+/// the `alloc` and no-`alloc` builds (a caller-chosen payload type means
+/// the same thing either way), while const params collapse away under
+/// `alloc`.
+pub fn compute_type_params(types: &[GeneratedType]) -> HashMap<String, Vec<TypeParam>> {
+    let mut params: HashMap<String, Vec<TypeParam>> = types
+        .iter()
+        .map(|ty| {
+            let name = match ty {
+                GeneratedType::Struct(s) => s.name.clone(),
+                GeneratedType::Enum(e) => e.name.clone(),
+            };
+            (name, Vec::new())
+        })
+        .collect();
+
+    loop {
+        let mut changed = false;
+
+        for ty in types {
+            if let GeneratedType::Struct(s) = ty {
+                let resolved = type_params_for_fields(&s.fields, &params);
+                if resolved != params[&s.name] {
+                    params.insert(s.name.clone(), resolved);
+                    changed = true;
+                }
+            }
+        }
+
+        if !changed {
+            break;
+        }
+    }
+
+    params
+}
+
+/// [`params_for_fields`], for type params. See [`compute_type_params`].
+pub fn type_params_for_fields(
+    fields: &[RustField],
+    params: &HashMap<String, Vec<TypeParam>>,
+) -> Vec<TypeParam> {
+    let mut out = Vec::new();
+    for field in fields {
+        collect_type_params(&field.ty, params, &mut out);
+    }
+    out
+}
+
+fn collect_type_params(
+    ty: &RustType,
+    params: &HashMap<String, Vec<TypeParam>>,
+    out: &mut Vec<TypeParam>,
+) {
+    match ty {
+        RustType::Any(param) => push_unique_type(out, param.clone()),
+        RustType::Vec(inner, _) => collect_type_params(inner, params, out),
+        RustType::UnboundedVec(inner, _) => collect_type_params(inner, params, out),
+        RustType::Local(name) => {
+            if let Some(existing) = params.get(name) {
+                for param in existing.clone() {
+                    push_unique_type(out, param);
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
+fn push_unique_type(out: &mut Vec<TypeParam>, param: TypeParam) {
     if !out.iter().any(|existing| existing.name == param.name) {
         out.push(param);
     }
@@ -221,6 +300,54 @@ mod tests {
             params["TwoFields"],
             vec![param("TwoFieldsACap", 1024), param("TwoFieldsBCap", 1024)]
         );
+    }
+
+    fn type_param(name: &str) -> TypeParam {
+        TypeParam {
+            name: name.to_string(),
+        }
+    }
+
+    #[test]
+    fn struct_with_an_untyped_field_gets_its_own_type_param() {
+        let types = vec![struct_with_field(
+            "DataTransferRequest",
+            "data",
+            RustType::Any(type_param("DataTransferRequestData")),
+        )];
+
+        let params = compute_type_params(&types);
+
+        assert_eq!(
+            params["DataTransferRequest"],
+            vec![type_param("DataTransferRequestData")]
+        );
+    }
+
+    #[test]
+    fn type_params_propagate_through_local_references_and_vecs() {
+        let types = vec![
+            struct_with_field("Leaf", "data", RustType::Any(type_param("LeafData"))),
+            struct_with_field("Middle", "leaf", RustType::Local("Leaf".to_string())),
+            struct_with_field(
+                "Top",
+                "middles",
+                RustType::Vec(Box::new(RustType::Local("Middle".to_string())), 4),
+            ),
+        ];
+
+        let params = compute_type_params(&types);
+
+        assert_eq!(params["Top"], vec![type_param("LeafData")]);
+    }
+
+    #[test]
+    fn struct_with_no_untyped_field_gets_no_type_params() {
+        let types = vec![struct_with_field("Plain", "value", RustType::Integer)];
+
+        let params = compute_type_params(&types);
+
+        assert!(params["Plain"].is_empty());
     }
 
     #[test]

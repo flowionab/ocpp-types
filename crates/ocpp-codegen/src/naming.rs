@@ -119,6 +119,17 @@ pub fn const_param_name(owner: &str, field_name: &str) -> String {
     )
 }
 
+/// The generic *type* parameter name for a schema property that declares no
+/// type at all (2.0.1/2.1's `DataTransfer.data`, "open to implementation"),
+/// e.g. `DataTransferRequest` + `data` -> `DataTransferRequestData`. Owner-
+/// qualified for the same reason as [`const_param_name`]: several such
+/// fields can end up threaded onto one ancestor struct.
+pub fn type_param_name(owner: &str, field_name: &str) -> String {
+    // Type parameters are PascalCase (`non_camel_case_types`), unlike the
+    // SCREAMING_SNAKE_CASE const params.
+    format!("{}{}", pascal_case(owner), pascal_case(field_name))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -168,6 +179,11 @@ mod tests {
         // `non_camel_case_types`-clean without this.
         assert_eq!(rust_variant_ident("wInductive"), "WInductive");
         assert_eq!(rust_variant_ident("wResonant"), "WResonant");
+    }
+
+    #[test]
+    fn type_param_name_combines_owner_and_field_in_pascal_case() {
+        assert_eq!(type_param_name("DataTransferRequest", "data"), "DataTransferRequestData");
     }
 
     #[test]

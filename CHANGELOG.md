@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3]
+
+### Fixed
+
+- 2.0.1/2.1: `DataTransferRequest.data` and `DataTransferResponse.data` were generated as
+  `Option<()>`, making the field structurally incapable of carrying the vendor payload the message
+  exists to transport — the only workaround was to hand-write the wire struct and bypass
+  `ocpp-types` for that message. The schemas give these properties no type at all (the spec leaves
+  them "open to implementation"), and `ocpp-codegen` mapped an untyped property to the unit type.
+  Such properties now become a caller-chosen generic type parameter defaulting to `()`, e.g.
+  `DataTransferRequest<VendorPayload>` with `data: Option<VendorPayload>`. Existing code that never
+  populated `data` is unaffected — the default keeps `DataTransferRequest` spelled exactly as
+  before. 1.6J is unaffected: its schema types `data` as a string, so it was already
+  `Option<heapless::String<N>>`.
+
 ## [0.1.2]
 
 ### Fixed
@@ -80,7 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   codes, unbounded-field capacities, WebSocket envelopes), each verified to actually run, not just
   compile.
 
-[Unreleased]: https://github.com/flowionab/ocpp-types/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/flowionab/ocpp-types/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/flowionab/ocpp-types/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/flowionab/ocpp-types/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/flowionab/ocpp-types/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/flowionab/ocpp-types/releases/tag/v0.1.0

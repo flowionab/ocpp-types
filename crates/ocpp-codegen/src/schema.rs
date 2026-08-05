@@ -7,6 +7,7 @@ use crate::model::RustField;
 use crate::model::RustStruct;
 use crate::model::RustType;
 use crate::model::RustVariant;
+use crate::model::TypeParam;
 use crate::pool::TypePool;
 use serde_json::Map;
 use serde_json::Value;
@@ -380,6 +381,19 @@ impl<'a> SchemaParser<'a> {
                 self.resolve_named_type(crate::naming::pascal_case(field_name), schema)?
             }
 
+            // A property with no `type` and no `$ref` at all -- 2.0.1/2.1's
+            // `DataTransfer.data`, which the spec leaves open to
+            // implementation. There's no `no_std` type that models
+            // arbitrary JSON, and mapping it to `()` would make the field
+            // structurally unable to carry the payload it exists for, so
+            // the caller picks the type (see `RustType::Any`).
+            None => RustType::Any(TypeParam {
+                name: crate::naming::type_param_name(owner, field_name),
+            }),
+
+            // A `type` the generator doesn't recognize. Nothing sensible to
+            // generate, and (unlike the untyped case above) no reason to
+            // think a caller-chosen payload is what the schema meant.
             _ => RustType::Unknown,
         })
     }
@@ -467,6 +481,32 @@ impl<'a> SchemaParser<'a> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn property_with_no_declared_type_becomes_a_caller_chosen_type_param() {
+        // 2.0.1/2.1's `DataTransfer.data`: "Data without specified length or
+        // format ... open to implementation". Mapping this to `()` (as the
+        // generator used to) makes the field structurally incapable of
+        // carrying the payload it exists for.
+        let schema = json!({
+            "title": "DataTransferRequest",
+            "type": "object",
+            "properties": {
+                "data": { "description": "Data without specified length or format." }
+            },
+            "required": []
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V201).unwrap();
+
+        let data = parsed.message.fields.iter().find(|f| f.name == "data").unwrap();
+        assert_eq!(
+            data.ty,
+            RustType::Any(TypeParam {
+                name: "DataTransferRequestData".to_string()
+            })
+        );
+    }
 
     #[test]
     fn action_name_strips_request_suffix() {

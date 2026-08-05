@@ -44,12 +44,13 @@ pub fn generate_batch(schemas: &[Value], version: OcppVersion) -> anyhow::Result
     // that a *different* schema file was the one to register.
     let eq_by_name = crate::eqcheck::compute_eq_derivable(pool.types());
     let const_params = crate::generics::compute_const_params(pool.types());
+    let type_params = crate::generics::compute_type_params(pool.types());
 
     let messages = parsed_messages
         .into_iter()
         .map(|message| GeneratedMessage {
             struct_name: message.name.clone(),
-            source: crate::rust::generate_message(&message, &eq_by_name, &const_params),
+            source: crate::rust::generate_message(&message, &eq_by_name, &const_params, &type_params),
         })
         .collect();
 
