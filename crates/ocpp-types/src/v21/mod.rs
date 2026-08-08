@@ -7,6 +7,7 @@ mod primitives;
 pub use primitives::*;
 mod error;
 pub use error::*;
+pub mod standard;
 mod a_f_r_r_signal_request;
 pub use a_f_r_r_signal_request::*;
 mod a_f_r_r_signal_response;

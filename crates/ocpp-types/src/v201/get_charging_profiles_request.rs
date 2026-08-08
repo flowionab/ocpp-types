@@ -5,12 +5,12 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetChargingProfilesRequest {
+pub struct GetChargingProfilesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
-    pub charging_profile: ChargingProfileCriterion,
+    pub charging_profile: ChargingProfileCriterion<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// For which EVSE installed charging profiles SHALL be reported. If 0, only charging profiles installed on the Charging Station itself (the grid connection) SHALL be reported. If omitted, all installed charging profiles SHALL be reported.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -20,22 +20,24 @@ pub struct GetChargingProfilesRequest {
     pub request_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetChargingProfilesRequest {
+impl<CustomDataType> crate::Action for GetChargingProfilesRequest<CustomDataType> {
     const ACTION: &'static str = "GetChargingProfiles";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetChargingProfilesRequest<
-    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     pub charging_profile: ChargingProfileCriterion<
+        CustomDataType,
         CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// For which EVSE installed charging profiles SHALL be reported. If 0, only charging profiles installed on the Charging Station itself (the grid connection) SHALL be reported. If omitted, all installed charging profiles SHALL be reported.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -45,7 +47,13 @@ pub struct GetChargingProfilesRequest<
     pub request_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize> crate::Action
-for GetChargingProfilesRequest<CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP> {
+impl<
+    CustomDataType,
+    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize,
+> crate::Action
+for GetChargingProfilesRequest<
+    CustomDataType,
+    CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP,
+> {
     const ACTION: &'static str = "GetChargingProfiles";
 }

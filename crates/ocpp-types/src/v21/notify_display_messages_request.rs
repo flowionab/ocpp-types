@@ -5,13 +5,13 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyDisplayMessagesRequest {
+pub struct NotifyDisplayMessagesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "messageInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub message_info: Option<alloc::vec::Vec<MessageInfo>>,
+    pub message_info: Option<alloc::vec::Vec<MessageInfo<CustomDataType>>>,
     /// The id of the &lt;&lt;getdisplaymessagesrequest,GetDisplayMessagesRequest&gt;&gt; that requested this message.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
@@ -20,28 +20,25 @@ pub struct NotifyDisplayMessagesRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyDisplayMessagesRequest {
+impl<CustomDataType> crate::Action for NotifyDisplayMessagesRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyDisplayMessages";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyDisplayMessagesRequest<
-    const NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP: usize = 16usize,
-    const MESSAGE_INFO_END_DATE_TIME_CAP: usize = 1024usize,
-    const MESSAGE_INFO_START_DATE_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP: usize = 8usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "messageInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub message_info: Option<
         heapless::Vec<
-            MessageInfo<
-                MESSAGE_INFO_END_DATE_TIME_CAP,
-                MESSAGE_INFO_START_DATE_TIME_CAP,
-            >,
+            MessageInfo<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP>,
             NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP,
         >,
     >,
@@ -54,14 +51,14 @@ pub struct NotifyDisplayMessagesRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP: usize,
-    const MESSAGE_INFO_END_DATE_TIME_CAP: usize,
-    const MESSAGE_INFO_START_DATE_TIME_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
 > crate::Action
 for NotifyDisplayMessagesRequest<
+    CustomDataType,
     NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP,
-    MESSAGE_INFO_END_DATE_TIME_CAP,
-    MESSAGE_INFO_START_DATE_TIME_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
 > {
     const ACTION: &'static str = "NotifyDisplayMessages";
 }

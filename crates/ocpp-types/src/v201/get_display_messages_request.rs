@@ -5,10 +5,10 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetDisplayMessagesRequest {
+pub struct GetDisplayMessagesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// If provided the Charging Station shall return Display Messages of the given ids. This field SHALL NOT contain more ids than set in &lt;&lt;configkey-number-of-display-messages,NumberOfDisplayMessages.maxLimit&gt;&gt;
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id: Option<alloc::vec::Vec<i64>>,
@@ -21,18 +21,19 @@ pub struct GetDisplayMessagesRequest {
     pub state: Option<MessageStateEnum>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetDisplayMessagesRequest {
+impl<CustomDataType> crate::Action for GetDisplayMessagesRequest<CustomDataType> {
     const ACTION: &'static str = "GetDisplayMessages";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDisplayMessagesRequest<
-    const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// If provided the Charging Station shall return Display Messages of the given ids. This field SHALL NOT contain more ids than set in &lt;&lt;configkey-number-of-display-messages,NumberOfDisplayMessages.maxLimit&gt;&gt;
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id: Option<heapless::Vec<i64, GET_DISPLAY_MESSAGES_REQUEST_ID_CAP>>,
@@ -45,7 +46,7 @@ pub struct GetDisplayMessagesRequest<
     pub state: Option<MessageStateEnum>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize> crate::Action
-for GetDisplayMessagesRequest<GET_DISPLAY_MESSAGES_REQUEST_ID_CAP> {
+impl<CustomDataType, const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize> crate::Action
+for GetDisplayMessagesRequest<CustomDataType, GET_DISPLAY_MESSAGES_REQUEST_ID_CAP> {
     const ACTION: &'static str = "GetDisplayMessages";
 }

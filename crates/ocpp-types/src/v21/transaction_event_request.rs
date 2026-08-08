@@ -5,31 +5,31 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct TransactionEventRequest {
+pub struct TransactionEventRequest<CustomDataType = crate::NoCustomData> {
     /// The maximum current of the connected cable in Ampere (A).
     #[cfg_attr(feature = "serde", serde(rename = "cableMaxCurrent"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cable_max_current: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "costDetails"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub cost_details: Option<CostDetails>,
+    pub cost_details: Option<CostDetails<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventType"))]
     pub event_type: TransactionEventEnum,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub evse: Option<EVSE>,
+    pub evse: Option<EVSE<CustomDataType>>,
     /// *(2.1)* True when EVSE electronics are in sleep mode for this transaction. Default value (when absent) is false.
     #[cfg_attr(feature = "serde", serde(rename = "evseSleep"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_sleep: Option<bool>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token: Option<IdToken>,
+    pub id_token: Option<IdToken<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "meterValue"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub meter_value: Option<alloc::vec::Vec<MeterValue>>,
+    pub meter_value: Option<alloc::vec::Vec<MeterValue<CustomDataType>>>,
     /// If the Charging Station is able to report the number of phases used, then it SHALL provide it.
     /// When omitted the CSMS may be able to determine the number of phases used as follows: +
     /// 1: The numberPhases in the currently used ChargingSchedule. +
@@ -51,28 +51,28 @@ pub struct TransactionEventRequest {
     #[cfg_attr(feature = "serde", serde(rename = "seqNo"))]
     pub seq_no: i64,
     /// The date and time at which this transaction event occurred.
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "transactionInfo"))]
-    pub transaction_info: Transaction,
+    pub transaction_info: Transaction<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "triggerReason"))]
     pub trigger_reason: TriggerReasonEnum,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for TransactionEventRequest {
+impl<CustomDataType> crate::Action for TransactionEventRequest<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TransactionEventRequest<
-    const COST_DETAILS_CHARGING_PERIODS_CAP: usize = 16usize,
-    const CHARGING_PERIOD_DIMENSIONS_CAP: usize = 16usize,
-    const CHARGING_PERIOD_START_PERIOD_CAP: usize = 1024usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
-    const TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_TIMESTAMP_CAP: usize = 1024usize,
-    const TRANSACTION_EVENT_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const COST_DETAILS_CHARGING_PERIODS_CAP: usize = 8usize,
+    const CHARGING_PERIOD_DIMENSIONS_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP: usize = 8usize,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 8usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize = 1024usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize = 1024usize,
 > {
     /// The maximum current of the connected cable in Ampere (A).
     #[cfg_attr(feature = "serde", serde(rename = "cableMaxCurrent"))]
@@ -82,30 +82,35 @@ pub struct TransactionEventRequest<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cost_details: Option<
         CostDetails<
+            CustomDataType,
             COST_DETAILS_CHARGING_PERIODS_CAP,
             CHARGING_PERIOD_DIMENSIONS_CAP,
-            CHARGING_PERIOD_START_PERIOD_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventType"))]
     pub event_type: TransactionEventEnum,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub evse: Option<EVSE>,
+    pub evse: Option<EVSE<CustomDataType>>,
     /// *(2.1)* True when EVSE electronics are in sleep mode for this transaction. Default value (when absent) is false.
     #[cfg_attr(feature = "serde", serde(rename = "evseSleep"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_sleep: Option<bool>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token: Option<IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>>,
+    pub id_token: Option<IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "meterValue"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub meter_value: Option<
         heapless::Vec<
-            MeterValue<METER_VALUE_SAMPLED_VALUE_CAP, METER_VALUE_TIMESTAMP_CAP>,
+            MeterValue<
+                CustomDataType,
+                METER_VALUE_SAMPLED_VALUE_CAP,
+                SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+                SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+            >,
             TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP,
         >,
     >,
@@ -130,32 +135,32 @@ pub struct TransactionEventRequest<
     #[cfg_attr(feature = "serde", serde(rename = "seqNo"))]
     pub seq_no: i64,
     /// The date and time at which this transaction event occurred.
-    pub timestamp: heapless::String<TRANSACTION_EVENT_REQUEST_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "transactionInfo"))]
-    pub transaction_info: Transaction,
+    pub transaction_info: Transaction<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "triggerReason"))]
     pub trigger_reason: TriggerReasonEnum,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const COST_DETAILS_CHARGING_PERIODS_CAP: usize,
     const CHARGING_PERIOD_DIMENSIONS_CAP: usize,
-    const CHARGING_PERIOD_START_PERIOD_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
     const TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP: usize,
     const METER_VALUE_SAMPLED_VALUE_CAP: usize,
-    const METER_VALUE_TIMESTAMP_CAP: usize,
-    const TRANSACTION_EVENT_REQUEST_TIMESTAMP_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
 > crate::Action
 for TransactionEventRequest<
+    CustomDataType,
     COST_DETAILS_CHARGING_PERIODS_CAP,
     CHARGING_PERIOD_DIMENSIONS_CAP,
-    CHARGING_PERIOD_START_PERIOD_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
     TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP,
     METER_VALUE_SAMPLED_VALUE_CAP,
-    METER_VALUE_TIMESTAMP_CAP,
-    TRANSACTION_EVENT_REQUEST_TIMESTAMP_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
 }

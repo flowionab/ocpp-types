@@ -5,37 +5,40 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetVariableMonitoringResponse {
+pub struct SetVariableMonitoringResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "setMonitoringResult"))]
-    pub set_monitoring_result: alloc::vec::Vec<SetMonitoringResult>,
+    pub set_monitoring_result: alloc::vec::Vec<SetMonitoringResult<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for SetVariableMonitoringResponse {
+impl<CustomDataType> crate::Action for SetVariableMonitoringResponse<CustomDataType> {
     const ACTION: &'static str = "SetVariableMonitoring";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetVariableMonitoringResponse<
-    const SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "setMonitoringResult"))]
     pub set_monitoring_result: heapless::Vec<
-        SetMonitoringResult,
+        SetMonitoringResult<CustomDataType>,
         SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP,
     >,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP: usize,
 > crate::Action
 for SetVariableMonitoringResponse<
+    CustomDataType,
     SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP,
 > {
     const ACTION: &'static str = "SetVariableMonitoring";

@@ -1,0 +1,21 @@
+Security Event;Description;Critical
+FirmwareUpdated;The Charge Point firmware is updated;Yes
+FailedToAuthenticateAtCsms;The authentication credentials provided by the Charge Point were rejected by the Central System;No
+CsmsFailedToAuthenticate;The authentication credentials provided by the Central System were rejected by the Charge Point;No
+SettingSystemTime;The system time on the Charge Point was changed;Yes
+StartupOfTheDevice;The Charge Point has booted;Yes
+ResetOrReboot;The Charge Point was rebooted or reset;Yes
+SecurityLogWasCleared;The security log was cleared;Yes
+ReconfigurationOfSecurityParameters;Security parameters, such as keys or the security profile used, were changed;No
+MemoryExhaustion;The Flash or RAM memory of the Charge Point is getting full;Yes
+InvalidMessages;The Charge Point has received messages that are not valid OCPP messages, if signed messages, signage invalid/incorrect;No
+AttemptedReplayAttacks;The Charge Point has received a replayed message (other than the Central System trying to resend a message because there was for example a network problem);No
+TamperDetectionActivated;The physical tamper detection sensor was triggered;Yes
+InvalidFirmwareSignature;The firmware signature is not valid;Yes
+InvalidFirmwareSigningCertificate;The certificate used to verify the firmware signature is not valid;Yes
+InvalidCsmsCertificate;The certificate that the Central System uses was not valid or could not be verified;Yes
+InvalidChargePointCertificate;The certificate sent to the Charge Point using the CertificateSigned.req message is not a valid certificate;Yes
+InvalidTLSVersion;The TLS version used by the Central System is lower than 1.2 and is not allowed by the security specification;Yes
+InvalidTLSCipherSuite;The Central System did only allow connections using TLS cipher suites that are not allowed by the security specification;Yes
+MaintenanceLoginAccepted;Successful login to the local maintenance interface. It is recommended to include information like the user identification and the origin of the login attempt in the techInfo field;Yes
+MaintenanceLoginFailed;Failed login attempt to the local maintenance interface. It is recommended to include information like the user identification and the origin of the login attempt in the techInfo field;Yes

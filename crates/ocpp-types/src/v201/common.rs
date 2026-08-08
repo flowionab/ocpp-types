@@ -11,13 +11,13 @@ pub struct CustomData {
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AdditionalInfo {
+pub struct AdditionalInfo<CustomDataType = crate::NoCustomData> {
     /// This field specifies the additional IdToken.
     #[cfg_attr(feature = "serde", serde(rename = "additionalIdToken"))]
     pub additional_id_token: heapless::String<36usize>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This defines the type of the additionalIdToken. This is a custom type, so the implementation needs to be agreed upon by all involved parties.
     pub r#type: heapless::String<50usize>,
 }
@@ -39,13 +39,13 @@ pub enum IdTokenEnum {
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct IdToken {
+pub struct IdToken<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "additionalInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub additional_info: Option<alloc::vec::Vec<AdditionalInfo>>,
+    pub additional_info: Option<alloc::vec::Vec<AdditionalInfo<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// IdToken is case insensitive. Might hold the hidden id of an RFID tag, but can for example also contain a UUID.
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     pub id_token: heapless::String<36usize>,
@@ -55,15 +55,18 @@ pub struct IdToken {
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct IdToken<const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize> {
+pub struct IdToken<
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+> {
     #[cfg_attr(feature = "serde", serde(rename = "additionalInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub additional_info: Option<
-        heapless::Vec<AdditionalInfo, ID_TOKEN_ADDITIONAL_INFO_CAP>,
+        heapless::Vec<AdditionalInfo<CustomDataType>, ID_TOKEN_ADDITIONAL_INFO_CAP>,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// IdToken is case insensitive. Might hold the hidden id of an RFID tag, but can for example also contain a UUID.
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     pub id_token: heapless::String<36usize>,
@@ -79,10 +82,10 @@ pub enum HashAlgorithmEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct OCSPRequestData {
+pub struct OCSPRequestData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "hashAlgorithm"))]
     pub hash_algorithm: HashAlgorithmEnum,
     /// Hashed value of the issuers public key
@@ -128,14 +131,14 @@ pub enum MessageFormatEnum {
 /// Contains message details, for a message to be displayed on a Charging Station.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MessageContent {
+pub struct MessageContent<CustomDataType = crate::NoCustomData> {
     /// Message_ Content. Content. Message
     /// urn:x-enexis:ecdm:uid:1:570852
     /// Message contents.
     pub content: heapless::String<512usize>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub format: MessageFormatEnum,
     /// Message_ Content. Language. Language_ Code
     /// urn:x-enexis:ecdm:uid:1:570849
@@ -167,27 +170,27 @@ pub enum AuthorizationStatusEnum {
 /// It is advised to not stop charging for a token that expires during charging, as ExpiryDate is only used for caching purposes. If ExpiryDate is not given, the status has no end date.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct IdTokenInfo {
+pub struct IdTokenInfo<CustomDataType = crate::NoCustomData> {
     /// ID_ Token. Expiry. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569373
     /// Date and Time after which the token must be considered invalid.
     #[cfg_attr(feature = "serde", serde(rename = "cacheExpiryDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub cache_expiry_date_time: Option<alloc::string::String>,
+    pub cache_expiry_date_time: Option<crate::OcppTimestamp>,
     /// Priority from a business point of view. Default priority is 0, The range is from -9 to 9. Higher values indicate a higher priority. The chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; overrules this one.
     #[cfg_attr(feature = "serde", serde(rename = "chargingPriority"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_priority: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Only used when the IdToken is only valid for one or more specific EVSEs, not for the entire Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<alloc::vec::Vec<i64>>,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken>,
+    pub group_id_token: Option<IdToken<CustomDataType>>,
     /// ID_ Token. Language1. Language_ Code
     /// urn:x-oca:ocpp:uid:1:569374
     /// Preferred user interface language of identifier user. Contains a language code as defined in &lt;&lt;ref-RFC5646,\[RFC5646\]&gt;&gt;.
@@ -200,7 +203,7 @@ pub struct IdTokenInfo {
     pub language2: Option<heapless::String<8usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "personalMessage"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub personal_message: Option<MessageContent>,
+    pub personal_message: Option<MessageContent<CustomDataType>>,
     pub status: AuthorizationStatusEnum,
 }
 #[cfg(not(feature = "alloc"))]
@@ -211,32 +214,30 @@ pub struct IdTokenInfo {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdTokenInfo<
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 16usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
 > {
     /// ID_ Token. Expiry. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569373
     /// Date and Time after which the token must be considered invalid.
     #[cfg_attr(feature = "serde", serde(rename = "cacheExpiryDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub cache_expiry_date_time: Option<
-        heapless::String<ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP>,
-    >,
+    pub cache_expiry_date_time: Option<crate::OcppTimestamp>,
     /// Priority from a business point of view. Default priority is 0, The range is from -9 to 9. Higher values indicate a higher priority. The chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; overrules this one.
     #[cfg_attr(feature = "serde", serde(rename = "chargingPriority"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_priority: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Only used when the IdToken is only valid for one or more specific EVSEs, not for the entire Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<heapless::Vec<i64, ID_TOKEN_INFO_EVSE_ID_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>>,
+    pub group_id_token: Option<IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>>,
     /// ID_ Token. Language1. Language_ Code
     /// urn:x-oca:ocpp:uid:1:569374
     /// Preferred user interface language of identifier user. Contains a language code as defined in &lt;&lt;ref-RFC5646,\[RFC5646\]&gt;&gt;.
@@ -249,7 +250,7 @@ pub struct IdTokenInfo<
     pub language2: Option<heapless::String<8usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "personalMessage"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub personal_message: Option<MessageContent>,
+    pub personal_message: Option<MessageContent<CustomDataType>>,
     pub status: AuthorizationStatusEnum,
 }
 /// Wireless_ Communication_ Module
@@ -257,10 +258,10 @@ pub struct IdTokenInfo<
 /// Defines parameters required for initiating and maintaining wireless communication with other devices.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Modem {
+pub struct Modem<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Wireless_ Communication_ Module. ICCID. CI20_ Text
     /// urn:x-oca:ocpp:uid:1:569327
     /// This contains the ICCID of the modem’s SIM card.
@@ -277,10 +278,10 @@ pub struct Modem {
 /// The physical system where an Electrical Vehicle (EV) can be charged.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingStation {
+pub struct ChargingStation<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This contains the firmware version of the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "firmwareVersion"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -290,7 +291,7 @@ pub struct ChargingStation {
     /// Defines the model of the device.
     pub model: heapless::String<20usize>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub modem: Option<Modem>,
+    pub modem: Option<Modem<CustomDataType>>,
     /// Device. Serial_ Number. Serial_ Number
     /// urn:x-oca:ocpp:uid:1:569324
     /// Vendor-specific device identifier.
@@ -327,14 +328,14 @@ pub enum RegistrationStatusEnum {
 /// Element providing more information about the status.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct StatusInfo {
+pub struct StatusInfo<CustomDataType = crate::NoCustomData> {
     /// Additional text to provide detailed information.
     #[cfg_attr(feature = "serde", serde(rename = "additionalInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub additional_info: Option<heapless::String<512usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// A predefined code for the reason why the status is returned in this response. The string is case-insensitive.
     #[cfg_attr(feature = "serde", serde(rename = "reasonCode"))]
     pub reason_code: heapless::String<20usize>,
@@ -365,14 +366,14 @@ pub enum CertificateSignedStatusEnum {
 /// Electric Vehicle Supply Equipment
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct EVSE {
+pub struct EVSE<CustomDataType = crate::NoCustomData> {
     /// An id to designate a specific connector (on an EVSE) by connector index number.
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub connector_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// EVSE Identifier. This contains a number (&gt; 0) designating an EVSE of the Charging Station.
@@ -416,13 +417,13 @@ pub enum ChargingProfilePurposeEnum {
 /// A ChargingProfile consists of a ChargingSchedule, describing the amount of power or current that can be delivered per time interval.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClearChargingProfile {
+pub struct ClearChargingProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfilePurpose"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_profile_purpose: Option<ChargingProfilePurposeEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// Specifies the id of the EVSE for which to clear charging profiles. An evseId of zero (0) specifies the charging profile for the overall Charging Station. Absence of this parameter means the clearing applies to all charging profiles that match the other criteria in the request.
@@ -460,16 +461,16 @@ pub enum ClearMonitoringStatusEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClearMonitoringResult {
+pub struct ClearMonitoringResult<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Id of the monitor of which a clear was requested.
     pub id: i64,
     pub status: ClearMonitoringStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
 /// Source of the charging limit.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -482,10 +483,10 @@ pub enum ChargingLimitSourceEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CertificateHashData {
+pub struct CertificateHashData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "hashAlgorithm"))]
     pub hash_algorithm: HashAlgorithmEnum,
     /// Hashed value of the issuers public key
@@ -586,7 +587,7 @@ pub enum GetCertificateStatusEnum {
 /// A ChargingProfile consists of ChargingSchedule, describing the amount of power or current that can be delivered per time interval.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingProfileCriterion {
+pub struct ChargingProfileCriterion<CustomDataType = crate::NoCustomData> {
     /// For which charging limit sources, charging profiles SHALL be reported. If omitted, the Charging Station SHALL not filter on chargingLimitSource.
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -600,7 +601,7 @@ pub struct ChargingProfileCriterion {
     pub charging_profile_purpose: Option<ChargingProfilePurposeEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Profile. Stack_ Level. Counter
     /// urn:x-oca:ocpp:uid:1:569230
     /// Value determining level in hierarchy stack of profiles. Higher values have precedence over lower values. Lowest level is 0.
@@ -615,7 +616,8 @@ pub struct ChargingProfileCriterion {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChargingProfileCriterion<
-    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize = 8usize,
 > {
     /// For which charging limit sources, charging profiles SHALL be reported. If omitted, the Charging Station SHALL not filter on chargingLimitSource.
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
@@ -632,7 +634,7 @@ pub struct ChargingProfileCriterion<
     pub charging_profile_purpose: Option<ChargingProfilePurposeEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Profile. Stack_ Level. Counter
     /// urn:x-oca:ocpp:uid:1:569230
     /// Value determining level in hierarchy stack of profiles. Higher values have precedence over lower values. Lowest level is 0.
@@ -659,10 +661,10 @@ pub enum ChargingRateUnitEnum {
 /// Charging schedule period structure defines a time period in a charging schedule.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingSchedulePeriod {
+pub struct ChargingSchedulePeriod<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Schedule_ Period. Limit. Measure
     /// urn:x-oca:ocpp:uid:1:569241
     /// Charging rate limit during the schedule period, in the applicable chargingRateUnit, for example in Amperes (A) or Watts (W). Accepts at most one digit fraction (e.g. 8.1).
@@ -688,14 +690,16 @@ pub struct ChargingSchedulePeriod {
 /// urn:x-oca:ocpp:uid:2:233362
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CompositeSchedule {
+pub struct CompositeSchedule<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
-    pub charging_schedule_period: alloc::vec::Vec<ChargingSchedulePeriod>,
+    pub charging_schedule_period: alloc::vec::Vec<
+        ChargingSchedulePeriod<CustomDataType>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Duration of the schedule in seconds.
     pub duration: i64,
     /// The ID of the EVSE for which the
@@ -708,7 +712,7 @@ pub struct CompositeSchedule {
     /// urn:x-oca:ocpp:uid:1:569456
     /// Date and time at which the schedule becomes active. All time measurements within the schedule are relative to this timestamp.
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
-    pub schedule_start: alloc::string::String,
+    pub schedule_start: crate::OcppTimestamp,
 }
 #[cfg(not(feature = "alloc"))]
 /// Composite_ Schedule
@@ -716,19 +720,19 @@ pub struct CompositeSchedule {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeSchedule<
-    const COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const COMPOSITE_SCHEDULE_SCHEDULE_START_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
     pub charging_schedule_period: heapless::Vec<
-        ChargingSchedulePeriod,
+        ChargingSchedulePeriod<CustomDataType>,
         COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Duration of the schedule in seconds.
     pub duration: i64,
     /// The ID of the EVSE for which the
@@ -741,7 +745,7 @@ pub struct CompositeSchedule<
     /// urn:x-oca:ocpp:uid:1:569456
     /// Date and time at which the schedule becomes active. All time measurements within the schedule are relative to this timestamp.
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
-    pub schedule_start: heapless::String<COMPOSITE_SCHEDULE_SCHEDULE_START_CAP>,
+    pub schedule_start: crate::OcppTimestamp,
 }
 /// The Charging Station will indicate if it was
 /// able to process the request
@@ -786,17 +790,19 @@ pub enum GetCertificateIdUseEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CertificateHashDataChain {
+pub struct CertificateHashDataChain<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "certificateHashData"))]
-    pub certificate_hash_data: CertificateHashData,
+    pub certificate_hash_data: CertificateHashData<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
     pub certificate_type: GetCertificateIdUseEnum,
     #[cfg_attr(feature = "serde", serde(rename = "childCertificateHashData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub child_certificate_hash_data: Option<heapless::Vec<CertificateHashData, 4usize>>,
+    pub child_certificate_hash_data: Option<
+        heapless::Vec<CertificateHashData<CustomDataType>, 4usize>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 /// Charging Station indicates if it can process the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -805,59 +811,27 @@ pub enum GetInstalledCertificateStatusEnum {
     Accepted,
     NotFound,
 }
-#[cfg(feature = "alloc")]
 /// Log
 /// urn:x-enexis:ecdm:uid:2:233373
 /// Generic class for the configuration of logging entries.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LogParameters {
+pub struct LogParameters<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Log. Latest_ Timestamp. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569482
     /// This contains the date and time of the latest logging information to include in the diagnostics.
     #[cfg_attr(feature = "serde", serde(rename = "latestTimestamp"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub latest_timestamp: Option<alloc::string::String>,
+    pub latest_timestamp: Option<crate::OcppTimestamp>,
     /// Log. Oldest_ Timestamp. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569477
     /// This contains the date and time of the oldest logging information to include in the diagnostics.
     #[cfg_attr(feature = "serde", serde(rename = "oldestTimestamp"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub oldest_timestamp: Option<alloc::string::String>,
-    /// Log. Remote_ Location. URI
-    /// urn:x-enexis:ecdm:uid:1:569484
-    /// The URL of the location at the remote system where the log should be stored.
-    #[cfg_attr(feature = "serde", serde(rename = "remoteLocation"))]
-    pub remote_location: heapless::String<512usize>,
-}
-#[cfg(not(feature = "alloc"))]
-/// Log
-/// urn:x-enexis:ecdm:uid:2:233373
-/// Generic class for the configuration of logging entries.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LogParameters<
-    const LOG_PARAMETERS_LATEST_TIMESTAMP_CAP: usize = 1024usize,
-    const LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    /// Log. Latest_ Timestamp. Date_ Time
-    /// urn:x-enexis:ecdm:uid:1:569482
-    /// This contains the date and time of the latest logging information to include in the diagnostics.
-    #[cfg_attr(feature = "serde", serde(rename = "latestTimestamp"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub latest_timestamp: Option<heapless::String<LOG_PARAMETERS_LATEST_TIMESTAMP_CAP>>,
-    /// Log. Oldest_ Timestamp. Date_ Time
-    /// urn:x-enexis:ecdm:uid:1:569477
-    /// This contains the date and time of the oldest logging information to include in the diagnostics.
-    #[cfg_attr(feature = "serde", serde(rename = "oldestTimestamp"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub oldest_timestamp: Option<heapless::String<LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP>>,
+    pub oldest_timestamp: Option<crate::OcppTimestamp>,
     /// Log. Remote_ Location. URI
     /// urn:x-enexis:ecdm:uid:1:569484
     /// The URL of the location at the remote system where the log should be stored.
@@ -883,12 +857,12 @@ pub enum LogStatusEnum {
 /// A physical or logical component
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Component {
+pub struct Component<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub evse: Option<EVSE>,
+    pub evse: Option<EVSE<CustomDataType>>,
     /// Name of instance in case the component exists as multiple instances. Case Insensitive. strongly advised to use Camel Case.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub instance: Option<heapless::String<50usize>>,
@@ -898,10 +872,10 @@ pub struct Component {
 /// Reference key to a component-variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Variable {
+pub struct Variable<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Name of instance in case the variable exists as multiple instances. Case Insensitive. strongly advised to use Camel Case.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub instance: Option<heapless::String<50usize>>,
@@ -911,13 +885,13 @@ pub struct Variable {
 /// Class to report components, variables and variable attributes and characteristics.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ComponentVariable {
-    pub component: Component,
+pub struct ComponentVariable<CustomDataType = crate::NoCustomData> {
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub variable: Option<Variable>,
+    pub variable: Option<Variable<CustomDataType>>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -946,15 +920,15 @@ pub enum AttributeEnum {
 /// Class to hold parameters for GetVariables request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetVariableData {
+pub struct GetVariableData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub attribute_type: Option<AttributeEnum>,
-    pub component: Component,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
 }
 /// Result status of getting the variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -966,15 +940,16 @@ pub enum GetVariableStatusEnum {
     UnknownVariable,
     NotSupportedAttributeType,
 }
+#[cfg(feature = "alloc")]
 /// Class to hold results of GetVariables request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetVariableResult {
+pub struct GetVariableResult<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "attributeStatus"))]
     pub attribute_status: GetVariableStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "attributeStatusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub attribute_status_info: Option<StatusInfo>,
+    pub attribute_status_info: Option<StatusInfo<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub attribute_type: Option<AttributeEnum>,
@@ -983,12 +958,42 @@ pub struct GetVariableResult {
     /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(rename = "attributeValue"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub attribute_value: Option<heapless::String<2500usize>>,
-    pub component: Component,
+    pub attribute_value: Option<alloc::string::String>,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
+}
+#[cfg(not(feature = "alloc"))]
+/// Class to hold results of GetVariables request.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GetVariableResult<
+    CustomDataType = crate::NoCustomData,
+    const GET_VARIABLE_RESULT_ATTRIBUTE_VALUE_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "attributeStatus"))]
+    pub attribute_status: GetVariableStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "attributeStatusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub attribute_status_info: Option<StatusInfo<CustomDataType>>,
+    #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub attribute_type: Option<AttributeEnum>,
+    /// Value of requested attribute type of component-variable. This field can only be empty when the given status is NOT accepted.
+    ///
+    /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
+    #[cfg_attr(feature = "serde", serde(rename = "attributeValue"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub attribute_value: Option<
+        heapless::String<GET_VARIABLE_RESULT_ATTRIBUTE_VALUE_CAP>,
+    >,
+    pub component: Component<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
 }
 /// Indicates the certificate type that is sent.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1130,22 +1135,48 @@ pub enum PhaseEnum {
     #[cfg_attr(feature = "serde", serde(rename = "L3-L1"))]
     L3L1,
 }
+#[cfg(feature = "alloc")]
 /// Represent a signed version of the meter value.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SignedMeterValue {
+pub struct SignedMeterValue<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Method used to encode the meter values before applying the digital signature algorithm.
     #[cfg_attr(feature = "serde", serde(rename = "encodingMethod"))]
     pub encoding_method: heapless::String<50usize>,
     /// Base64 encoded, sending depends on configuration variable _PublicKeyWithSignedMeterValue_.
     #[cfg_attr(feature = "serde", serde(rename = "publicKey"))]
-    pub public_key: heapless::String<2500usize>,
+    pub public_key: alloc::string::String,
     /// Base64 encoded, contains the signed data which might contain more then just the meter value. It can contain information like timestamps, reference to a customer etc.
     #[cfg_attr(feature = "serde", serde(rename = "signedMeterData"))]
-    pub signed_meter_data: heapless::String<2500usize>,
+    pub signed_meter_data: alloc::string::String,
+    /// Method used to create the digital signature.
+    #[cfg_attr(feature = "serde", serde(rename = "signingMethod"))]
+    pub signing_method: heapless::String<50usize>,
+}
+#[cfg(not(feature = "alloc"))]
+/// Represent a signed version of the meter value.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SignedMeterValue<
+    CustomDataType = crate::NoCustomData,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize = 1024usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// Method used to encode the meter values before applying the digital signature algorithm.
+    #[cfg_attr(feature = "serde", serde(rename = "encodingMethod"))]
+    pub encoding_method: heapless::String<50usize>,
+    /// Base64 encoded, sending depends on configuration variable _PublicKeyWithSignedMeterValue_.
+    #[cfg_attr(feature = "serde", serde(rename = "publicKey"))]
+    pub public_key: heapless::String<SIGNED_METER_VALUE_PUBLIC_KEY_CAP>,
+    /// Base64 encoded, contains the signed data which might contain more then just the meter value. It can contain information like timestamps, reference to a customer etc.
+    #[cfg_attr(feature = "serde", serde(rename = "signedMeterData"))]
+    pub signed_meter_data: heapless::String<SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP>,
     /// Method used to create the digital signature.
     #[cfg_attr(feature = "serde", serde(rename = "signingMethod"))]
     pub signing_method: heapless::String<50usize>,
@@ -1153,10 +1184,10 @@ pub struct SignedMeterValue {
 /// Represents a UnitOfMeasure with a multiplier
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UnitOfMeasure {
+pub struct UnitOfMeasure<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Multiplier, this value represents the exponent to base 10. I.e. multiplier 3 means 10 raised to the 3rd power. Default is 0.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub multiplier: Option<i64>,
@@ -1166,6 +1197,7 @@ pub struct UnitOfMeasure {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub unit: Option<heapless::String<20usize>>,
 }
+#[cfg(feature = "alloc")]
 /// Sampled_ Value
 /// urn:x-oca:ocpp:uid:2:233266
 /// Single sampled value in MeterValues. Each value can be accompanied by optional fields.
@@ -1173,12 +1205,12 @@ pub struct UnitOfMeasure {
 /// To save on mobile data usage, default values of all of the optional fields are such that. The value without any additional fields will be interpreted, as a register reading of active import energy in Wh (Watt-hour) units.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SampledValue {
+pub struct SampledValue<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub context: Option<ReadingContextEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub location: Option<LocationEnum>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -1187,10 +1219,51 @@ pub struct SampledValue {
     pub phase: Option<PhaseEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "signedMeterValue"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub signed_meter_value: Option<SignedMeterValue>,
+    pub signed_meter_value: Option<SignedMeterValue<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "unitOfMeasure"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub unit_of_measure: Option<UnitOfMeasure>,
+    pub unit_of_measure: Option<UnitOfMeasure<CustomDataType>>,
+    /// Sampled_ Value. Value. Measure
+    /// urn:x-oca:ocpp:uid:1:569260
+    /// Indicates the measured value.
+    pub value: f64,
+}
+#[cfg(not(feature = "alloc"))]
+/// Sampled_ Value
+/// urn:x-oca:ocpp:uid:2:233266
+/// Single sampled value in MeterValues. Each value can be accompanied by optional fields.
+///
+/// To save on mobile data usage, default values of all of the optional fields are such that. The value without any additional fields will be interpreted, as a register reading of active import energy in Wh (Watt-hour) units.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SampledValue<
+    CustomDataType = crate::NoCustomData,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize = 1024usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub context: Option<ReadingContextEnum>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub location: Option<LocationEnum>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub measurand: Option<MeasurandEnum>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub phase: Option<PhaseEnum>,
+    #[cfg_attr(feature = "serde", serde(rename = "signedMeterValue"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub signed_meter_value: Option<
+        SignedMeterValue<
+            CustomDataType,
+            SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+            SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+        >,
+    >,
+    #[cfg_attr(feature = "serde", serde(rename = "unitOfMeasure"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub unit_of_measure: Option<UnitOfMeasure<CustomDataType>>,
     /// Sampled_ Value. Value. Measure
     /// urn:x-oca:ocpp:uid:1:569260
     /// Indicates the measured value.
@@ -1202,16 +1275,16 @@ pub struct SampledValue {
 /// Collection of one or more sampled values in MeterValuesRequest and TransactionEvent. All sampled values in a MeterValue are sampled at the same point in time.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MeterValue {
+pub struct MeterValue<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
-    pub sampled_value: alloc::vec::Vec<SampledValue>,
+    pub sampled_value: alloc::vec::Vec<SampledValue<CustomDataType>>,
     /// Meter_ Value. Timestamp. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569259
     /// Timestamp for measured value(s).
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
 }
 #[cfg(not(feature = "alloc"))]
 /// Meter_ Value
@@ -1220,29 +1293,38 @@ pub struct MeterValue {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MeterValue<
-    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_TIMESTAMP_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 8usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize = 1024usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
-    pub sampled_value: heapless::Vec<SampledValue, METER_VALUE_SAMPLED_VALUE_CAP>,
+    pub sampled_value: heapless::Vec<
+        SampledValue<
+            CustomDataType,
+            SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+            SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+        >,
+        METER_VALUE_SAMPLED_VALUE_CAP,
+    >,
     /// Meter_ Value. Timestamp. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569259
     /// Timestamp for measured value(s).
-    pub timestamp: heapless::String<METER_VALUE_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
 }
 /// Charging_ Limit
 /// urn:x-enexis:ecdm:uid:2:234489
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingLimit {
+pub struct ChargingLimit<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
     pub charging_limit_source: ChargingLimitSourceEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Limit. Is_ Grid_ Critical. Indicator
     /// urn:x-enexis:ecdm:uid:1:570847
     /// Indicates whether the charging limit is critical for the grid.
@@ -1264,7 +1346,7 @@ pub enum CostKindEnum {
 /// urn:x-oca:ocpp:uid:2:233258
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Cost {
+pub struct Cost<CustomDataType = crate::NoCustomData> {
     /// Cost. Amount. Amount
     /// urn:x-oca:ocpp:uid:1:569244
     /// The estimated or actual cost per kWh
@@ -1279,17 +1361,17 @@ pub struct Cost {
     pub cost_kind: CostKindEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 /// Consumption_ Cost
 /// urn:x-oca:ocpp:uid:2:233259
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ConsumptionCost {
-    pub cost: heapless::Vec<Cost, 3usize>,
+pub struct ConsumptionCost<CustomDataType = crate::NoCustomData> {
+    pub cost: heapless::Vec<Cost<CustomDataType>, 3usize>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Consumption_ Cost. Start_ Value. Numeric
     /// urn:x-oca:ocpp:uid:1:569246
     /// The lowest level of consumption that defines the starting point of this consumption block. The block interval extends to the start of the next interval.
@@ -1300,10 +1382,10 @@ pub struct ConsumptionCost {
 /// urn:x-oca:ocpp:uid:2:233270
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RelativeTimeInterval {
+pub struct RelativeTimeInterval<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Relative_ Timer_ Interval. Duration. Elapsed_ Time
     /// urn:x-oca:ocpp:uid:1:569280
     /// Duration of the interval, in seconds.
@@ -1318,13 +1400,13 @@ pub struct RelativeTimeInterval {
 /// urn:x-oca:ocpp:uid:2:233271
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SalesTariffEntry {
+pub struct SalesTariffEntry<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "consumptionCost"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub consumption_cost: Option<heapless::Vec<ConsumptionCost, 3usize>>,
+    pub consumption_cost: Option<heapless::Vec<ConsumptionCost<CustomDataType>, 3usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Sales_ Tariff_ Entry. E_ Price_ Level. Unsigned_ Integer
     /// urn:x-oca:ocpp:uid:1:569281
     /// Defines the price level of this SalesTariffEntry (referring to NumEPriceLevels). Small values for the EPriceLevel represent a cheaper TariffEntry. Large values for the EPriceLevel represent a more expensive TariffEntry.
@@ -1332,7 +1414,7 @@ pub struct SalesTariffEntry {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub e_price_level: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "relativeTimeInterval"))]
-    pub relative_time_interval: RelativeTimeInterval,
+    pub relative_time_interval: RelativeTimeInterval<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
 /// Sales_ Tariff
@@ -1340,10 +1422,10 @@ pub struct SalesTariffEntry {
 /// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SalesTariff {
+pub struct SalesTariff<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// SalesTariff identifier used to identify one sales tariff. An SAID remains a unique identifier for one schedule throughout a charging session.
@@ -1361,7 +1443,7 @@ pub struct SalesTariff {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub sales_tariff_description: Option<heapless::String<32usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "salesTariffEntry"))]
-    pub sales_tariff_entry: alloc::vec::Vec<SalesTariffEntry>,
+    pub sales_tariff_entry: alloc::vec::Vec<SalesTariffEntry<CustomDataType>>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Sales_ Tariff
@@ -1369,10 +1451,13 @@ pub struct SalesTariff {
 /// NOTE: This dataType is based on dataTypes from &lt;&lt;ref-ISOIEC15118-2,ISO 15118-2&gt;&gt;.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SalesTariff {
+pub struct SalesTariff<
+    CustomDataType = crate::NoCustomData,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
+> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// SalesTariff identifier used to identify one sales tariff. An SAID remains a unique identifier for one schedule throughout a charging session.
@@ -1390,7 +1475,10 @@ pub struct SalesTariff {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub sales_tariff_description: Option<heapless::String<32usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "salesTariffEntry"))]
-    pub sales_tariff_entry: heapless::Vec<SalesTariffEntry, 1024usize>,
+    pub sales_tariff_entry: heapless::Vec<
+        SalesTariffEntry<CustomDataType>,
+        SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+    >,
 }
 #[cfg(feature = "alloc")]
 /// Charging_ Schedule
@@ -1398,14 +1486,16 @@ pub struct SalesTariff {
 /// Charging schedule structure defines a list of charging periods, as used in: GetCompositeSchedule.conf and ChargingProfile.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingSchedule {
+pub struct ChargingSchedule<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
-    pub charging_schedule_period: alloc::vec::Vec<ChargingSchedulePeriod>,
+    pub charging_schedule_period: alloc::vec::Vec<
+        ChargingSchedulePeriod<CustomDataType>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Schedule. Duration. Elapsed_ Time
     /// urn:x-oca:ocpp:uid:1:569236
     /// Duration of the charging schedule in seconds. If the duration is left empty, the last period will continue indefinitely or until end of the transaction if chargingProfilePurpose = TxProfile.
@@ -1421,13 +1511,13 @@ pub struct ChargingSchedule {
     pub min_charging_rate: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "salesTariff"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub sales_tariff: Option<SalesTariff>,
+    pub sales_tariff: Option<SalesTariff<CustomDataType>>,
     /// Charging_ Schedule. Start_ Schedule. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569237
     /// Starting point of an absolute schedule. If absent the schedule will be relative to start of charging.
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_schedule: Option<alloc::string::String>,
+    pub start_schedule: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Charging_ Schedule
@@ -1436,15 +1526,20 @@ pub struct ChargingSchedule {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChargingSchedule<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnitEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedulePeriod"))]
-    pub charging_schedule_period: heapless::Vec<ChargingSchedulePeriod, 1024usize>,
+    pub charging_schedule_period: heapless::Vec<
+        ChargingSchedulePeriod<CustomDataType>,
+        CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Charging_ Schedule. Duration. Elapsed_ Time
     /// urn:x-oca:ocpp:uid:1:569236
     /// Duration of the charging schedule in seconds. If the duration is left empty, the last period will continue indefinitely or until end of the transaction if chargingProfilePurpose = TxProfile.
@@ -1460,86 +1555,45 @@ pub struct ChargingSchedule<
     pub min_charging_rate: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "salesTariff"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub sales_tariff: Option<SalesTariff>,
+    pub sales_tariff: Option<
+        SalesTariff<CustomDataType, SALES_TARIFF_SALES_TARIFF_ENTRY_CAP>,
+    >,
     /// Charging_ Schedule. Start_ Schedule. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569237
     /// Starting point of an absolute schedule. If absent the schedule will be relative to start of charging.
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_schedule: Option<heapless::String<CHARGING_SCHEDULE_START_SCHEDULE_CAP>>,
+    pub start_schedule: Option<crate::OcppTimestamp>,
 }
-#[cfg(feature = "alloc")]
 /// Message_ Info
 /// urn:x-enexis:ecdm:uid:2:233264
 /// Contains message details, for a message to be displayed on a Charging Station.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MessageInfo {
+pub struct MessageInfo<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub display: Option<Component>,
+    pub display: Option<Component<CustomDataType>>,
     /// Message_ Info. End. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569257
     /// Until what date-time should this message be shown, after this date/time this message SHALL be removed.
     #[cfg_attr(feature = "serde", serde(rename = "endDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub end_date_time: Option<alloc::string::String>,
+    pub end_date_time: Option<crate::OcppTimestamp>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// Master resource identifier, unique within an exchange context. It is defined within the OCPP context as a positive Integer value (greater or equal to zero).
     pub id: i64,
-    pub message: MessageContent,
+    pub message: MessageContent<CustomDataType>,
     pub priority: MessagePriorityEnum,
     /// Message_ Info. Start. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569256
     /// From what date-time should this message be shown. If omitted: directly.
     #[cfg_attr(feature = "serde", serde(rename = "startDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_date_time: Option<alloc::string::String>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub state: Option<MessageStateEnum>,
-    /// During which transaction shall this message be shown.
-    /// Message SHALL be removed by the Charging Station after transaction has
-    /// ended.
-    #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub transaction_id: Option<heapless::String<36usize>>,
-}
-#[cfg(not(feature = "alloc"))]
-/// Message_ Info
-/// urn:x-enexis:ecdm:uid:2:233264
-/// Contains message details, for a message to be displayed on a Charging Station.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MessageInfo<
-    const MESSAGE_INFO_END_DATE_TIME_CAP: usize = 1024usize,
-    const MESSAGE_INFO_START_DATE_TIME_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub display: Option<Component>,
-    /// Message_ Info. End. Date_ Time
-    /// urn:x-enexis:ecdm:uid:1:569257
-    /// Until what date-time should this message be shown, after this date/time this message SHALL be removed.
-    #[cfg_attr(feature = "serde", serde(rename = "endDateTime"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub end_date_time: Option<heapless::String<MESSAGE_INFO_END_DATE_TIME_CAP>>,
-    /// Identified_ Object. MRID. Numeric_ Identifier
-    /// urn:x-enexis:ecdm:uid:1:569198
-    /// Master resource identifier, unique within an exchange context. It is defined within the OCPP context as a positive Integer value (greater or equal to zero).
-    pub id: i64,
-    pub message: MessageContent,
-    pub priority: MessagePriorityEnum,
-    /// Message_ Info. Start. Date_ Time
-    /// urn:x-enexis:ecdm:uid:1:569256
-    /// From what date-time should this message be shown. If omitted: directly.
-    #[cfg_attr(feature = "serde", serde(rename = "startDateTime"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_date_time: Option<heapless::String<MESSAGE_INFO_START_DATE_TIME_CAP>>,
+    pub start_date_time: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub state: Option<MessageStateEnum>,
     /// During which transaction shall this message be shown.
@@ -1554,10 +1608,10 @@ pub struct MessageInfo<
 /// EV AC charging parameters.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ACChargingParameters {
+pub struct ACChargingParameters<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// AC_ Charging_ Parameters. Energy_ Amount. Energy_ Amount
     /// urn:x-oca:ocpp:uid:1:569211
     /// Amount of energy requested (in Wh). This includes energy required for preconditioning.
@@ -1584,7 +1638,7 @@ pub struct ACChargingParameters {
 /// EV DC charging parameters
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DCChargingParameters {
+pub struct DCChargingParameters<CustomDataType = crate::NoCustomData> {
     /// DC_ Charging_ Parameters. Bulk_ SOC. Percentage
     /// urn:x-oca:ocpp:uid:1:569222
     /// Percentage of SoC at which the EV considers a fast charging process to end. (possible values: 0 - 100)
@@ -1593,7 +1647,7 @@ pub struct DCChargingParameters {
     pub bulk_so_c: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// DC_ Charging_ Parameters. Energy_ Amount. Energy_ Amount
     /// urn:x-oca:ocpp:uid:1:569217
     /// Amount of energy requested (in Wh). This inludes energy required for preconditioning.
@@ -1649,51 +1703,26 @@ pub enum EnergyTransferModeEnum {
     #[cfg_attr(feature = "serde", serde(rename = "AC_three_phase"))]
     ACthreephase,
 }
-#[cfg(feature = "alloc")]
 /// Charging_ Needs
 /// urn:x-oca:ocpp:uid:2:233249
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingNeeds {
+pub struct ChargingNeeds<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "acChargingParameters"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ac_charging_parameters: Option<ACChargingParameters>,
+    pub ac_charging_parameters: Option<ACChargingParameters<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "dcChargingParameters"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub dc_charging_parameters: Option<DCChargingParameters>,
+    pub dc_charging_parameters: Option<DCChargingParameters<CustomDataType>>,
     /// Charging_ Needs. Departure_ Time. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569223
     /// Estimated departure time of the EV.
     #[cfg_attr(feature = "serde", serde(rename = "departureTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub departure_time: Option<alloc::string::String>,
-    #[cfg_attr(feature = "serde", serde(rename = "requestedEnergyTransfer"))]
-    pub requested_energy_transfer: EnergyTransferModeEnum,
-}
-#[cfg(not(feature = "alloc"))]
-/// Charging_ Needs
-/// urn:x-oca:ocpp:uid:2:233249
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingNeeds<const CHARGING_NEEDS_DEPARTURE_TIME_CAP: usize = 1024usize> {
-    #[cfg_attr(feature = "serde", serde(rename = "acChargingParameters"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ac_charging_parameters: Option<ACChargingParameters>,
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    #[cfg_attr(feature = "serde", serde(rename = "dcChargingParameters"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub dc_charging_parameters: Option<DCChargingParameters>,
-    /// Charging_ Needs. Departure_ Time. Date_ Time
-    /// urn:x-oca:ocpp:uid:1:569223
-    /// Estimated departure time of the EV.
-    #[cfg_attr(feature = "serde", serde(rename = "departureTime"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub departure_time: Option<heapless::String<CHARGING_NEEDS_DEPARTURE_TIME_CAP>>,
+    pub departure_time: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "requestedEnergyTransfer"))]
     pub requested_energy_transfer: EnergyTransferModeEnum,
 }
@@ -1726,22 +1755,22 @@ pub enum EventTriggerEnum {
 /// Class to report an event notification for a component-variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct EventData {
+pub struct EventData<CustomDataType = crate::NoCustomData> {
     /// Actual value (_attributeType_ Actual) of the variable.
     ///
     /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(rename = "actualValue"))]
-    pub actual_value: heapless::String<2500usize>,
+    pub actual_value: alloc::string::String,
     /// Refers to the Id of an event that is considered to be the cause for this event.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cause: Option<i64>,
     /// _Cleared_ is set to true to report the clearing of a monitored situation, i.e. a 'return to normal'.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cleared: Option<bool>,
-    pub component: Component,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identifies the event. This field can be referred to as a cause by other events.
     #[cfg_attr(feature = "serde", serde(rename = "eventId"))]
     pub event_id: i64,
@@ -1756,13 +1785,13 @@ pub struct EventData {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub tech_info: Option<heapless::String<500usize>>,
     /// Timestamp of the moment the report was generated.
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
     /// If an event notification is linked to a specific transaction, this field can be used to specify its transactionId.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_id: Option<heapless::String<36usize>>,
     pub trigger: EventTriggerEnum,
-    pub variable: Variable,
+    pub variable: Variable<CustomDataType>,
     /// Identifies the VariableMonitoring which triggered the event.
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoringId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -1772,22 +1801,25 @@ pub struct EventData {
 /// Class to report an event notification for a component-variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct EventData<const EVENT_DATA_TIMESTAMP_CAP: usize = 1024usize> {
+pub struct EventData<
+    CustomDataType = crate::NoCustomData,
+    const EVENT_DATA_ACTUAL_VALUE_CAP: usize = 1024usize,
+> {
     /// Actual value (_attributeType_ Actual) of the variable.
     ///
     /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(rename = "actualValue"))]
-    pub actual_value: heapless::String<2500usize>,
+    pub actual_value: heapless::String<EVENT_DATA_ACTUAL_VALUE_CAP>,
     /// Refers to the Id of an event that is considered to be the cause for this event.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cause: Option<i64>,
     /// _Cleared_ is set to true to report the clearing of a monitored situation, i.e. a 'return to normal'.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cleared: Option<bool>,
-    pub component: Component,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identifies the event. This field can be referred to as a cause by other events.
     #[cfg_attr(feature = "serde", serde(rename = "eventId"))]
     pub event_id: i64,
@@ -1802,13 +1834,13 @@ pub struct EventData<const EVENT_DATA_TIMESTAMP_CAP: usize = 1024usize> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub tech_info: Option<heapless::String<500usize>>,
     /// Timestamp of the moment the report was generated.
-    pub timestamp: heapless::String<EVENT_DATA_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
     /// If an event notification is linked to a specific transaction, this field can be used to specify its transactionId.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_id: Option<heapless::String<36usize>>,
     pub trigger: EventTriggerEnum,
-    pub variable: Variable,
+    pub variable: Variable<CustomDataType>,
     /// Identifies the VariableMonitoring which triggered the event.
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoringId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -1827,10 +1859,10 @@ pub enum MonitorEnum {
 /// A monitoring setting for a variable.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct VariableMonitoring {
+pub struct VariableMonitoring<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identifies the monitor.
     pub id: i64,
     /// The severity that will be assigned to an event that is triggered by this monitor. The severity range is 0-9, with 0 as the highest and 9 as the lowest severity level.
@@ -1868,30 +1900,31 @@ pub struct VariableMonitoring {
 /// Class to hold parameters of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MonitoringData {
-    pub component: Component,
+pub struct MonitoringData<CustomDataType = crate::NoCustomData> {
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoring"))]
-    pub variable_monitoring: alloc::vec::Vec<VariableMonitoring>,
+    pub variable_monitoring: alloc::vec::Vec<VariableMonitoring<CustomDataType>>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Class to hold parameters of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MonitoringData<
-    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize = 8usize,
 > {
-    pub component: Component,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoring"))]
     pub variable_monitoring: heapless::Vec<
-        VariableMonitoring,
+        VariableMonitoring<CustomDataType>,
         MONITORING_DATA_VARIABLE_MONITORING_CAP,
     >,
 }
@@ -1903,16 +1936,17 @@ pub enum MutabilityEnum {
     WriteOnly,
     ReadWrite,
 }
+#[cfg(feature = "alloc")]
 /// Attribute data of a variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct VariableAttribute {
+pub struct VariableAttribute<CustomDataType = crate::NoCustomData> {
     /// If true, value that will never be changed by the Charging Station at runtime. Default when omitted is false.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub constant: Option<bool>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub mutability: Option<MutabilityEnum>,
     /// If true, value will be persistent across system reboots or power down. Default when omitted is false.
@@ -1924,7 +1958,34 @@ pub struct VariableAttribute {
     ///
     /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub value: Option<heapless::String<2500usize>>,
+    pub value: Option<alloc::string::String>,
+}
+#[cfg(not(feature = "alloc"))]
+/// Attribute data of a variable.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct VariableAttribute<
+    CustomDataType = crate::NoCustomData,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize = 1024usize,
+> {
+    /// If true, value that will never be changed by the Charging Station at runtime. Default when omitted is false.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub constant: Option<bool>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub mutability: Option<MutabilityEnum>,
+    /// If true, value will be persistent across system reboots or power down. Default when omitted is false.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub persistent: Option<bool>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub r#type: Option<AttributeEnum>,
+    /// Value of the attribute. May only be omitted when mutability is set to 'WriteOnly'.
+    ///
+    /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub value: Option<heapless::String<VARIABLE_ATTRIBUTE_VALUE_CAP>>,
 }
 /// Data type of this variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1944,13 +2005,14 @@ pub enum DataEnum {
     SequenceList,
     MemberList,
 }
+#[cfg(feature = "alloc")]
 /// Fixed read-only parameters of a variable.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct VariableCharacteristics {
+pub struct VariableCharacteristics<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "dataType"))]
     pub data_type: DataEnum,
     /// Maximum possible value of this variable. When the datatype of this Variable is String, OptionList, SequenceList or MemberList, this field defines the maximum length of the (CSV) string.
@@ -1980,22 +2042,90 @@ pub struct VariableCharacteristics {
     /// The Configuration Variable &lt;&lt;configkey-configuration-value-size,ConfigurationValueSize&gt;&gt; can be used to limit SetVariableData.attributeValue and VariableCharacteristics.valueList. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(rename = "valuesList"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub values_list: Option<heapless::String<1000usize>>,
+    pub values_list: Option<alloc::string::String>,
 }
+#[cfg(not(feature = "alloc"))]
+/// Fixed read-only parameters of a variable.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct VariableCharacteristics<
+    CustomDataType = crate::NoCustomData,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize = 1000usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "dataType"))]
+    pub data_type: DataEnum,
+    /// Maximum possible value of this variable. When the datatype of this Variable is String, OptionList, SequenceList or MemberList, this field defines the maximum length of the (CSV) string.
+    #[cfg_attr(feature = "serde", serde(rename = "maxLimit"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub max_limit: Option<f64>,
+    /// Minimum possible value of this variable.
+    #[cfg_attr(feature = "serde", serde(rename = "minLimit"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub min_limit: Option<f64>,
+    /// Flag indicating if this variable supports monitoring.
+    #[cfg_attr(feature = "serde", serde(rename = "supportsMonitoring"))]
+    pub supports_monitoring: bool,
+    /// Unit of the variable. When the transmitted value has a unit, this field SHALL be included.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub unit: Option<heapless::String<16usize>>,
+    /// Allowed values when variable is Option/Member/SequenceList.
+    ///
+    /// * OptionList: The (Actual) Variable value must be a single value from the reported (CSV) enumeration list.
+    ///
+    /// * MemberList: The (Actual) Variable value  may be an (unordered) (sub-)set of the reported (CSV) valid values list.
+    ///
+    /// * SequenceList: The (Actual) Variable value  may be an ordered (priority, etc)  (sub-)set of the reported (CSV) valid values.
+    ///
+    /// This is a comma separated list.
+    ///
+    /// The Configuration Variable &lt;&lt;configkey-configuration-value-size,ConfigurationValueSize&gt;&gt; can be used to limit SetVariableData.attributeValue and VariableCharacteristics.valueList. The max size of these values will always remain equal.
+    #[cfg_attr(feature = "serde", serde(rename = "valuesList"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub values_list: Option<heapless::String<VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP>>,
+}
+#[cfg(feature = "alloc")]
 /// Class to report components, variables and variable attributes and characteristics.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReportData {
-    pub component: Component,
+pub struct ReportData<CustomDataType = crate::NoCustomData> {
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "variableAttribute"))]
-    pub variable_attribute: heapless::Vec<VariableAttribute, 4usize>,
+    pub variable_attribute: heapless::Vec<VariableAttribute<CustomDataType>, 4usize>,
     #[cfg_attr(feature = "serde", serde(rename = "variableCharacteristics"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub variable_characteristics: Option<VariableCharacteristics>,
+    pub variable_characteristics: Option<VariableCharacteristics<CustomDataType>>,
+}
+#[cfg(not(feature = "alloc"))]
+/// Class to report components, variables and variable attributes and characteristics.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ReportData<
+    CustomDataType = crate::NoCustomData,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize = 1024usize,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize = 1000usize,
+> {
+    pub component: Component<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "variableAttribute"))]
+    pub variable_attribute: heapless::Vec<
+        VariableAttribute<CustomDataType, VARIABLE_ATTRIBUTE_VALUE_CAP>,
+        4usize,
+    >,
+    #[cfg_attr(feature = "serde", serde(rename = "variableCharacteristics"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub variable_characteristics: Option<
+        VariableCharacteristics<CustomDataType, VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP>,
+    >,
 }
 /// This contains the progress status of the publishfirmware
 /// installation.
@@ -2038,16 +2168,16 @@ pub enum RecurrencyKindEnum {
 /// A ChargingProfile consists of ChargingSchedule, describing the amount of power or current that can be delivered per time interval.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChargingProfile {
+pub struct ChargingProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfileKind"))]
     pub charging_profile_kind: ChargingProfileKindEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfilePurpose"))]
     pub charging_profile_purpose: ChargingProfilePurposeEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
-    pub charging_schedule: heapless::Vec<ChargingSchedule, 3usize>,
+    pub charging_schedule: heapless::Vec<ChargingSchedule<CustomDataType>, 3usize>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// Id of ChargingProfile.
@@ -2069,13 +2199,13 @@ pub struct ChargingProfile {
     /// Point in time at which the profile starts to be valid. If absent, the profile is valid as soon as it is received by the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<alloc::string::String>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     /// Charging_ Profile. Valid_ To. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569235
     /// Point in time at which the profile stops to be valid. If absent, the profile is valid until it is replaced by another profile.
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<alloc::string::String>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Charging_ Profile
@@ -2084,9 +2214,9 @@ pub struct ChargingProfile {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChargingProfile<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfileKind"))]
     pub charging_profile_kind: ChargingProfileKindEnum,
@@ -2094,12 +2224,16 @@ pub struct ChargingProfile<
     pub charging_profile_purpose: ChargingProfilePurposeEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     pub charging_schedule: heapless::Vec<
-        ChargingSchedule<CHARGING_SCHEDULE_START_SCHEDULE_CAP>,
+        ChargingSchedule<
+            CustomDataType,
+            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+            SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+        >,
         3usize,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Identified_ Object. MRID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:569198
     /// Id of ChargingProfile.
@@ -2121,13 +2255,13 @@ pub struct ChargingProfile<
     /// Point in time at which the profile starts to be valid. If absent, the profile is valid as soon as it is received by the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<heapless::String<CHARGING_PROFILE_VALID_FROM_CAP>>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     /// Charging_ Profile. Valid_ To. Date_ Time
     /// urn:x-oca:ocpp:uid:1:569235
     /// Point in time at which the profile stops to be valid. If absent, the profile is valid until it is replaced by another profile.
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<heapless::String<CHARGING_PROFILE_VALID_TO_CAP>>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 /// Status indicating whether the Charging Station accepts the request to start a transaction.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2215,35 +2349,35 @@ pub enum ResetStatusEnum {
 /// Contains the identifier to use for authorization.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AuthorizationData {
+pub struct AuthorizationData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken,
+    pub id_token: IdToken<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token_info: Option<IdTokenInfo>,
+    pub id_token_info: Option<IdTokenInfo<CustomDataType>>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Contains the identifier to use for authorization.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthorizationData<
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>,
+    pub id_token: IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id_token_info: Option<
         IdTokenInfo<
-            ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
+            CustomDataType,
             ID_TOKEN_INFO_EVSE_ID_CAP,
             ID_TOKEN_ADDITIONAL_INFO_CAP,
         >,
@@ -2308,7 +2442,7 @@ pub enum APNAuthenticationEnum {
 /// NOTE: When asking a GSM modem to dial in, it is possible to specify which mobile operator should be used. This can be done with the mobile country code (MCC) in combination with a mobile network code (MNC). Example: If your preferred network is Vodafone Netherlands, the MCC=204 and the MNC=04 which means the key PreferredNetwork = 20404 Some modems allows to specify a preferred network, which means, if this network is not available, a different network is used. If you specify UseOnlyPreferredNetwork and this network is not available, the modem will not dial in.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct APN {
+pub struct APN<CustomDataType = crate::NoCustomData> {
     /// APN. APN. URI
     /// urn:x-oca:ocpp:uid:1:568814
     /// The Access Point Name as an URL.
@@ -2329,7 +2463,7 @@ pub struct APN {
     pub apn_user_name: Option<heapless::String<20usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// APN. Preferred_ Network. Mobile_ Network_ ID
     /// urn:x-oca:ocpp:uid:1:568822
     /// Preferred network, written as MCC and MNC concatenated. See note.
@@ -2399,10 +2533,10 @@ pub enum VPNEnum {
 /// VPN Configuration settings
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct VPN {
+pub struct VPN<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// VPN. Group. Group_ Name
     /// urn:x-oca:ocpp:uid:1:569274
     /// VPN group.
@@ -2431,12 +2565,12 @@ pub struct VPN {
 /// The NetworkConnectionProfile defines the functional and technical parameters of a communication link.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NetworkConnectionProfile {
+pub struct NetworkConnectionProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub apn: Option<APN>,
+    pub apn: Option<APN<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Duration in seconds before a message send by the Charging Station via this network connection times-out.
     /// The best setting depends on the underlying network and response times of the CSMS.
     /// If you are looking for a some guideline: use 30 seconds as a starting point.
@@ -2457,7 +2591,7 @@ pub struct NetworkConnectionProfile {
     #[cfg_attr(feature = "serde", serde(rename = "securityProfile"))]
     pub security_profile: i64,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub vpn: Option<VPN>,
+    pub vpn: Option<VPN<CustomDataType>>,
 }
 /// Result of operation.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2470,11 +2604,11 @@ pub enum SetNetworkProfileStatusEnum {
 /// Class to hold parameters of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetMonitoringData {
-    pub component: Component,
+pub struct SetMonitoringData<CustomDataType = crate::NoCustomData> {
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// An id SHALL only be given to replace an existing monitor. The Charging Station handles the generation of id's for new monitors.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id: Option<i64>,
@@ -2509,7 +2643,7 @@ pub struct SetMonitoringData {
     /// Value for threshold or delta monitoring.
     /// For Periodic or PeriodicClockAligned this is the interval in seconds.
     pub value: f64,
-    pub variable: Variable,
+    pub variable: Variable<CustomDataType>,
 }
 /// Status is OK if a value could be returned. Otherwise this will indicate the reason why a value could not be returned.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2525,11 +2659,11 @@ pub enum SetMonitoringStatusEnum {
 /// Class to hold result of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetMonitoringResult {
-    pub component: Component,
+pub struct SetMonitoringResult<CustomDataType = crate::NoCustomData> {
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Id given to the VariableMonitor by the Charging Station. The Id is only returned when status is accepted. Installed VariableMonitors should have unique id's but the id's of removed Installed monitors should have unique id's but the id's of removed monitors MAY be reused.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id: Option<i64>,
@@ -2560,13 +2694,14 @@ pub struct SetMonitoringResult {
     pub status: SetMonitoringStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
     pub r#type: MonitorEnum,
-    pub variable: Variable,
+    pub variable: Variable<CustomDataType>,
 }
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetVariableData {
+pub struct SetVariableData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub attribute_type: Option<AttributeEnum>,
@@ -2574,12 +2709,33 @@ pub struct SetVariableData {
     ///
     /// The Configuration Variable &lt;&lt;configkey-configuration-value-size,ConfigurationValueSize&gt;&gt; can be used to limit SetVariableData.attributeValue and VariableCharacteristics.valueList. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(rename = "attributeValue"))]
-    pub attribute_value: heapless::String<1000usize>,
-    pub component: Component,
+    pub attribute_value: alloc::string::String,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SetVariableData<
+    CustomDataType = crate::NoCustomData,
+    const SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP: usize = 1000usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub attribute_type: Option<AttributeEnum>,
+    /// Value to be assigned to attribute of variable.
+    ///
+    /// The Configuration Variable &lt;&lt;configkey-configuration-value-size,ConfigurationValueSize&gt;&gt; can be used to limit SetVariableData.attributeValue and VariableCharacteristics.valueList. The max size of these values will always remain equal.
+    #[cfg_attr(feature = "serde", serde(rename = "attributeValue"))]
+    pub attribute_value: heapless::String<SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP>,
+    pub component: Component<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
 }
 /// Result status of setting the variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2594,20 +2750,20 @@ pub enum SetVariableStatusEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetVariableResult {
+pub struct SetVariableResult<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "attributeStatus"))]
     pub attribute_status: SetVariableStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "attributeStatusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub attribute_status_info: Option<StatusInfo>,
+    pub attribute_status_info: Option<StatusInfo<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "attributeType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub attribute_type: Option<AttributeEnum>,
-    pub component: Component,
+    pub component: Component<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub variable: Variable,
+    pub custom_data: Option<CustomDataType>,
+    pub variable: Variable<CustomDataType>,
 }
 /// This contains the current status of the Connector.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2671,13 +2827,13 @@ pub enum ReasonEnum {
 /// urn:x-oca:ocpp:uid:2:233318
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Transaction {
+pub struct Transaction<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingState"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_state: Option<ChargingStateEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The ID given to remote start request (&lt;&lt;requeststarttransactionrequest, RequestStartTransactionRequest&gt;&gt;. This enables to CSMS to match the started transaction to the given start request.
     #[cfg_attr(feature = "serde", serde(rename = "remoteStartId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -2768,16 +2924,16 @@ pub enum UnpublishFirmwareStatusEnum {
 /// Represents a copy of the firmware that can be loaded/updated on the Charging Station.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Firmware {
+pub struct Firmware<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Firmware. Install. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569462
     /// Date and time at which the firmware shall be installed.
     #[cfg_attr(feature = "serde", serde(rename = "installDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub install_date_time: Option<alloc::string::String>,
+    pub install_date_time: Option<crate::OcppTimestamp>,
     /// Firmware. Location. URI
     /// urn:x-enexis:ecdm:uid:1:569460
     /// URI defining the origin of the firmware.
@@ -2786,17 +2942,17 @@ pub struct Firmware {
     /// urn:x-enexis:ecdm:uid:1:569461
     /// Date and time at which the firmware shall be retrieved.
     #[cfg_attr(feature = "serde", serde(rename = "retrieveDateTime"))]
-    pub retrieve_date_time: alloc::string::String,
+    pub retrieve_date_time: crate::OcppTimestamp,
     /// Firmware. Signature. Signature
     /// urn:x-enexis:ecdm:uid:1:569464
     /// Base64 encoded firmware signature.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub signature: Option<heapless::String<800usize>>,
+    pub signature: Option<alloc::string::String>,
     /// Certificate with which the firmware was signed.
     /// PEM encoded X.509 certificate.
     #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub signing_certificate: Option<heapless::String<5500usize>>,
+    pub signing_certificate: Option<alloc::string::String>,
 }
 #[cfg(not(feature = "alloc"))]
 /// Firmware
@@ -2805,18 +2961,19 @@ pub struct Firmware {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Firmware<
-    const FIRMWARE_INSTALL_DATE_TIME_CAP: usize = 1024usize,
-    const FIRMWARE_RETRIEVE_DATE_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const FIRMWARE_SIGNATURE_CAP: usize = 800usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Firmware. Install. Date_ Time
     /// urn:x-enexis:ecdm:uid:1:569462
     /// Date and time at which the firmware shall be installed.
     #[cfg_attr(feature = "serde", serde(rename = "installDateTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub install_date_time: Option<heapless::String<FIRMWARE_INSTALL_DATE_TIME_CAP>>,
+    pub install_date_time: Option<crate::OcppTimestamp>,
     /// Firmware. Location. URI
     /// urn:x-enexis:ecdm:uid:1:569460
     /// URI defining the origin of the firmware.
@@ -2825,17 +2982,17 @@ pub struct Firmware<
     /// urn:x-enexis:ecdm:uid:1:569461
     /// Date and time at which the firmware shall be retrieved.
     #[cfg_attr(feature = "serde", serde(rename = "retrieveDateTime"))]
-    pub retrieve_date_time: heapless::String<FIRMWARE_RETRIEVE_DATE_TIME_CAP>,
+    pub retrieve_date_time: crate::OcppTimestamp,
     /// Firmware. Signature. Signature
     /// urn:x-enexis:ecdm:uid:1:569464
     /// Base64 encoded firmware signature.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub signature: Option<heapless::String<800usize>>,
+    pub signature: Option<heapless::String<FIRMWARE_SIGNATURE_CAP>>,
     /// Certificate with which the firmware was signed.
     /// PEM encoded X.509 certificate.
     #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub signing_certificate: Option<heapless::String<5500usize>>,
+    pub signing_certificate: Option<heapless::String<FIRMWARE_SIGNING_CERTIFICATE_CAP>>,
 }
 /// This field indicates whether the Charging Station was able to accept the request.
 #[derive(Debug, Clone, PartialEq, Eq)]

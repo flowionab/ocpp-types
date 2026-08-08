@@ -5,12 +5,12 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyEVChargingNeedsRequest {
+pub struct NotifyEVChargingNeedsRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingNeeds"))]
-    pub charging_needs: ChargingNeeds,
+    pub charging_needs: ChargingNeeds<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Defines the EVSE and connector to which the EV is connected. EvseId may not be 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -23,36 +23,37 @@ pub struct NotifyEVChargingNeedsRequest {
     /// *(2.1)* Time when EV charging needs were received. +
     /// Field can be added when charging station was offline when charging needs were received.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<alloc::string::String>,
+    pub timestamp: Option<crate::OcppTimestamp>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyEVChargingNeedsRequest {
+impl<CustomDataType> crate::Action for NotifyEVChargingNeedsRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEVChargingNeedsRequest<
-    const CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP: usize = 16usize,
-    const CHARGING_NEEDS_DEPARTURE_TIME_CAP: usize = 1024usize,
-    const D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP: usize = 16usize,
-    const D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP: usize = 16usize,
-    const E_V_ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const E_V_POWER_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const NOTIFY_E_V_CHARGING_NEEDS_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP: usize = 8usize,
+    const D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP: usize = 8usize,
+    const D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP: usize = 8usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP: usize = 8usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize = 1024usize,
+    const E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingNeeds"))]
     pub charging_needs: ChargingNeeds<
+        CustomDataType,
         CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP,
-        CHARGING_NEEDS_DEPARTURE_TIME_CAP,
         D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP,
         D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP,
-        E_V_ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-        E_V_POWER_SCHEDULE_TIME_ANCHOR_CAP,
+        E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP,
+        E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+        E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Defines the EVSE and connector to which the EV is connected. EvseId may not be 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -65,28 +66,26 @@ pub struct NotifyEVChargingNeedsRequest<
     /// *(2.1)* Time when EV charging needs were received. +
     /// Field can be added when charging station was offline when charging needs were received.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<
-        heapless::String<NOTIFY_E_V_CHARGING_NEEDS_REQUEST_TIMESTAMP_CAP>,
-    >,
+    pub timestamp: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP: usize,
-    const CHARGING_NEEDS_DEPARTURE_TIME_CAP: usize,
     const D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP: usize,
     const D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP: usize,
-    const E_V_ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const E_V_POWER_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const NOTIFY_E_V_CHARGING_NEEDS_REQUEST_TIMESTAMP_CAP: usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP: usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP: usize,
 > crate::Action
 for NotifyEVChargingNeedsRequest<
+    CustomDataType,
     CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP,
-    CHARGING_NEEDS_DEPARTURE_TIME_CAP,
     D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP,
     D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP,
-    E_V_ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-    E_V_POWER_SCHEDULE_TIME_ANCHOR_CAP,
-    NOTIFY_E_V_CHARGING_NEEDS_REQUEST_TIMESTAMP_CAP,
+    E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP,
+    E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP,
 > {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
 }

@@ -5,46 +5,47 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetTariffsResponse {
+pub struct GetTariffsResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: TariffGetStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "tariffAssignments"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub tariff_assignments: Option<alloc::vec::Vec<TariffAssignment>>,
+    pub tariff_assignments: Option<alloc::vec::Vec<TariffAssignment<CustomDataType>>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetTariffsResponse {
+impl<CustomDataType> crate::Action for GetTariffsResponse<CustomDataType> {
     const ACTION: &'static str = "GetTariffs";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTariffsResponse<
-    const GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP: usize = 16usize,
-    const TARIFF_ASSIGNMENT_EVSE_IDS_CAP: usize = 16usize,
-    const TARIFF_ASSIGNMENT_ID_TOKENS_CAP: usize = 16usize,
-    const TARIFF_ASSIGNMENT_VALID_FROM_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+    const GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP: usize = 8usize,
+    const TARIFF_ASSIGNMENT_EVSE_IDS_CAP: usize = 8usize,
+    const TARIFF_ASSIGNMENT_ID_TOKENS_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: TariffGetStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "tariffAssignments"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub tariff_assignments: Option<
         heapless::Vec<
             TariffAssignment<
+                CustomDataType,
                 TARIFF_ASSIGNMENT_EVSE_IDS_CAP,
                 TARIFF_ASSIGNMENT_ID_TOKENS_CAP,
-                TARIFF_ASSIGNMENT_VALID_FROM_CAP,
             >,
             GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP,
         >,
@@ -52,16 +53,18 @@ pub struct GetTariffsResponse<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
     const GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP: usize,
     const TARIFF_ASSIGNMENT_EVSE_IDS_CAP: usize,
     const TARIFF_ASSIGNMENT_ID_TOKENS_CAP: usize,
-    const TARIFF_ASSIGNMENT_VALID_FROM_CAP: usize,
 > crate::Action
 for GetTariffsResponse<
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
     GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP,
     TARIFF_ASSIGNMENT_EVSE_IDS_CAP,
     TARIFF_ASSIGNMENT_ID_TOKENS_CAP,
-    TARIFF_ASSIGNMENT_VALID_FROM_CAP,
 > {
     const ACTION: &'static str = "GetTariffs";
 }

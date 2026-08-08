@@ -7,20 +7,20 @@ use super::common::*;
 /// urn:x-enexis:ecdm:uid:2:234744
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MeterValuesRequest {
+pub struct MeterValuesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Request_ Body. EVSEID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:571101
     /// This contains a number (&gt;0) designating an EVSE of the Charging Station. ‘0’ (zero) is used to designate the main power meter.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "meterValue"))]
-    pub meter_value: alloc::vec::Vec<MeterValue>,
+    pub meter_value: alloc::vec::Vec<MeterValue<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for MeterValuesRequest {
+impl<CustomDataType> crate::Action for MeterValuesRequest<CustomDataType> {
     const ACTION: &'static str = "MeterValues";
 }
 #[cfg(not(feature = "alloc"))]
@@ -29,13 +29,15 @@ impl crate::Action for MeterValuesRequest {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MeterValuesRequest<
-    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_TIMESTAMP_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize = 8usize,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize = 8usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize = 1024usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Request_ Body. EVSEID. Numeric_ Identifier
     /// urn:x-enexis:ecdm:uid:1:571101
     /// This contains a number (&gt;0) designating an EVSE of the Charging Station. ‘0’ (zero) is used to designate the main power meter.
@@ -43,20 +45,29 @@ pub struct MeterValuesRequest<
     pub evse_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "meterValue"))]
     pub meter_value: heapless::Vec<
-        MeterValue<METER_VALUE_SAMPLED_VALUE_CAP, METER_VALUE_TIMESTAMP_CAP>,
+        MeterValue<
+            CustomDataType,
+            METER_VALUE_SAMPLED_VALUE_CAP,
+            SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+            SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+        >,
         METER_VALUES_REQUEST_METER_VALUE_CAP,
     >,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const METER_VALUES_REQUEST_METER_VALUE_CAP: usize,
     const METER_VALUE_SAMPLED_VALUE_CAP: usize,
-    const METER_VALUE_TIMESTAMP_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
 > crate::Action
 for MeterValuesRequest<
+    CustomDataType,
     METER_VALUES_REQUEST_METER_VALUE_CAP,
     METER_VALUE_SAMPLED_VALUE_CAP,
-    METER_VALUE_TIMESTAMP_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
 > {
     const ACTION: &'static str = "MeterValues";
 }

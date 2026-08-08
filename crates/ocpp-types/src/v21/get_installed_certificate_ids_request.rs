@@ -5,24 +5,26 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetInstalledCertificateIdsRequest {
+pub struct GetInstalledCertificateIdsRequest<CustomDataType = crate::NoCustomData> {
     /// Indicates the type of certificates requested. When omitted, all certificate types are requested.
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub certificate_type: Option<alloc::vec::Vec<GetCertificateIdUseEnum>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetInstalledCertificateIdsRequest {
+impl<CustomDataType> crate::Action
+for GetInstalledCertificateIdsRequest<CustomDataType> {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInstalledCertificateIdsRequest<
-    const GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP: usize = 8usize,
 > {
     /// Indicates the type of certificates requested. When omitted, all certificate types are requested.
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
@@ -35,13 +37,15 @@ pub struct GetInstalledCertificateIdsRequest<
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP: usize,
 > crate::Action
 for GetInstalledCertificateIdsRequest<
+    CustomDataType,
     GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP,
 > {
     const ACTION: &'static str = "GetInstalledCertificateIds";

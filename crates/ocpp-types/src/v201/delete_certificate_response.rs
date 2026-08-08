@@ -4,15 +4,15 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DeleteCertificateResponse {
+pub struct DeleteCertificateResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: DeleteCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for DeleteCertificateResponse {
+impl<CustomDataType> crate::Action for DeleteCertificateResponse<CustomDataType> {
     const ACTION: &'static str = "DeleteCertificate";
 }

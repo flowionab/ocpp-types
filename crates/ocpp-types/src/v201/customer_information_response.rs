@@ -4,15 +4,15 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CustomerInformationResponse {
+pub struct CustomerInformationResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: CustomerInformationStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for CustomerInformationResponse {
+impl<CustomDataType> crate::Action for CustomerInformationResponse<CustomDataType> {
     const ACTION: &'static str = "CustomerInformation";
 }

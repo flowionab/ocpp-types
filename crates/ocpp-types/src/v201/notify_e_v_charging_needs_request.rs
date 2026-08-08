@@ -2,15 +2,14 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyEVChargingNeedsRequest {
+pub struct NotifyEVChargingNeedsRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingNeeds"))]
-    pub charging_needs: ChargingNeeds,
+    pub charging_needs: ChargingNeeds<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Defines the EVSE and connector to which the EV is connected. EvseId may not be 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -19,31 +18,6 @@ pub struct NotifyEVChargingNeedsRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub max_schedule_tuples: Option<i64>,
 }
-#[cfg(feature = "alloc")]
-impl crate::Action for NotifyEVChargingNeedsRequest {
-    const ACTION: &'static str = "NotifyEVChargingNeeds";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyEVChargingNeedsRequest<
-    const CHARGING_NEEDS_DEPARTURE_TIME_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "chargingNeeds"))]
-    pub charging_needs: ChargingNeeds<CHARGING_NEEDS_DEPARTURE_TIME_CAP>,
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    /// Defines the EVSE and connector to which the EV is connected. EvseId may not be 0.
-    #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
-    pub evse_id: i64,
-    /// Contains the maximum schedule tuples the car supports per schedule.
-    #[cfg_attr(feature = "serde", serde(rename = "maxScheduleTuples"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub max_schedule_tuples: Option<i64>,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const CHARGING_NEEDS_DEPARTURE_TIME_CAP: usize> crate::Action
-for NotifyEVChargingNeedsRequest<CHARGING_NEEDS_DEPARTURE_TIME_CAP> {
+impl<CustomDataType> crate::Action for NotifyEVChargingNeedsRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
 }

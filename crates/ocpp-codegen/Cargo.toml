@@ -2,6 +2,9 @@
 name = "ocpp-codegen"
 version.workspace = true
 edition.workspace = true
+# Higher than the workspace floor: this crate uses let-chains. It is a
+# dev-time tool and is never published, so it does not constrain consumers.
+rust-version = "1.88"
 publish = false
 
 [dependencies]

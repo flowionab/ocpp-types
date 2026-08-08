@@ -2,21 +2,61 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetDERControlResponse {
+pub struct SetDERControlResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: DERControlStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
     /// List of controlIds that are superseded as a result of setting this control.
     #[cfg_attr(feature = "serde", serde(rename = "supersededIds"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub superseded_ids: Option<heapless::Vec<heapless::String<36usize>, 24usize>>,
+    pub superseded_ids: Option<alloc::vec::Vec<heapless::String<36usize>>>,
 }
-impl crate::Action for SetDERControlResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for SetDERControlResponse<CustomDataType> {
+    const ACTION: &'static str = "SetDERControl";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SetDERControlResponse<
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+    const SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP: usize = 8usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub status: DERControlStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+    /// List of controlIds that are superseded as a result of setting this control.
+    #[cfg_attr(feature = "serde", serde(rename = "supersededIds"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub superseded_ids: Option<
+        heapless::Vec<
+            heapless::String<36usize>,
+            SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP,
+        >,
+    >,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+    const SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP: usize,
+> crate::Action
+for SetDERControlResponse<
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+    SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP,
+> {
     const ACTION: &'static str = "SetDERControl";
 }

@@ -5,45 +5,46 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BootNotificationResponse {
+pub struct BootNotificationResponse<CustomDataType = crate::NoCustomData> {
     /// This contains the CSMS’s current time.
     #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
-    pub current_time: alloc::string::String,
+    pub current_time: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// When &lt;&lt;cmn_registrationstatusenumtype,Status&gt;&gt; is Accepted, this contains the heartbeat interval in seconds. If the CSMS returns something other than Accepted, the value of the interval field indicates the minimum wait time before sending a next BootNotification request.
     pub interval: i64,
     pub status: RegistrationStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for BootNotificationResponse {
+impl<CustomDataType> crate::Action for BootNotificationResponse<CustomDataType> {
     const ACTION: &'static str = "BootNotification";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BootNotificationResponse<
-    const BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
 > {
     /// This contains the CSMS’s current time.
     #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
-    pub current_time: heapless::String<BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP>,
+    pub current_time: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// When &lt;&lt;cmn_registrationstatusenumtype,Status&gt;&gt; is Accepted, this contains the heartbeat interval in seconds. If the CSMS returns something other than Accepted, the value of the interval field indicates the minimum wait time before sending a next BootNotification request.
     pub interval: i64,
     pub status: RegistrationStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP: usize> crate::Action
-for BootNotificationResponse<BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP> {
+impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
+for BootNotificationResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "BootNotification";
 }

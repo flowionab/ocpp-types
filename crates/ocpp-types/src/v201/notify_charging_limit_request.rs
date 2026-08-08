@@ -5,44 +5,50 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyChargingLimitRequest {
+pub struct NotifyChargingLimitRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimit"))]
-    pub charging_limit: ChargingLimit,
+    pub charging_limit: ChargingLimit<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub charging_schedule: Option<alloc::vec::Vec<ChargingSchedule>>,
+    pub charging_schedule: Option<alloc::vec::Vec<ChargingSchedule<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The charging schedule contained in this notification applies to an EVSE. evseId must be &gt; 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyChargingLimitRequest {
+impl<CustomDataType> crate::Action for NotifyChargingLimitRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyChargingLimit";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyChargingLimitRequest<
-    const NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimit"))]
-    pub charging_limit: ChargingLimit,
+    pub charging_limit: ChargingLimit<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_schedule: Option<
         heapless::Vec<
-            ChargingSchedule<CHARGING_SCHEDULE_START_SCHEDULE_CAP>,
+            ChargingSchedule<
+                CustomDataType,
+                CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+                SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+            >,
             NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The charging schedule contained in this notification applies to an EVSE. evseId must be &gt; 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -50,12 +56,16 @@ pub struct NotifyChargingLimitRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
 > crate::Action
 for NotifyChargingLimitRequest<
+    CustomDataType,
     NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "NotifyChargingLimit";
 }

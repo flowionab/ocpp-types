@@ -2,21 +2,47 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RequestStartTransactionResponse {
+pub struct RequestStartTransactionResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: RequestStartStopStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
     /// When the transaction was already started by the Charging Station before the RequestStartTransactionRequest was received, for example: cable plugged in first. This contains the transactionId of the already started transaction.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_id: Option<heapless::String<36usize>>,
 }
-impl crate::Action for RequestStartTransactionResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for RequestStartTransactionResponse<CustomDataType> {
+    const ACTION: &'static str = "RequestStartTransaction";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct RequestStartTransactionResponse<
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub status: RequestStartStopStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+    /// When the transaction was already started by the Charging Station before the RequestStartTransactionRequest was received, for example: cable plugged in first. This contains the transactionId of the already started transaction.
+    #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub transaction_id: Option<heapless::String<36usize>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
+for RequestStartTransactionResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "RequestStartTransaction";
 }

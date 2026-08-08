@@ -2,21 +2,55 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetCertificateStatusResponse {
+pub struct GetCertificateStatusResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// OCSPResponse class as defined in &lt;&lt;ref-ocpp_security_24, IETF RFC 6960&gt;&gt;. DER encoded (as defined in &lt;&lt;ref-ocpp_security_24, IETF RFC 6960&gt;&gt;), and then base64 encoded. MAY only be omitted when status is not Accepted.
     #[cfg_attr(feature = "serde", serde(rename = "ocspResult"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ocsp_result: Option<heapless::String<5500usize>>,
+    pub ocsp_result: Option<alloc::string::String>,
     pub status: GetCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for GetCertificateStatusResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for GetCertificateStatusResponse<CustomDataType> {
+    const ACTION: &'static str = "GetCertificateStatus";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GetCertificateStatusResponse<
+    CustomDataType = crate::NoCustomData,
+    const GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// OCSPResponse class as defined in &lt;&lt;ref-ocpp_security_24, IETF RFC 6960&gt;&gt;. DER encoded (as defined in &lt;&lt;ref-ocpp_security_24, IETF RFC 6960&gt;&gt;), and then base64 encoded. MAY only be omitted when status is not Accepted.
+    #[cfg_attr(feature = "serde", serde(rename = "ocspResult"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub ocsp_result: Option<
+        heapless::String<GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP>,
+    >,
+    pub status: GetCertificateStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP: usize,
+> crate::Action
+for GetCertificateStatusResponse<
+    CustomDataType,
+    GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP,
+> {
     const ACTION: &'static str = "GetCertificateStatus";
 }

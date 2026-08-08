@@ -4,12 +4,12 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UnpublishFirmwareResponse {
+pub struct UnpublishFirmwareResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: UnpublishFirmwareStatusEnum,
 }
-impl crate::Action for UnpublishFirmwareResponse {
+impl<CustomDataType> crate::Action for UnpublishFirmwareResponse<CustomDataType> {
     const ACTION: &'static str = "UnpublishFirmware";
 }

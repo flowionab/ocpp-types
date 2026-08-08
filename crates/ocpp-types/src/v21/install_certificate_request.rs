@@ -2,17 +2,45 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct InstallCertificateRequest {
+pub struct InstallCertificateRequest<CustomDataType = crate::NoCustomData> {
     /// A PEM encoded X.509 certificate.
-    pub certificate: heapless::String<10000usize>,
+    pub certificate: alloc::string::String,
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
     pub certificate_type: InstallCertificateUseEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
-impl crate::Action for InstallCertificateRequest {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for InstallCertificateRequest<CustomDataType> {
+    const ACTION: &'static str = "InstallCertificate";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct InstallCertificateRequest<
+    CustomDataType = crate::NoCustomData,
+    const INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP: usize = 1024usize,
+> {
+    /// A PEM encoded X.509 certificate.
+    pub certificate: heapless::String<INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP>,
+    #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
+    pub certificate_type: InstallCertificateUseEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP: usize,
+> crate::Action
+for InstallCertificateRequest<
+    CustomDataType,
+    INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP,
+> {
     const ACTION: &'static str = "InstallCertificate";
 }

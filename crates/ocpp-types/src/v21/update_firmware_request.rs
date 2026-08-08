@@ -5,11 +5,11 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UpdateFirmwareRequest {
+pub struct UpdateFirmwareRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub firmware: Firmware,
+    pub custom_data: Option<CustomDataType>,
+    pub firmware: Firmware<CustomDataType>,
     /// The Id of this request
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
@@ -23,22 +23,26 @@ pub struct UpdateFirmwareRequest {
     pub retry_interval: Option<i64>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for UpdateFirmwareRequest {
+impl<CustomDataType> crate::Action for UpdateFirmwareRequest<CustomDataType> {
     const ACTION: &'static str = "UpdateFirmware";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdateFirmwareRequest<
-    const FIRMWARE_INSTALL_DATE_TIME_CAP: usize = 1024usize,
-    const FIRMWARE_RETRIEVE_DATE_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const FIRMWARE_LOCATION_CAP: usize = 1024usize,
+    const FIRMWARE_SIGNATURE_CAP: usize = 800usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub firmware: Firmware<
-        FIRMWARE_INSTALL_DATE_TIME_CAP,
-        FIRMWARE_RETRIEVE_DATE_TIME_CAP,
+        CustomDataType,
+        FIRMWARE_LOCATION_CAP,
+        FIRMWARE_SIGNATURE_CAP,
+        FIRMWARE_SIGNING_CERTIFICATE_CAP,
     >,
     /// The Id of this request
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
@@ -54,12 +58,16 @@ pub struct UpdateFirmwareRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const FIRMWARE_INSTALL_DATE_TIME_CAP: usize,
-    const FIRMWARE_RETRIEVE_DATE_TIME_CAP: usize,
+    CustomDataType,
+    const FIRMWARE_LOCATION_CAP: usize,
+    const FIRMWARE_SIGNATURE_CAP: usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize,
 > crate::Action
 for UpdateFirmwareRequest<
-    FIRMWARE_INSTALL_DATE_TIME_CAP,
-    FIRMWARE_RETRIEVE_DATE_TIME_CAP,
+    CustomDataType,
+    FIRMWARE_LOCATION_CAP,
+    FIRMWARE_SIGNATURE_CAP,
+    FIRMWARE_SIGNING_CERTIFICATE_CAP,
 > {
     const ACTION: &'static str = "UpdateFirmware";
 }

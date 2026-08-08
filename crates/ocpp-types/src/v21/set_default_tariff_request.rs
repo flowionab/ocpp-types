@@ -5,85 +5,57 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetDefaultTariffRequest {
+pub struct SetDefaultTariffRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// EVSE that tariff applies to. When _evseId_ = 0, then tarriff applies to all EVSEs.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
-    pub tariff: Tariff,
+    pub tariff: Tariff<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for SetDefaultTariffRequest {
+impl<CustomDataType> crate::Action for SetDefaultTariffRequest<CustomDataType> {
     const ACTION: &'static str = "SetDefaultTariff";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDefaultTariffRequest<
-    const TARIFF_TIME_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_ENERGY_PRICES_CAP: usize = 16usize,
-    const TARIFF_FIXED_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_VALID_FROM_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const TARIFF_TIME_PRICES_CAP: usize = 8usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
+    const TARIFF_ENERGY_PRICES_CAP: usize = 8usize,
+    const TARIFF_FIXED_PRICES_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// EVSE that tariff applies to. When _evseId_ = 0, then tarriff applies to all EVSEs.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
     pub tariff: Tariff<
+        CustomDataType,
         TARIFF_TIME_PRICES_CAP,
-        TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-        TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
+        MESSAGE_CONTENT_CONTENT_CAP,
         TARIFF_ENERGY_PRICES_CAP,
         TARIFF_FIXED_PRICES_CAP,
-        TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-        TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-        TARIFF_VALID_FROM_CAP,
     >,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const TARIFF_TIME_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
     const TARIFF_ENERGY_PRICES_CAP: usize,
     const TARIFF_FIXED_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize,
-    const TARIFF_VALID_FROM_CAP: usize,
 > crate::Action
 for SetDefaultTariffRequest<
+    CustomDataType,
     TARIFF_TIME_PRICES_CAP,
-    TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
     TARIFF_ENERGY_PRICES_CAP,
     TARIFF_FIXED_PRICES_CAP,
-    TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-    TARIFF_VALID_FROM_CAP,
 > {
     const ACTION: &'static str = "SetDefaultTariff";
 }

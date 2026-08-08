@@ -5,15 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyEventRequest {
+pub struct NotifyEventRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventData"))]
-    pub event_data: alloc::vec::Vec<EventData>,
+    pub event_data: alloc::vec::Vec<EventData<CustomDataType>>,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: alloc::string::String,
+    pub generated_at: crate::OcppTimestamp,
     /// Sequence number of this message. First message starts at 0.
     #[cfg_attr(feature = "serde", serde(rename = "seqNo"))]
     pub seq_no: i64,
@@ -22,28 +22,28 @@ pub struct NotifyEventRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyEventRequest {
+impl<CustomDataType> crate::Action for NotifyEventRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEvent";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEventRequest<
-    const NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP: usize = 16usize,
-    const EVENT_DATA_TIMESTAMP_CAP: usize = 1024usize,
-    const NOTIFY_EVENT_REQUEST_GENERATED_AT_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP: usize = 8usize,
+    const EVENT_DATA_ACTUAL_VALUE_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventData"))]
     pub event_data: heapless::Vec<
-        EventData<EVENT_DATA_TIMESTAMP_CAP>,
+        EventData<CustomDataType, EVENT_DATA_ACTUAL_VALUE_CAP>,
         NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP,
     >,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: heapless::String<NOTIFY_EVENT_REQUEST_GENERATED_AT_CAP>,
+    pub generated_at: crate::OcppTimestamp,
     /// Sequence number of this message. First message starts at 0.
     #[cfg_attr(feature = "serde", serde(rename = "seqNo"))]
     pub seq_no: i64,
@@ -53,14 +53,14 @@ pub struct NotifyEventRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP: usize,
-    const EVENT_DATA_TIMESTAMP_CAP: usize,
-    const NOTIFY_EVENT_REQUEST_GENERATED_AT_CAP: usize,
+    const EVENT_DATA_ACTUAL_VALUE_CAP: usize,
 > crate::Action
 for NotifyEventRequest<
+    CustomDataType,
     NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP,
-    EVENT_DATA_TIMESTAMP_CAP,
-    NOTIFY_EVENT_REQUEST_GENERATED_AT_CAP,
+    EVENT_DATA_ACTUAL_VALUE_CAP,
 > {
     const ACTION: &'static str = "NotifyEvent";
 }

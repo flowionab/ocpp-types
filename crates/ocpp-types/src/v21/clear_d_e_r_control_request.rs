@@ -4,7 +4,7 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClearDERControlRequest {
+pub struct ClearDERControlRequest<CustomDataType = crate::NoCustomData> {
     /// Id of control setting to clear. When omitted all settings for _controlType_ are cleared.
     #[cfg_attr(feature = "serde", serde(rename = "controlId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -14,11 +14,11 @@ pub struct ClearDERControlRequest {
     pub control_type: Option<DERControlEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// True: clearing default DER controls. False: clearing scheduled controls.
     #[cfg_attr(feature = "serde", serde(rename = "isDefault"))]
     pub is_default: bool,
 }
-impl crate::Action for ClearDERControlRequest {
+impl<CustomDataType> crate::Action for ClearDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "ClearDERControl";
 }

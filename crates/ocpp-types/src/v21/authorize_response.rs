@@ -5,7 +5,7 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AuthorizeResponse {
+pub struct AuthorizeResponse<CustomDataType = crate::NoCustomData> {
     /// *(2.1)* List of allowed energy transfer modes the EV can choose from. If omitted this defaults to charging only.
     #[cfg_attr(feature = "serde", serde(rename = "allowedEnergyTransfer"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -15,36 +15,28 @@ pub struct AuthorizeResponse {
     pub certificate_status: Option<AuthorizeCertificateStatusEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
-    pub id_token_info: IdTokenInfo,
+    pub id_token_info: IdTokenInfo<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub tariff: Option<Tariff>,
+    pub tariff: Option<Tariff<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for AuthorizeResponse {
+impl<CustomDataType> crate::Action for AuthorizeResponse<CustomDataType> {
     const ACTION: &'static str = "Authorize";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthorizeResponse<
-    const AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP: usize = 16usize,
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 16usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
-    const TARIFF_TIME_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_ENERGY_PRICES_CAP: usize = 16usize,
-    const TARIFF_FIXED_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_VALID_FROM_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP: usize = 8usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
+    const TARIFF_TIME_PRICES_CAP: usize = 8usize,
+    const TARIFF_ENERGY_PRICES_CAP: usize = 8usize,
+    const TARIFF_FIXED_PRICES_CAP: usize = 8usize,
 > {
     /// *(2.1)* List of allowed energy transfer modes the EV can choose from. If omitted this defaults to charging only.
     #[cfg_attr(feature = "serde", serde(rename = "allowedEnergyTransfer"))]
@@ -60,67 +52,45 @@ pub struct AuthorizeResponse<
     pub certificate_status: Option<AuthorizeCertificateStatusEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     pub id_token_info: IdTokenInfo<
-        ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
+        CustomDataType,
         ID_TOKEN_INFO_EVSE_ID_CAP,
         ID_TOKEN_ADDITIONAL_INFO_CAP,
+        MESSAGE_CONTENT_CONTENT_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub tariff: Option<
         Tariff<
+            CustomDataType,
             TARIFF_TIME_PRICES_CAP,
-            TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-            TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-            TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-            TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
+            MESSAGE_CONTENT_CONTENT_CAP,
             TARIFF_ENERGY_PRICES_CAP,
             TARIFF_FIXED_PRICES_CAP,
-            TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-            TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-            TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-            TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-            TARIFF_VALID_FROM_CAP,
         >,
     >,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP: usize,
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize,
     const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
     const TARIFF_TIME_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize,
     const TARIFF_ENERGY_PRICES_CAP: usize,
     const TARIFF_FIXED_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize,
-    const TARIFF_VALID_FROM_CAP: usize,
 > crate::Action
 for AuthorizeResponse<
+    CustomDataType,
     AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP,
-    ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
     ID_TOKEN_INFO_EVSE_ID_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
     TARIFF_TIME_PRICES_CAP,
-    TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
     TARIFF_ENERGY_PRICES_CAP,
     TARIFF_FIXED_PRICES_CAP,
-    TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-    TARIFF_VALID_FROM_CAP,
 > {
     const ACTION: &'static str = "Authorize";
 }

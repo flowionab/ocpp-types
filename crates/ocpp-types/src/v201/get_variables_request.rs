@@ -5,34 +5,38 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetVariablesRequest {
+pub struct GetVariablesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "getVariableData"))]
-    pub get_variable_data: alloc::vec::Vec<GetVariableData>,
+    pub get_variable_data: alloc::vec::Vec<GetVariableData<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetVariablesRequest {
+impl<CustomDataType> crate::Action for GetVariablesRequest<CustomDataType> {
     const ACTION: &'static str = "GetVariables";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVariablesRequest<
-    const GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "getVariableData"))]
     pub get_variable_data: heapless::Vec<
-        GetVariableData,
+        GetVariableData<CustomDataType>,
         GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP,
     >,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP: usize> crate::Action
-for GetVariablesRequest<GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP> {
+impl<
+    CustomDataType,
+    const GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP: usize,
+> crate::Action
+for GetVariablesRequest<CustomDataType, GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP> {
     const ACTION: &'static str = "GetVariables";
 }

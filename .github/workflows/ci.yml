@@ -16,14 +16,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace
+      - run: cargo build -p ocpp-types --no-default-features
       - run: cargo test --workspace
       - run: cargo build -p ocpp-types --features alloc
       - run: cargo test -p ocpp-types --features serde
-      - run: cargo test -p ocpp-types --features alloc
+      - run: cargo test -p ocpp-types --no-default-features
+      - run: cargo test -p ocpp-types --no-default-features --features serde
+      - run: cargo test -p ocpp-types --features chrono
       # The alloc+serde combination has caught real bugs the other configs
       # didn't (cfg-gating that only conflicts once both const-generic and
       # alloc code paths are compiled together), so it's covered on its own.
       - run: cargo test -p ocpp-types --features serde,alloc
+      - run: cargo test -p ocpp-types --features serde,alloc,chrono
 
   generated-types-up-to-date:
     runs-on: ubuntu-latest
@@ -39,3 +43,16 @@ jobs:
             echo "Generated types are out of date. Run ./scripts/generate.sh and commit the result."
             exit 1
           fi
+
+  msrv:
+    # The manifest's `rust-version` is a promise to consumers; without a build
+    # at that version it is only a comment. `ocpp-codegen` needs 1.88, so this
+    # checks the published crate alone.
+    name: Minimum supported Rust version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.87
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p ocpp-types --all-features
+      - run: cargo build -p ocpp-types --no-default-features

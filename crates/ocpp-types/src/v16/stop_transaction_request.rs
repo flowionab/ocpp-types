@@ -13,7 +13,7 @@ pub struct StopTransactionRequest {
     pub meter_stop: i64,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reason: Option<Reason>,
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "transactionData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_data: Option<alloc::vec::Vec<TransactionDataItem>>,
@@ -28,11 +28,9 @@ impl crate::Action for StopTransactionRequest {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StopTransactionRequest<
-    const STOP_TRANSACTION_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
-    const STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP: usize = 16usize,
-    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize = 16usize,
+    const STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP: usize = 8usize,
+    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize = 8usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usize,
-    const TRANSACTION_DATA_ITEM_TIMESTAMP_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "idTag"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -41,7 +39,7 @@ pub struct StopTransactionRequest<
     pub meter_stop: i64,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub reason: Option<Reason>,
-    pub timestamp: heapless::String<STOP_TRANSACTION_REQUEST_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "transactionData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_data: Option<
@@ -49,7 +47,6 @@ pub struct StopTransactionRequest<
             TransactionDataItem<
                 TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP,
                 SAMPLED_VALUE_ITEM_VALUE_CAP,
-                TRANSACTION_DATA_ITEM_TIMESTAMP_CAP,
             >,
             STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP,
         >,
@@ -59,18 +56,14 @@ pub struct StopTransactionRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const STOP_TRANSACTION_REQUEST_TIMESTAMP_CAP: usize,
     const STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP: usize,
     const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
-    const TRANSACTION_DATA_ITEM_TIMESTAMP_CAP: usize,
 > crate::Action
 for StopTransactionRequest<
-    STOP_TRANSACTION_REQUEST_TIMESTAMP_CAP,
     STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP,
     TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP,
     SAMPLED_VALUE_ITEM_VALUE_CAP,
-    TRANSACTION_DATA_ITEM_TIMESTAMP_CAP,
 > {
     const ACTION: &'static str = "StopTransaction";
 }

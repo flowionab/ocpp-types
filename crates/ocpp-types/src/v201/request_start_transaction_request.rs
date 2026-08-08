@@ -5,75 +5,75 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RequestStartTransactionRequest {
+pub struct RequestStartTransactionRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub charging_profile: Option<ChargingProfile>,
+    pub charging_profile: Option<ChargingProfile<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Number of the EVSE on which to start the transaction. EvseId SHALL be &gt; 0
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken>,
+    pub group_id_token: Option<IdToken<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken,
+    pub id_token: IdToken<CustomDataType>,
     /// Id given by the server to this start request. The Charging Station might return this in the &lt;&lt;transactioneventrequest, TransactionEventRequest&gt;&gt;, letting the server know which transaction was started for this request. Use to start a transaction.
     #[cfg_attr(feature = "serde", serde(rename = "remoteStartId"))]
     pub remote_start_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for RequestStartTransactionRequest {
+impl<CustomDataType> crate::Action for RequestStartTransactionRequest<CustomDataType> {
     const ACTION: &'static str = "RequestStartTransaction";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RequestStartTransactionRequest<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_profile: Option<
         ChargingProfile<
-            CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-            CHARGING_PROFILE_VALID_FROM_CAP,
-            CHARGING_PROFILE_VALID_TO_CAP,
+            CustomDataType,
+            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+            SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Number of the EVSE on which to start the transaction. EvseId SHALL be &gt; 0
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>>,
+    pub group_id_token: Option<IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>,
+    pub id_token: IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>,
     /// Id given by the server to this start request. The Charging Station might return this in the &lt;&lt;transactioneventrequest, TransactionEventRequest&gt;&gt;, letting the server know which transaction was started for this request. Use to start a transaction.
     #[cfg_attr(feature = "serde", serde(rename = "remoteStartId"))]
     pub remote_start_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize,
+    CustomDataType,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
 > crate::Action
 for RequestStartTransactionRequest<
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CHARGING_PROFILE_VALID_FROM_CAP,
-    CHARGING_PROFILE_VALID_TO_CAP,
+    CustomDataType,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "RequestStartTransaction";

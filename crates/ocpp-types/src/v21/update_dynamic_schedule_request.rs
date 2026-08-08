@@ -5,16 +5,16 @@ use super::common::*;
 /// Id of dynamic charging profile to update.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UpdateDynamicScheduleRequest {
+pub struct UpdateDynamicScheduleRequest<CustomDataType = crate::NoCustomData> {
     /// Id of charging profile to update.
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfileId"))]
     pub charging_profile_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "scheduleUpdate"))]
-    pub schedule_update: ChargingScheduleUpdate,
+    pub schedule_update: ChargingScheduleUpdate<CustomDataType>,
 }
-impl crate::Action for UpdateDynamicScheduleRequest {
+impl<CustomDataType> crate::Action for UpdateDynamicScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "UpdateDynamicSchedule";
 }

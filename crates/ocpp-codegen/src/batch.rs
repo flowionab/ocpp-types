@@ -64,22 +64,25 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-    fn schema_with_custom_data(title: &str) -> Value {
+    fn schema_with_shared_definition(title: &str) -> Value {
+        // Deliberately not `customData`: that property is a type parameter
+        // now, not a `$ref` to a pooled definition, so it would no longer
+        // exercise sharing at all.
         json!({
             "title": title,
             "type": "object",
             "definitions": {
-                "CustomDataType": {
-                    "javaType": "CustomData",
+                "StatusInfoType": {
+                    "javaType": "StatusInfo",
                     "type": "object",
                     "properties": {
-                        "vendorId": { "type": "string", "maxLength": 255 }
+                        "reasonCode": { "type": "string", "maxLength": 20 }
                     },
-                    "required": ["vendorId"]
+                    "required": ["reasonCode"]
                 }
             },
             "properties": {
-                "customData": { "$ref": "#/definitions/CustomDataType" }
+                "statusInfo": { "$ref": "#/definitions/StatusInfoType" }
             },
             "required": []
         })
@@ -88,20 +91,20 @@ mod tests {
     #[test]
     fn shared_definition_is_generated_once_in_common_not_per_message() {
         let schemas = vec![
-            schema_with_custom_data("FirstRequest"),
-            schema_with_custom_data("SecondRequest"),
+            schema_with_shared_definition("FirstRequest"),
+            schema_with_shared_definition("SecondRequest"),
         ];
 
         let output = generate_batch(&schemas, OcppVersion::V16).unwrap();
 
-        let common_occurrences = output.common.matches("pub struct CustomData").count();
+        let common_occurrences = output.common.matches("pub struct StatusInfo").count();
         assert_eq!(common_occurrences, 1);
 
         assert_eq!(output.messages.len(), 2);
         for message in &output.messages {
             assert!(!message.source.contains("pub struct CustomData"));
             assert!(message.source.contains("use super::common::*"));
-            assert!(message.source.contains("CustomData"));
+            assert!(message.source.contains("StatusInfo"));
         }
     }
 
@@ -173,7 +176,7 @@ mod tests {
 
     #[test]
     fn message_struct_names_are_reported_for_file_naming() {
-        let schemas = vec![schema_with_custom_data("FirstRequest")];
+        let schemas = vec![schema_with_shared_definition("FirstRequest")];
 
         let output = generate_batch(&schemas, OcppVersion::V16).unwrap();
 

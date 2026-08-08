@@ -5,35 +5,39 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyPeriodicEventStream {
+pub struct NotifyPeriodicEventStream<CustomDataType = crate::NoCustomData> {
     /// Base timestamp to add to time offset of values.
-    pub basetime: alloc::string::String,
+    pub basetime: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub data: alloc::vec::Vec<StreamDataElement>,
+    pub custom_data: Option<CustomDataType>,
+    pub data: alloc::vec::Vec<StreamDataElement<CustomDataType>>,
     /// Id of stream.
     pub id: i64,
     /// Number of data elements still pending to be sent.
     pub pending: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyPeriodicEventStream {
+impl<CustomDataType> crate::Action for NotifyPeriodicEventStream<CustomDataType> {
     const ACTION: &'static str = "NotifyPeriodicEventStream";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyPeriodicEventStream<
-    const NOTIFY_PERIODIC_EVENT_STREAM_BASETIME_CAP: usize = 1024usize,
-    const NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP: usize = 8usize,
+    const STREAM_DATA_ELEMENT_V_CAP: usize = 1024usize,
 > {
     /// Base timestamp to add to time offset of values.
-    pub basetime: heapless::String<NOTIFY_PERIODIC_EVENT_STREAM_BASETIME_CAP>,
+    pub basetime: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub data: heapless::Vec<StreamDataElement, NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP>,
+    pub custom_data: Option<CustomDataType>,
+    pub data: heapless::Vec<
+        StreamDataElement<CustomDataType, STREAM_DATA_ELEMENT_V_CAP>,
+        NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP,
+    >,
     /// Id of stream.
     pub id: i64,
     /// Number of data elements still pending to be sent.
@@ -41,12 +45,14 @@ pub struct NotifyPeriodicEventStream<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const NOTIFY_PERIODIC_EVENT_STREAM_BASETIME_CAP: usize,
+    CustomDataType,
     const NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP: usize,
+    const STREAM_DATA_ELEMENT_V_CAP: usize,
 > crate::Action
 for NotifyPeriodicEventStream<
-    NOTIFY_PERIODIC_EVENT_STREAM_BASETIME_CAP,
+    CustomDataType,
     NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP,
+    STREAM_DATA_ELEMENT_V_CAP,
 > {
     const ACTION: &'static str = "NotifyPeriodicEventStream";
 }

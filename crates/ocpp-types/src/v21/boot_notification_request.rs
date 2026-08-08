@@ -4,14 +4,14 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BootNotificationRequest {
+pub struct BootNotificationRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingStation"))]
-    pub charging_station: ChargingStation,
+    pub charging_station: ChargingStation<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub reason: BootReasonEnum,
 }
-impl crate::Action for BootNotificationRequest {
+impl<CustomDataType> crate::Action for BootNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "BootNotification";
 }

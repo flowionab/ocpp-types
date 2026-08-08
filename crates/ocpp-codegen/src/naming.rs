@@ -1,3 +1,14 @@
+/// The single type parameter every 2.x `customData` field shares.
+///
+/// Not owner-qualified, unlike every other generated parameter name: one
+/// shared name means a struct containing ten others that each carry
+/// `customData` declares one parameter rather than ten, and that the count
+/// doesn't compound with nesting depth.
+///
+/// Distinct from the generated `CustomData` struct, which still exists and
+/// is what a caller names to opt back into the specification's own shape.
+pub const CUSTOM_DATA_PARAM: &str = "CustomDataType";
+
 pub fn rust_name(name: &str) -> String {
     let mut result = String::new();
 

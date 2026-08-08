@@ -142,7 +142,25 @@ pub fn type_params_for_fields(
     for field in fields {
         collect_type_params(&field.ty, params, &mut out);
     }
+    order_custom_data_last(&mut out);
     out
+}
+
+/// Moves the shared `customData` parameter to the end of a parameter list.
+///
+/// It is introduced by a field that sorts early in most structs, so left in
+/// traversal order it would come first and shift every other parameter along
+/// -- turning `DataTransferRequest<VendorPayload>` into a binding for
+/// `customData` instead of for `data`. Last is also the right place on
+/// merit: it is the parameter callers override least often.
+pub fn order_custom_data_last(params: &mut Vec<TypeParam>) {
+    if let Some(index) = params
+        .iter()
+        .position(|p| p.name == crate::naming::CUSTOM_DATA_PARAM)
+    {
+        let param = params.remove(index);
+        params.push(param);
+    }
 }
 
 fn collect_type_params(
@@ -305,6 +323,7 @@ mod tests {
     fn type_param(name: &str) -> TypeParam {
         TypeParam {
             name: name.to_string(),
+            default: "()".to_string(),
         }
     }
 

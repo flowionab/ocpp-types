@@ -7,6 +7,7 @@ mod primitives;
 pub use primitives::*;
 mod error;
 pub use error::*;
+pub mod standard;
 mod authorize_request;
 pub use authorize_request::*;
 mod authorize_response;

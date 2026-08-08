@@ -5,15 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyMonitoringReportRequest {
+pub struct NotifyMonitoringReportRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: alloc::string::String,
+    pub generated_at: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub monitor: Option<alloc::vec::Vec<MonitoringData>>,
+    pub monitor: Option<alloc::vec::Vec<MonitoringData<CustomDataType>>>,
     /// The id of the GetMonitoringRequest that requested this report.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
@@ -25,29 +25,27 @@ pub struct NotifyMonitoringReportRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyMonitoringReportRequest {
+impl<CustomDataType> crate::Action for NotifyMonitoringReportRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyMonitoringReport";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyMonitoringReportRequest<
-    const NOTIFY_MONITORING_REPORT_REQUEST_GENERATED_AT_CAP: usize = 1024usize,
-    const NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP: usize = 16usize,
-    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP: usize = 8usize,
+    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: heapless::String<
-        NOTIFY_MONITORING_REPORT_REQUEST_GENERATED_AT_CAP,
-    >,
+    pub generated_at: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub monitor: Option<
         heapless::Vec<
-            MonitoringData<MONITORING_DATA_VARIABLE_MONITORING_CAP>,
+            MonitoringData<CustomDataType, MONITORING_DATA_VARIABLE_MONITORING_CAP>,
             NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP,
         >,
     >,
@@ -63,12 +61,12 @@ pub struct NotifyMonitoringReportRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const NOTIFY_MONITORING_REPORT_REQUEST_GENERATED_AT_CAP: usize,
+    CustomDataType,
     const NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP: usize,
     const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize,
 > crate::Action
 for NotifyMonitoringReportRequest<
-    NOTIFY_MONITORING_REPORT_REQUEST_GENERATED_AT_CAP,
+    CustomDataType,
     NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP,
     MONITORING_DATA_VARIABLE_MONITORING_CAP,
 > {

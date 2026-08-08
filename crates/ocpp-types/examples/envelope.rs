@@ -29,10 +29,10 @@ fn main() {
     // there's no Action on the wire for it, since the receiver already
     // knows (from tracking its own outstanding CALLs) what kind of
     // response to expect.
-    #[cfg(not(feature = "alloc"))]
-    let current_time = heapless::String::try_from("2024-01-01T00:00:00Z").unwrap();
-    #[cfg(feature = "alloc")]
-    let current_time = String::from("2024-01-01T00:00:00Z");
+    // One type in both builds: `dateTime` fields are `OcppTimestamp`, not a
+    // capacity-parameterized string.
+    let current_time =
+        ocpp_types::OcppTimestamp::parse_rfc3339("2024-01-01T00:00:00Z").unwrap();
 
     let result: CallResult<HeartbeatResponse> = CallResult {
         message_id: MessageId::try_from("19223201").unwrap(),

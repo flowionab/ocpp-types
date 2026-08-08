@@ -497,7 +497,7 @@ mod tests {
         let result: CallResult<HeartbeatResponse> = CallResult {
             message_id: MessageId::try_from("19223201").unwrap(),
             payload: HeartbeatResponse {
-                current_time: heapless::String::try_from("2013-02-01T20:53:32.486Z").unwrap(),
+                current_time: crate::OcppTimestamp::parse_rfc3339("2013-02-01T20:53:32.486Z").unwrap(),
             },
         };
 
@@ -606,7 +606,7 @@ mod tests {
                 let send: SendMessage<NotifyPeriodicEventStream> = SendMessage {
                     message_id: MessageId::try_from("19223201").unwrap(),
                     payload: NotifyPeriodicEventStream {
-                        basetime: heapless::String::try_from("2024-08-27T12:30:40Z").unwrap(),
+                        basetime: crate::OcppTimestamp::parse_rfc3339("2024-08-27T12:30:40Z").unwrap(),
                         custom_data: None,
                         data: heapless::Vec::new(),
                         id: 123,

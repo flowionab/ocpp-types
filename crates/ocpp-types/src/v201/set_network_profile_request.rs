@@ -4,16 +4,16 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetNetworkProfileRequest {
+pub struct SetNetworkProfileRequest<CustomDataType = crate::NoCustomData> {
     /// Slot in which the configuration should be stored.
     #[cfg_attr(feature = "serde", serde(rename = "configurationSlot"))]
     pub configuration_slot: i64,
     #[cfg_attr(feature = "serde", serde(rename = "connectionData"))]
-    pub connection_data: NetworkConnectionProfile,
+    pub connection_data: NetworkConnectionProfile<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
-impl crate::Action for SetNetworkProfileRequest {
+impl<CustomDataType> crate::Action for SetNetworkProfileRequest<CustomDataType> {
     const ACTION: &'static str = "SetNetworkProfile";
 }

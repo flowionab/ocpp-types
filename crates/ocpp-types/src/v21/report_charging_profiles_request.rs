@@ -5,15 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReportChargingProfilesRequest {
+pub struct ReportChargingProfilesRequest<CustomDataType = crate::NoCustomData> {
     /// Source that has installed this charging profile. Values defined in Appendix as ChargingLimitSourceEnumStringType.
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
     pub charging_limit_source: heapless::String<20usize>,
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
-    pub charging_profile: alloc::vec::Vec<ChargingProfile>,
+    pub charging_profile: alloc::vec::Vec<ChargingProfile<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The evse to which the charging profile applies. If evseId = 0, the message contains an overall limit for the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -25,20 +25,22 @@ pub struct ReportChargingProfilesRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ReportChargingProfilesRequest {
+impl<CustomDataType> crate::Action for ReportChargingProfilesRequest<CustomDataType> {
     const ACTION: &'static str = "ReportChargingProfiles";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReportChargingProfilesRequest<
-    const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize = 16usize,
-    const ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_DYN_UPDATE_TIME_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize = 8usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize = 1024usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize = 8usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     /// Source that has installed this charging profile. Values defined in Appendix as ChargingLimitSourceEnumStringType.
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
@@ -46,18 +48,20 @@ pub struct ReportChargingProfilesRequest<
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     pub charging_profile: heapless::Vec<
         ChargingProfile<
-            ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-            PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP,
-            CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-            CHARGING_PROFILE_DYN_UPDATE_TIME_CAP,
-            CHARGING_PROFILE_VALID_FROM_CAP,
-            CHARGING_PROFILE_VALID_TO_CAP,
+            CustomDataType,
+            ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+            ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+            CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+            CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+            PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+            SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
         >,
         REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The evse to which the charging profile applies. If evseId = 0, the message contains an overall limit for the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -70,22 +74,26 @@ pub struct ReportChargingProfilesRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize,
-    const ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CHARGING_PROFILE_DYN_UPDATE_TIME_CAP: usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
 > crate::Action
 for ReportChargingProfilesRequest<
+    CustomDataType,
     REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP,
-    ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-    PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CHARGING_PROFILE_DYN_UPDATE_TIME_CAP,
-    CHARGING_PROFILE_VALID_FROM_CAP,
-    CHARGING_PROFILE_VALID_TO_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "ReportChargingProfiles";
 }

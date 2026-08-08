@@ -2,25 +2,55 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SignCertificateRequest {
+pub struct SignCertificateRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub certificate_type: Option<CertificateSigningUseEnum>,
     /// The Charging Station SHALL send the public key in form of a Certificate Signing Request (CSR) as described in RFC 2986 \[22\] and then PEM encoded, using the &lt;&lt;signcertificaterequest,SignCertificateRequest&gt;&gt; message.
-    pub csr: heapless::String<5500usize>,
+    pub csr: alloc::string::String,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "hashRootCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub hash_root_certificate: Option<CertificateHashData>,
+    pub hash_root_certificate: Option<CertificateHashData<CustomDataType>>,
     /// *(2.1)* RequestId to match this message with the CertificateSignedRequest.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub request_id: Option<i64>,
 }
-impl crate::Action for SignCertificateRequest {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for SignCertificateRequest<CustomDataType> {
+    const ACTION: &'static str = "SignCertificate";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SignCertificateRequest<
+    CustomDataType = crate::NoCustomData,
+    const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub certificate_type: Option<CertificateSigningUseEnum>,
+    /// The Charging Station SHALL send the public key in form of a Certificate Signing Request (CSR) as described in RFC 2986 \[22\] and then PEM encoded, using the &lt;&lt;signcertificaterequest,SignCertificateRequest&gt;&gt; message.
+    pub csr: heapless::String<SIGN_CERTIFICATE_REQUEST_CSR_CAP>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    #[cfg_attr(feature = "serde", serde(rename = "hashRootCertificate"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub hash_root_certificate: Option<CertificateHashData<CustomDataType>>,
+    /// *(2.1)* RequestId to match this message with the CertificateSignedRequest.
+    #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub request_id: Option<i64>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<CustomDataType, const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize> crate::Action
+for SignCertificateRequest<CustomDataType, SIGN_CERTIFICATE_REQUEST_CSR_CAP> {
     const ACTION: &'static str = "SignCertificate";
 }

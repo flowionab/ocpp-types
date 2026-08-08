@@ -4,7 +4,7 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetDERControlRequest {
+pub struct GetDERControlRequest<CustomDataType = crate::NoCustomData> {
     /// Id of setting to get. When omitted all settings for _controlType_ are retrieved.
     #[cfg_attr(feature = "serde", serde(rename = "controlId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -14,7 +14,7 @@ pub struct GetDERControlRequest {
     pub control_type: Option<DERControlEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// True: get a default DER control. False: get a scheduled control.
     #[cfg_attr(feature = "serde", serde(rename = "isDefault"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -23,6 +23,6 @@ pub struct GetDERControlRequest {
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
-impl crate::Action for GetDERControlRequest {
+impl<CustomDataType> crate::Action for GetDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "GetDERControl";
 }

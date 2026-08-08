@@ -5,39 +5,30 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetDisplayMessageRequest {
+pub struct SetDisplayMessageRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub message: MessageInfo,
+    pub custom_data: Option<CustomDataType>,
+    pub message: MessageInfo<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for SetDisplayMessageRequest {
+impl<CustomDataType> crate::Action for SetDisplayMessageRequest<CustomDataType> {
     const ACTION: &'static str = "SetDisplayMessage";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDisplayMessageRequest<
-    const MESSAGE_INFO_END_DATE_TIME_CAP: usize = 1024usize,
-    const MESSAGE_INFO_START_DATE_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub message: MessageInfo<
-        MESSAGE_INFO_END_DATE_TIME_CAP,
-        MESSAGE_INFO_START_DATE_TIME_CAP,
-    >,
+    pub custom_data: Option<CustomDataType>,
+    pub message: MessageInfo<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const MESSAGE_INFO_END_DATE_TIME_CAP: usize,
-    const MESSAGE_INFO_START_DATE_TIME_CAP: usize,
-> crate::Action
-for SetDisplayMessageRequest<
-    MESSAGE_INFO_END_DATE_TIME_CAP,
-    MESSAGE_INFO_START_DATE_TIME_CAP,
-> {
+impl<CustomDataType, const MESSAGE_CONTENT_CONTENT_CAP: usize> crate::Action
+for SetDisplayMessageRequest<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP> {
     const ACTION: &'static str = "SetDisplayMessage";
 }

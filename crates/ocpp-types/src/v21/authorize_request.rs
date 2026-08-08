@@ -5,43 +5,65 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AuthorizeRequest {
+pub struct AuthorizeRequest<CustomDataType = crate::NoCustomData> {
     /// *(2.1)* The X.509 certificate chain presented by EV and encoded in PEM format. Order of certificates in chain is from leaf up to (but excluding) root certificate. +
     /// Only needed in case of central contract validation when Charging Station cannot validate the contract certificate.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub certificate: Option<heapless::String<10000usize>>,
+    pub certificate: Option<alloc::string::String>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken,
+    pub id_token: IdToken<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "iso15118CertificateHashData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub iso15118_certificate_hash_data: Option<heapless::Vec<OCSPRequestData, 4usize>>,
+    pub iso15118_certificate_hash_data: Option<
+        heapless::Vec<OCSPRequestData<CustomDataType>, 4usize>,
+    >,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for AuthorizeRequest {
+impl<CustomDataType> crate::Action for AuthorizeRequest<CustomDataType> {
     const ACTION: &'static str = "Authorize";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AuthorizeRequest<const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize> {
+pub struct AuthorizeRequest<
+    CustomDataType = crate::NoCustomData,
+    const AUTHORIZE_REQUEST_CERTIFICATE_CAP: usize = 1024usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP: usize = 1024usize,
+> {
     /// *(2.1)* The X.509 certificate chain presented by EV and encoded in PEM format. Order of certificates in chain is from leaf up to (but excluding) root certificate. +
     /// Only needed in case of central contract validation when Charging Station cannot validate the contract certificate.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub certificate: Option<heapless::String<10000usize>>,
+    pub certificate: Option<heapless::String<AUTHORIZE_REQUEST_CERTIFICATE_CAP>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>,
+    pub id_token: IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>,
     #[cfg_attr(feature = "serde", serde(rename = "iso15118CertificateHashData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub iso15118_certificate_hash_data: Option<heapless::Vec<OCSPRequestData, 4usize>>,
+    pub iso15118_certificate_hash_data: Option<
+        heapless::Vec<
+            OCSPRequestData<CustomDataType, O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP>,
+            4usize,
+        >,
+    >,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
-for AuthorizeRequest<ID_TOKEN_ADDITIONAL_INFO_CAP> {
+impl<
+    CustomDataType,
+    const AUTHORIZE_REQUEST_CERTIFICATE_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP: usize,
+> crate::Action
+for AuthorizeRequest<
+    CustomDataType,
+    AUTHORIZE_REQUEST_CERTIFICATE_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP,
+> {
     const ACTION: &'static str = "Authorize";
 }

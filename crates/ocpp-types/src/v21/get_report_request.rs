@@ -5,30 +5,31 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetReportRequest {
+pub struct GetReportRequest<CustomDataType = crate::NoCustomData> {
     /// This field contains criteria for components for which a report is requested
     #[cfg_attr(feature = "serde", serde(rename = "componentCriteria"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub component_criteria: Option<heapless::Vec<ComponentCriterionEnum, 4usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "componentVariable"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub component_variable: Option<alloc::vec::Vec<ComponentVariable>>,
+    pub component_variable: Option<alloc::vec::Vec<ComponentVariable<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The Id of the request.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetReportRequest {
+impl<CustomDataType> crate::Action for GetReportRequest<CustomDataType> {
     const ACTION: &'static str = "GetReport";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetReportRequest<
-    const GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize = 8usize,
 > {
     /// This field contains criteria for components for which a report is requested
     #[cfg_attr(feature = "serde", serde(rename = "componentCriteria"))]
@@ -37,17 +38,23 @@ pub struct GetReportRequest<
     #[cfg_attr(feature = "serde", serde(rename = "componentVariable"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub component_variable: Option<
-        heapless::Vec<ComponentVariable, GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP>,
+        heapless::Vec<
+            ComponentVariable<CustomDataType>,
+            GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP,
+        >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The Id of the request.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize> crate::Action
-for GetReportRequest<GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP> {
+impl<
+    CustomDataType,
+    const GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize,
+> crate::Action
+for GetReportRequest<CustomDataType, GET_REPORT_REQUEST_COMPONENT_VARIABLE_CAP> {
     const ACTION: &'static str = "GetReport";
 }

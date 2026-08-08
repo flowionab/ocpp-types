@@ -5,42 +5,45 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct TransactionEventResponse {
+pub struct TransactionEventResponse<CustomDataType = crate::NoCustomData> {
     /// Priority from a business point of view. Default priority is 0, The range is from -9 to 9. Higher values indicate a higher priority. The chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; is temporarily, so it may not be set in the &lt;&lt;cmn_idtokeninfotype,IdTokenInfoType&gt;&gt; afterwards. Also the chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; has a higher priority than the one in &lt;&lt;cmn_idtokeninfotype,IdTokenInfoType&gt;&gt;.
     #[cfg_attr(feature = "serde", serde(rename = "chargingPriority"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_priority: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token_info: Option<IdTokenInfo>,
+    pub id_token_info: Option<IdTokenInfo<CustomDataType>>,
     /// When _eventType_ of TransactionEventRequest is Updated, then this value contains the running cost. When _eventType_ of TransactionEventRequest is Ended, then this contains the final total cost of this transaction, including taxes, in the currency configured with the Configuration Variable: Currency. Absence of this value does not imply that the transaction was free. To indicate a free transaction, the CSMS SHALL send a value of 0.00.
     #[cfg_attr(feature = "serde", serde(rename = "totalCost"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub total_cost: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "transactionLimit"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub transaction_limit: Option<TransactionLimit>,
+    pub transaction_limit: Option<TransactionLimit<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "updatedPersonalMessage"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub updated_personal_message: Option<MessageContent>,
+    pub updated_personal_message: Option<MessageContent<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "updatedPersonalMessageExtra"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub updated_personal_message_extra: Option<heapless::Vec<MessageContent, 4usize>>,
+    pub updated_personal_message_extra: Option<
+        heapless::Vec<MessageContent<CustomDataType>, 4usize>,
+    >,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for TransactionEventResponse {
+impl<CustomDataType> crate::Action for TransactionEventResponse<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TransactionEventResponse<
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 16usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
 > {
     /// Priority from a business point of view. Default priority is 0, The range is from -9 to 9. Higher values indicate a higher priority. The chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; is temporarily, so it may not be set in the &lt;&lt;cmn_idtokeninfotype,IdTokenInfoType&gt;&gt; afterwards. Also the chargingPriority in &lt;&lt;transactioneventresponse,TransactionEventResponse&gt;&gt; has a higher priority than the one in &lt;&lt;cmn_idtokeninfotype,IdTokenInfoType&gt;&gt;.
     #[cfg_attr(feature = "serde", serde(rename = "chargingPriority"))]
@@ -48,14 +51,15 @@ pub struct TransactionEventResponse<
     pub charging_priority: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id_token_info: Option<
         IdTokenInfo<
-            ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
+            CustomDataType,
             ID_TOKEN_INFO_EVSE_ID_CAP,
             ID_TOKEN_ADDITIONAL_INFO_CAP,
+            MESSAGE_CONTENT_CONTENT_CAP,
         >,
     >,
     /// When _eventType_ of TransactionEventRequest is Updated, then this value contains the running cost. When _eventType_ of TransactionEventRequest is Ended, then this contains the final total cost of this transaction, including taxes, in the currency configured with the Configuration Variable: Currency. Absence of this value does not imply that the transaction was free. To indicate a free transaction, the CSMS SHALL send a value of 0.00.
@@ -64,24 +68,33 @@ pub struct TransactionEventResponse<
     pub total_cost: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "transactionLimit"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub transaction_limit: Option<TransactionLimit>,
+    pub transaction_limit: Option<TransactionLimit<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "updatedPersonalMessage"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub updated_personal_message: Option<MessageContent>,
+    pub updated_personal_message: Option<
+        MessageContent<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "updatedPersonalMessageExtra"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub updated_personal_message_extra: Option<heapless::Vec<MessageContent, 4usize>>,
+    pub updated_personal_message_extra: Option<
+        heapless::Vec<
+            MessageContent<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP>,
+            4usize,
+        >,
+    >,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize,
+    CustomDataType,
     const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
 > crate::Action
 for TransactionEventResponse<
-    ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
+    CustomDataType,
     ID_TOKEN_INFO_EVSE_ID_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
 }

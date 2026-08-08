@@ -2,7 +2,6 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StartTransactionResponse {
@@ -11,23 +10,6 @@ pub struct StartTransactionResponse {
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     pub transaction_id: i64,
 }
-#[cfg(feature = "alloc")]
 impl crate::Action for StartTransactionResponse {
-    const ACTION: &'static str = "StartTransaction";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct StartTransactionResponse<
-    const ID_TAG_INFO_EXPIRY_DATE_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "idTagInfo"))]
-    pub id_tag_info: IdTagInfo<ID_TAG_INFO_EXPIRY_DATE_CAP>,
-    #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
-    pub transaction_id: i64,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const ID_TAG_INFO_EXPIRY_DATE_CAP: usize> crate::Action
-for StartTransactionResponse<ID_TAG_INFO_EXPIRY_DATE_CAP> {
     const ACTION: &'static str = "StartTransaction";
 }

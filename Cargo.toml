@@ -5,7 +5,11 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.3"
+version = "0.2.0"
 edition = "2024"
+# `ocpp-types` needs 1.87 for `is_multiple_of`; edition 2024 alone requires
+# 1.85. `ocpp-codegen` overrides this -- it uses let-chains, which need 1.88 --
+# but it is never published, so the number that reaches users is this one.
+rust-version = "1.87"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/flowionab/ocpp-types"

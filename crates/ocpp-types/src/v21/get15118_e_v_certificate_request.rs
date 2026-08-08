@@ -2,17 +2,18 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Get15118EVCertificateRequest {
+pub struct Get15118EVCertificateRequest<CustomDataType = crate::NoCustomData> {
     pub action: CertificateActionEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// *(2.1)* Raw CertificateInstallationReq request from EV, Base64 encoded. +
     /// Extended to support ISO 15118-20 certificates. The minimum supported length is 11000. If a longer _exiRequest_ is supported, then the supported length must be communicated in variable OCPPCommCtrlr.FieldLength\[ "Get15118EVCertificateRequest.exiRequest" \].
     #[cfg_attr(feature = "serde", serde(rename = "exiRequest"))]
-    pub exi_request: heapless::String<11000usize>,
+    pub exi_request: alloc::string::String,
     /// Schema version currently used for the 15118 session between EV and Charging Station. Needed for parsing of the EXI stream by the CSMS.
     #[cfg_attr(feature = "serde", serde(rename = "iso15118SchemaVersion"))]
     pub iso15118_schema_version: heapless::String<50usize>,
@@ -28,6 +29,48 @@ pub struct Get15118EVCertificateRequest {
         heapless::Vec<heapless::String<255usize>, 8usize>,
     >,
 }
-impl crate::Action for Get15118EVCertificateRequest {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for Get15118EVCertificateRequest<CustomDataType> {
+    const ACTION: &'static str = "Get15118EVCertificate";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Get15118EVCertificateRequest<
+    CustomDataType = crate::NoCustomData,
+    const GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP: usize = 1024usize,
+> {
+    pub action: CertificateActionEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// *(2.1)* Raw CertificateInstallationReq request from EV, Base64 encoded. +
+    /// Extended to support ISO 15118-20 certificates. The minimum supported length is 11000. If a longer _exiRequest_ is supported, then the supported length must be communicated in variable OCPPCommCtrlr.FieldLength\[ "Get15118EVCertificateRequest.exiRequest" \].
+    #[cfg_attr(feature = "serde", serde(rename = "exiRequest"))]
+    pub exi_request: heapless::String<GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP>,
+    /// Schema version currently used for the 15118 session between EV and Charging Station. Needed for parsing of the EXI stream by the CSMS.
+    #[cfg_attr(feature = "serde", serde(rename = "iso15118SchemaVersion"))]
+    pub iso15118_schema_version: heapless::String<50usize>,
+    /// *(2.1)* Absent during ISO 15118-2 session. Required during ISO 15118-20 session. +
+    /// Maximum number of contracts that EV wants to install.
+    #[cfg_attr(feature = "serde", serde(rename = "maximumContractCertificateChains"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub maximum_contract_certificate_chains: Option<i64>,
+    /// *(2.1)*  Absent during ISO 15118-2 session. Optional during ISO 15118-20 session. List of EMAIDs for which contract certificates must be requested first, in case there are more certificates than allowed by _maximumContractCertificateChains_.
+    #[cfg_attr(feature = "serde", serde(rename = "prioritizedEMAIDs"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub prioritized_e_m_a_i_ds: Option<
+        heapless::Vec<heapless::String<255usize>, 8usize>,
+    >,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP: usize,
+> crate::Action
+for Get15118EVCertificateRequest<
+    CustomDataType,
+    GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP,
+> {
     const ACTION: &'static str = "Get15118EVCertificate";
 }

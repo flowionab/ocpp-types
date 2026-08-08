@@ -13,10 +13,10 @@ pub struct GetDiagnosticsRequest {
     pub retry_interval: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "startTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_time: Option<alloc::string::String>,
+    pub start_time: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "stopTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub stop_time: Option<alloc::string::String>,
+    pub stop_time: Option<crate::OcppTimestamp>,
 }
 #[cfg(feature = "alloc")]
 impl crate::Action for GetDiagnosticsRequest {
@@ -27,8 +27,6 @@ impl crate::Action for GetDiagnosticsRequest {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDiagnosticsRequest<
     const GET_DIAGNOSTICS_REQUEST_LOCATION_CAP: usize = 1024usize,
-    const GET_DIAGNOSTICS_REQUEST_START_TIME_CAP: usize = 1024usize,
-    const GET_DIAGNOSTICS_REQUEST_STOP_TIME_CAP: usize = 1024usize,
 > {
     pub location: heapless::String<GET_DIAGNOSTICS_REQUEST_LOCATION_CAP>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -38,21 +36,13 @@ pub struct GetDiagnosticsRequest<
     pub retry_interval: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "startTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_time: Option<heapless::String<GET_DIAGNOSTICS_REQUEST_START_TIME_CAP>>,
+    pub start_time: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "stopTime"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub stop_time: Option<heapless::String<GET_DIAGNOSTICS_REQUEST_STOP_TIME_CAP>>,
+    pub stop_time: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const GET_DIAGNOSTICS_REQUEST_LOCATION_CAP: usize,
-    const GET_DIAGNOSTICS_REQUEST_START_TIME_CAP: usize,
-    const GET_DIAGNOSTICS_REQUEST_STOP_TIME_CAP: usize,
-> crate::Action
-for GetDiagnosticsRequest<
-    GET_DIAGNOSTICS_REQUEST_LOCATION_CAP,
-    GET_DIAGNOSTICS_REQUEST_START_TIME_CAP,
-    GET_DIAGNOSTICS_REQUEST_STOP_TIME_CAP,
-> {
+impl<const GET_DIAGNOSTICS_REQUEST_LOCATION_CAP: usize> crate::Action
+for GetDiagnosticsRequest<GET_DIAGNOSTICS_REQUEST_LOCATION_CAP> {
     const ACTION: &'static str = "GetDiagnostics";
 }

@@ -21,8 +21,8 @@ impl crate::Action for GetConfigurationResponse {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConfigurationResponse<
-    const GET_CONFIGURATION_RESPONSE_CONFIGURATION_KEY_CAP: usize = 16usize,
-    const GET_CONFIGURATION_RESPONSE_UNKNOWN_KEY_CAP: usize = 16usize,
+    const GET_CONFIGURATION_RESPONSE_CONFIGURATION_KEY_CAP: usize = 8usize,
+    const GET_CONFIGURATION_RESPONSE_UNKNOWN_KEY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "configurationKey"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]

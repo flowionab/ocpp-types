@@ -5,34 +5,44 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClearTariffsResponse {
+pub struct ClearTariffsResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "clearTariffsResult"))]
-    pub clear_tariffs_result: alloc::vec::Vec<ClearTariffsResult>,
+    pub clear_tariffs_result: alloc::vec::Vec<ClearTariffsResult<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ClearTariffsResponse {
+impl<CustomDataType> crate::Action for ClearTariffsResponse<CustomDataType> {
     const ACTION: &'static str = "ClearTariffs";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClearTariffsResponse<
-    const CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP: usize = 8usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "clearTariffsResult"))]
     pub clear_tariffs_result: heapless::Vec<
-        ClearTariffsResult,
+        ClearTariffsResult<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>,
         CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP: usize> crate::Action
-for ClearTariffsResponse<CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP> {
+impl<
+    CustomDataType,
+    const CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::Action
+for ClearTariffsResponse<
+    CustomDataType,
+    CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
     const ACTION: &'static str = "ClearTariffs";
 }

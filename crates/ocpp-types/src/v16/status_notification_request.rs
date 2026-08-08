@@ -2,7 +2,6 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StatusNotificationRequest {
@@ -14,7 +13,7 @@ pub struct StatusNotificationRequest {
     pub info: Option<heapless::String<50usize>>,
     pub status: StatusNotificationRequestStatus,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<alloc::string::String>,
+    pub timestamp: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "vendorErrorCode"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub vendor_error_code: Option<heapless::String<50usize>>,
@@ -22,34 +21,6 @@ pub struct StatusNotificationRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub vendor_id: Option<heapless::String<255usize>>,
 }
-#[cfg(feature = "alloc")]
 impl crate::Action for StatusNotificationRequest {
-    const ACTION: &'static str = "StatusNotification";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct StatusNotificationRequest<
-    const STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
-    pub connector_id: i64,
-    #[cfg_attr(feature = "serde", serde(rename = "errorCode"))]
-    pub error_code: ErrorCode,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub info: Option<heapless::String<50usize>>,
-    pub status: StatusNotificationRequestStatus,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<heapless::String<STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP>>,
-    #[cfg_attr(feature = "serde", serde(rename = "vendorErrorCode"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub vendor_error_code: Option<heapless::String<50usize>>,
-    #[cfg_attr(feature = "serde", serde(rename = "vendorId"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub vendor_id: Option<heapless::String<255usize>>,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP: usize> crate::Action
-for StatusNotificationRequest<STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP> {
     const ACTION: &'static str = "StatusNotification";
 }

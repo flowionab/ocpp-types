@@ -5,15 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CustomerInformationRequest {
+pub struct CustomerInformationRequest<CustomDataType = crate::NoCustomData> {
     /// Flag indicating whether the Charging Station should clear all information about the customer referred to.
     pub clear: bool,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customerCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub customer_certificate: Option<CertificateHashData>,
+    pub customer_certificate: Option<CertificateHashData<CustomDataType>>,
     /// A (e.g. vendor specific) identifier of the customer this request refers to. This field contains a custom identifier other than IdToken and Certificate.
     /// One of the possible identifiers (customerIdentifier, customerIdToken or customerCertificate) should be in the request message.
     #[cfg_attr(feature = "serde", serde(rename = "customerIdentifier"))]
@@ -21,7 +21,7 @@ pub struct CustomerInformationRequest {
     pub customer_identifier: Option<heapless::String<64usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token: Option<IdToken>,
+    pub id_token: Option<IdToken<CustomDataType>>,
     /// Flag indicating whether the Charging Station should return NotifyCustomerInformationRequest messages containing information about the customer referred to.
     pub report: bool,
     /// The Id of the request.
@@ -29,23 +29,24 @@ pub struct CustomerInformationRequest {
     pub request_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for CustomerInformationRequest {
+impl<CustomDataType> crate::Action for CustomerInformationRequest<CustomDataType> {
     const ACTION: &'static str = "CustomerInformation";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CustomerInformationRequest<
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
 > {
     /// Flag indicating whether the Charging Station should clear all information about the customer referred to.
     pub clear: bool,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customerCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub customer_certificate: Option<CertificateHashData>,
+    pub customer_certificate: Option<CertificateHashData<CustomDataType>>,
     /// A (e.g. vendor specific) identifier of the customer this request refers to. This field contains a custom identifier other than IdToken and Certificate.
     /// One of the possible identifiers (customerIdentifier, customerIdToken or customerCertificate) should be in the request message.
     #[cfg_attr(feature = "serde", serde(rename = "customerIdentifier"))]
@@ -53,7 +54,7 @@ pub struct CustomerInformationRequest<
     pub customer_identifier: Option<heapless::String<64usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_token: Option<IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>>,
+    pub id_token: Option<IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>>,
     /// Flag indicating whether the Charging Station should return NotifyCustomerInformationRequest messages containing information about the customer referred to.
     pub report: bool,
     /// The Id of the request.
@@ -61,7 +62,7 @@ pub struct CustomerInformationRequest<
     pub request_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
-for CustomerInformationRequest<ID_TOKEN_ADDITIONAL_INFO_CAP> {
+impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
+for CustomerInformationRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "CustomerInformation";
 }

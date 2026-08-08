@@ -5,12 +5,12 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyEVChargingScheduleRequest {
+pub struct NotifyEVChargingScheduleRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
-    pub charging_schedule: ChargingSchedule,
+    pub charging_schedule: ChargingSchedule<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The charging schedule contained in this notification applies to an EVSE. EvseId must be &gt; 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -25,30 +25,39 @@ pub struct NotifyEVChargingScheduleRequest {
     pub selected_charging_schedule_id: Option<i64>,
     /// Periods contained in the charging profile are relative to this point in time.
     #[cfg_attr(feature = "serde", serde(rename = "timeBase"))]
-    pub time_base: alloc::string::String,
+    pub time_base: crate::OcppTimestamp,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyEVChargingScheduleRequest {
+impl<CustomDataType> crate::Action for NotifyEVChargingScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingSchedule";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEVChargingScheduleRequest<
-    const ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP: usize = 1024usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const NOTIFY_E_V_CHARGING_SCHEDULE_REQUEST_TIME_BASE_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize = 1024usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize = 8usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     pub charging_schedule: ChargingSchedule<
-        ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-        PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP,
-        CHARGING_SCHEDULE_START_SCHEDULE_CAP,
+        CustomDataType,
+        ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+        ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+        CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+        CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+        CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+        PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+        SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The charging schedule contained in this notification applies to an EVSE. EvseId must be &gt; 0.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -63,20 +72,28 @@ pub struct NotifyEVChargingScheduleRequest<
     pub selected_charging_schedule_id: Option<i64>,
     /// Periods contained in the charging profile are relative to this point in time.
     #[cfg_attr(feature = "serde", serde(rename = "timeBase"))]
-    pub time_base: heapless::String<NOTIFY_E_V_CHARGING_SCHEDULE_REQUEST_TIME_BASE_CAP>,
+    pub time_base: crate::OcppTimestamp,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const NOTIFY_E_V_CHARGING_SCHEDULE_REQUEST_TIME_BASE_CAP: usize,
+    CustomDataType,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
 > crate::Action
 for NotifyEVChargingScheduleRequest<
-    ABSOLUTE_PRICE_SCHEDULE_TIME_ANCHOR_CAP,
-    PRICE_LEVEL_SCHEDULE_TIME_ANCHOR_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    NOTIFY_E_V_CHARGING_SCHEDULE_REQUEST_TIME_BASE_CAP,
+    CustomDataType,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "NotifyEVChargingSchedule";
 }

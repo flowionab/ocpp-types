@@ -10,25 +10,12 @@ pub enum IdTagInfoStatus {
     Invalid,
     ConcurrentTx,
 }
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdTagInfo {
     #[cfg_attr(feature = "serde", serde(rename = "expiryDate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub expiry_date: Option<alloc::string::String>,
-    #[cfg_attr(feature = "serde", serde(rename = "parentIdTag"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub parent_id_tag: Option<heapless::String<20usize>>,
-    pub status: IdTagInfoStatus,
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct IdTagInfo<const ID_TAG_INFO_EXPIRY_DATE_CAP: usize = 1024usize> {
-    #[cfg_attr(feature = "serde", serde(rename = "expiryDate"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub expiry_date: Option<heapless::String<ID_TAG_INFO_EXPIRY_DATE_CAP>>,
+    pub expiry_date: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "parentIdTag"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub parent_id_tag: Option<heapless::String<20usize>>,
@@ -44,6 +31,12 @@ pub enum BootNotificationResponseStatus {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CancelReservationResponseStatus {
+    Accepted,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum CertificateSignedResponseStatus {
     Accepted,
     Rejected,
 }
@@ -97,11 +90,55 @@ pub enum DataTransferResponseStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum HashAlgorithm {
+    SHA256,
+    SHA384,
+    SHA512,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct CertificateHashData {
+    #[cfg_attr(feature = "serde", serde(rename = "hashAlgorithm"))]
+    pub hash_algorithm: HashAlgorithm,
+    #[cfg_attr(feature = "serde", serde(rename = "issuerKeyHash"))]
+    pub issuer_key_hash: heapless::String<128usize>,
+    #[cfg_attr(feature = "serde", serde(rename = "issuerNameHash"))]
+    pub issuer_name_hash: heapless::String<128usize>,
+    #[cfg_attr(feature = "serde", serde(rename = "serialNumber"))]
+    pub serial_number: heapless::String<40usize>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum DeleteCertificateResponseStatus {
+    Accepted,
+    Failed,
+    NotFound,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DiagnosticsStatusNotificationRequestStatus {
     Idle,
     Uploaded,
     UploadFailed,
     Uploading,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ExtendedTriggerMessageRequestRequestedMessage {
+    BootNotification,
+    LogStatusNotification,
+    FirmwareStatusNotification,
+    Heartbeat,
+    MeterValues,
+    SignChargePointCertificate,
+    StatusNotification,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ExtendedTriggerMessageResponseStatus {
+    Accepted,
+    Rejected,
+    NotImplemented,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -145,14 +182,13 @@ pub struct ChargingSchedule {
     pub min_charging_rate: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_schedule: Option<alloc::string::String>,
+    pub start_schedule: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChargingSchedule<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     pub charging_rate_unit: ChargingRateUnit,
@@ -168,7 +204,7 @@ pub struct ChargingSchedule<
     pub min_charging_rate: Option<f64>,
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub start_schedule: Option<heapless::String<CHARGING_SCHEDULE_START_SCHEDULE_CAP>>,
+    pub start_schedule: Option<crate::OcppTimestamp>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -183,6 +219,61 @@ pub struct ConfigurationKeyItem {
     pub readonly: bool,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub value: Option<heapless::String<500usize>>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum CertificateType {
+    CentralSystemRootCertificate,
+    ManufacturerRootCertificate,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GetInstalledCertificateIdsResponseStatus {
+    Accepted,
+    NotFound,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Log {
+    #[cfg_attr(feature = "serde", serde(rename = "latestTimestamp"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub latest_timestamp: Option<crate::OcppTimestamp>,
+    #[cfg_attr(feature = "serde", serde(rename = "oldestTimestamp"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub oldest_timestamp: Option<crate::OcppTimestamp>,
+    #[cfg_attr(feature = "serde", serde(rename = "remoteLocation"))]
+    pub remote_location: heapless::String<512usize>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum LogType {
+    DiagnosticsLog,
+    SecurityLog,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GetLogResponseStatus {
+    Accepted,
+    Rejected,
+    AcceptedCanceled,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum InstallCertificateResponseStatus {
+    Accepted,
+    Failed,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum LogStatusNotificationRequestStatus {
+    BadMessage,
+    Idle,
+    NotSupportedOperation,
+    PermissionDenied,
+    Uploaded,
+    UploadFailure,
+    Uploading,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -350,22 +441,21 @@ pub struct SampledValueItem<const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usiz
 pub struct MeterValueItem {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: alloc::vec::Vec<SampledValueItem>,
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MeterValueItem<
-    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize = 16usize,
+    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize = 8usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usize,
-    const METER_VALUE_ITEM_TIMESTAMP_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: heapless::Vec<
         SampledValueItem<SAMPLED_VALUE_ITEM_VALUE_CAP>,
         METER_VALUE_ITEM_SAMPLED_VALUE_CAP,
     >,
-    pub timestamp: heapless::String<METER_VALUE_ITEM_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -402,19 +492,16 @@ pub struct ChargingProfile {
     pub transaction_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<alloc::string::String>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<alloc::string::String>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChargingProfile<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfileId"))]
     pub charging_profile_id: i64,
@@ -425,7 +512,6 @@ pub struct ChargingProfile<
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     pub charging_schedule: ChargingSchedule<
         CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-        CHARGING_SCHEDULE_START_SCHEDULE_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "recurrencyKind"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -437,10 +523,10 @@ pub struct ChargingProfile<
     pub transaction_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<heapless::String<CHARGING_PROFILE_VALID_FROM_CAP>>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<heapless::String<CHARGING_PROFILE_VALID_TO_CAP>>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -475,7 +561,6 @@ pub enum ResetResponseStatus {
     Accepted,
     Rejected,
 }
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LocalAuthorizationListItem {
@@ -484,18 +569,6 @@ pub struct LocalAuthorizationListItem {
     #[cfg_attr(feature = "serde", serde(rename = "idTagInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id_tag_info: Option<IdTagInfo>,
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LocalAuthorizationListItem<
-    const ID_TAG_INFO_EXPIRY_DATE_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "idTag"))]
-    pub id_tag: super::IdTag,
-    #[cfg_attr(feature = "serde", serde(rename = "idTagInfo"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub id_tag_info: Option<IdTagInfo<ID_TAG_INFO_EXPIRY_DATE_CAP>>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -533,19 +606,16 @@ pub struct CsChargingProfiles {
     pub transaction_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<alloc::string::String>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<alloc::string::String>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CsChargingProfiles<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CS_CHARGING_PROFILES_VALID_FROM_CAP: usize = 1024usize,
-    const CS_CHARGING_PROFILES_VALID_TO_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfileId"))]
     pub charging_profile_id: i64,
@@ -556,7 +626,6 @@ pub struct CsChargingProfiles<
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     pub charging_schedule: ChargingSchedule<
         CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-        CHARGING_SCHEDULE_START_SCHEDULE_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "recurrencyKind"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -568,10 +637,10 @@ pub struct CsChargingProfiles<
     pub transaction_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "validFrom"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_from: Option<heapless::String<CS_CHARGING_PROFILES_VALID_FROM_CAP>>,
+    pub valid_from: Option<crate::OcppTimestamp>,
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub valid_to: Option<heapless::String<CS_CHARGING_PROFILES_VALID_TO_CAP>>,
+    pub valid_to: Option<crate::OcppTimestamp>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -579,6 +648,70 @@ pub enum SetChargingProfileResponseStatus {
     Accepted,
     Rejected,
     NotSupported,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SignCertificateResponseStatus {
+    Accepted,
+    Rejected,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SignedFirmwareStatusNotificationRequestStatus {
+    Downloaded,
+    DownloadFailed,
+    Downloading,
+    DownloadScheduled,
+    DownloadPaused,
+    Idle,
+    InstallationFailed,
+    Installing,
+    Installed,
+    InstallRebooting,
+    InstallScheduled,
+    InstallVerificationFailed,
+    InvalidSignature,
+    SignatureVerified,
+}
+#[cfg(feature = "alloc")]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Firmware {
+    #[cfg_attr(feature = "serde", serde(rename = "installDateTime"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub install_date_time: Option<crate::OcppTimestamp>,
+    pub location: heapless::String<512usize>,
+    #[cfg_attr(feature = "serde", serde(rename = "retrieveDateTime"))]
+    pub retrieve_date_time: crate::OcppTimestamp,
+    pub signature: alloc::string::String,
+    #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
+    pub signing_certificate: alloc::string::String,
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Firmware<
+    const FIRMWARE_SIGNATURE_CAP: usize = 800usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "installDateTime"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub install_date_time: Option<crate::OcppTimestamp>,
+    pub location: heapless::String<512usize>,
+    #[cfg_attr(feature = "serde", serde(rename = "retrieveDateTime"))]
+    pub retrieve_date_time: crate::OcppTimestamp,
+    pub signature: heapless::String<FIRMWARE_SIGNATURE_CAP>,
+    #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
+    pub signing_certificate: heapless::String<FIRMWARE_SIGNING_CERTIFICATE_CAP>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SignedUpdateFirmwareResponseStatus {
+    Accepted,
+    Rejected,
+    AcceptedCanceled,
+    InvalidCertificate,
+    RevokedCertificate,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -634,26 +767,25 @@ pub enum Reason {
 pub struct TransactionDataItem {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: alloc::vec::Vec<SampledValueItem>,
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TransactionDataItem<
-    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize = 16usize,
+    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize = 8usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usize,
-    const TRANSACTION_DATA_ITEM_TIMESTAMP_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: heapless::Vec<
         SampledValueItem<SAMPLED_VALUE_ITEM_VALUE_CAP>,
         TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP,
     >,
-    pub timestamp: heapless::String<TRANSACTION_DATA_ITEM_TIMESTAMP_CAP>,
+    pub timestamp: crate::OcppTimestamp,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum RequestedMessage {
+pub enum TriggerMessageRequestRequestedMessage {
     BootNotification,
     DiagnosticsStatusNotification,
     FirmwareStatusNotification,

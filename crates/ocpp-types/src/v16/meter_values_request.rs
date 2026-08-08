@@ -22,20 +22,15 @@ impl crate::Action for MeterValuesRequest {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MeterValuesRequest<
-    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize = 16usize,
-    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize = 16usize,
+    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize = 8usize,
+    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize = 8usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usize,
-    const METER_VALUE_ITEM_TIMESTAMP_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     pub connector_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "meterValue"))]
     pub meter_value: heapless::Vec<
-        MeterValueItem<
-            METER_VALUE_ITEM_SAMPLED_VALUE_CAP,
-            SAMPLED_VALUE_ITEM_VALUE_CAP,
-            METER_VALUE_ITEM_TIMESTAMP_CAP,
-        >,
+        MeterValueItem<METER_VALUE_ITEM_SAMPLED_VALUE_CAP, SAMPLED_VALUE_ITEM_VALUE_CAP>,
         METER_VALUES_REQUEST_METER_VALUE_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
@@ -47,13 +42,11 @@ impl<
     const METER_VALUES_REQUEST_METER_VALUE_CAP: usize,
     const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize,
     const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
-    const METER_VALUE_ITEM_TIMESTAMP_CAP: usize,
 > crate::Action
 for MeterValuesRequest<
     METER_VALUES_REQUEST_METER_VALUE_CAP,
     METER_VALUE_ITEM_SAMPLED_VALUE_CAP,
     SAMPLED_VALUE_ITEM_VALUE_CAP,
-    METER_VALUE_ITEM_TIMESTAMP_CAP,
 > {
     const ACTION: &'static str = "MeterValues";
 }

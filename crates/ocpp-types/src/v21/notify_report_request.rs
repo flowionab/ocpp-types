@@ -5,16 +5,16 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyReportRequest {
+pub struct NotifyReportRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: alloc::string::String,
+    pub generated_at: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "reportData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub report_data: Option<alloc::vec::Vec<ReportData>>,
+    pub report_data: Option<alloc::vec::Vec<ReportData<CustomDataType>>>,
     /// The id of the GetReportRequest  or GetBaseReportRequest that requested this report
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
@@ -26,26 +26,35 @@ pub struct NotifyReportRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyReportRequest {
+impl<CustomDataType> crate::Action for NotifyReportRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyReport";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyReportRequest<
-    const NOTIFY_REPORT_REQUEST_GENERATED_AT_CAP: usize = 1024usize,
-    const NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP: usize = 8usize,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize = 1024usize,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize = 1000usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Timestamp of the moment this message was generated at the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "generatedAt"))]
-    pub generated_at: heapless::String<NOTIFY_REPORT_REQUEST_GENERATED_AT_CAP>,
+    pub generated_at: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "reportData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub report_data: Option<
-        heapless::Vec<ReportData, NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP>,
+        heapless::Vec<
+            ReportData<
+                CustomDataType,
+                VARIABLE_ATTRIBUTE_VALUE_CAP,
+                VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP,
+            >,
+            NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP,
+        >,
     >,
     /// The id of the GetReportRequest  or GetBaseReportRequest that requested this report
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
@@ -59,12 +68,16 @@ pub struct NotifyReportRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const NOTIFY_REPORT_REQUEST_GENERATED_AT_CAP: usize,
+    CustomDataType,
     const NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP: usize,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize,
 > crate::Action
 for NotifyReportRequest<
-    NOTIFY_REPORT_REQUEST_GENERATED_AT_CAP,
+    CustomDataType,
     NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP,
+    VARIABLE_ATTRIBUTE_VALUE_CAP,
+    VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP,
 > {
     const ACTION: &'static str = "NotifyReport";
 }

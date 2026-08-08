@@ -5,26 +5,28 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyAllowedEnergyTransferRequest {
+pub struct NotifyAllowedEnergyTransferRequest<CustomDataType = crate::NoCustomData> {
     /// Modes of energy transfer that are accepted by CSMS.
     #[cfg_attr(feature = "serde", serde(rename = "allowedEnergyTransfer"))]
     pub allowed_energy_transfer: alloc::vec::Vec<EnergyTransferModeEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The transaction for which the allowed energy transfer is allowed.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     pub transaction_id: heapless::String<36usize>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for NotifyAllowedEnergyTransferRequest {
+impl<CustomDataType> crate::Action
+for NotifyAllowedEnergyTransferRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyAllowedEnergyTransfer";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyAllowedEnergyTransferRequest<
-    const NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP: usize = 8usize,
 > {
     /// Modes of energy transfer that are accepted by CSMS.
     #[cfg_attr(feature = "serde", serde(rename = "allowedEnergyTransfer"))]
@@ -34,16 +36,18 @@ pub struct NotifyAllowedEnergyTransferRequest<
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The transaction for which the allowed energy transfer is allowed.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     pub transaction_id: heapless::String<36usize>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP: usize,
 > crate::Action
 for NotifyAllowedEnergyTransferRequest<
+    CustomDataType,
     NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP,
 > {
     const ACTION: &'static str = "NotifyAllowedEnergyTransfer";

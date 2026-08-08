@@ -2,17 +2,39 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetDisplayMessageResponse {
+pub struct SetDisplayMessageResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: DisplayMessageStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for SetDisplayMessageResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for SetDisplayMessageResponse<CustomDataType> {
+    const ACTION: &'static str = "SetDisplayMessage";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SetDisplayMessageResponse<
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    pub status: DisplayMessageStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
+for SetDisplayMessageResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "SetDisplayMessage";
 }

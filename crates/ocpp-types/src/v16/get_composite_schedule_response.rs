@@ -14,7 +14,7 @@ pub struct GetCompositeScheduleResponse {
     pub connector_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub schedule_start: Option<alloc::string::String>,
+    pub schedule_start: Option<crate::OcppTimestamp>,
     pub status: GetCompositeScheduleResponseStatus,
 }
 #[cfg(feature = "alloc")]
@@ -25,38 +25,23 @@ impl crate::Action for GetCompositeScheduleResponse {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompositeScheduleResponse<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const GET_COMPOSITE_SCHEDULE_RESPONSE_SCHEDULE_START_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_schedule: Option<
-        ChargingSchedule<
-            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-            CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-        >,
+        ChargingSchedule<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP>,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub connector_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub schedule_start: Option<
-        heapless::String<GET_COMPOSITE_SCHEDULE_RESPONSE_SCHEDULE_START_CAP>,
-    >,
+    pub schedule_start: Option<crate::OcppTimestamp>,
     pub status: GetCompositeScheduleResponseStatus,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const GET_COMPOSITE_SCHEDULE_RESPONSE_SCHEDULE_START_CAP: usize,
-> crate::Action
-for GetCompositeScheduleResponse<
-    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    GET_COMPOSITE_SCHEDULE_RESPONSE_SCHEDULE_START_CAP,
-> {
+impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
+for GetCompositeScheduleResponse<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "GetCompositeSchedule";
 }

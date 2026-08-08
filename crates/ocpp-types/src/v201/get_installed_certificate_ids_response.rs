@@ -5,49 +5,55 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetInstalledCertificateIdsResponse {
+pub struct GetInstalledCertificateIdsResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "certificateHashDataChain"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub certificate_hash_data_chain: Option<alloc::vec::Vec<CertificateHashDataChain>>,
+    pub certificate_hash_data_chain: Option<
+        alloc::vec::Vec<CertificateHashDataChain<CustomDataType>>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: GetInstalledCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetInstalledCertificateIdsResponse {
+impl<CustomDataType> crate::Action
+for GetInstalledCertificateIdsResponse<CustomDataType> {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInstalledCertificateIdsResponse<
-    const GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "certificateHashDataChain"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub certificate_hash_data_chain: Option<
         heapless::Vec<
-            CertificateHashDataChain,
+            CertificateHashDataChain<CustomDataType>,
             GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub status: GetInstalledCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP: usize,
 > crate::Action
 for GetInstalledCertificateIdsResponse<
+    CustomDataType,
     GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP,
 > {
     const ACTION: &'static str = "GetInstalledCertificateIds";

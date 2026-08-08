@@ -2,32 +2,14 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BootNotificationResponse {
     #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
-    pub current_time: alloc::string::String,
+    pub current_time: crate::OcppTimestamp,
     pub interval: i64,
     pub status: BootNotificationResponseStatus,
 }
-#[cfg(feature = "alloc")]
 impl crate::Action for BootNotificationResponse {
-    const ACTION: &'static str = "BootNotification";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BootNotificationResponse<
-    const BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "currentTime"))]
-    pub current_time: heapless::String<BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP>,
-    pub interval: i64,
-    pub status: BootNotificationResponseStatus,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP: usize> crate::Action
-for BootNotificationResponse<BOOT_NOTIFICATION_RESPONSE_CURRENT_TIME_CAP> {
     const ACTION: &'static str = "BootNotification";
 }

@@ -5,41 +5,46 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetPeriodicEventStreamResponse {
+pub struct GetPeriodicEventStreamResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "constantStreamData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub constant_stream_data: Option<alloc::vec::Vec<ConstantStreamData>>,
+    pub constant_stream_data: Option<
+        alloc::vec::Vec<ConstantStreamData<CustomDataType>>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetPeriodicEventStreamResponse {
+impl<CustomDataType> crate::Action for GetPeriodicEventStreamResponse<CustomDataType> {
     const ACTION: &'static str = "GetPeriodicEventStream";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPeriodicEventStreamResponse<
-    const GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "constantStreamData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub constant_stream_data: Option<
         heapless::Vec<
-            ConstantStreamData,
+            ConstantStreamData<CustomDataType>,
             GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP: usize,
 > crate::Action
 for GetPeriodicEventStreamResponse<
+    CustomDataType,
     GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP,
 > {
     const ACTION: &'static str = "GetPeriodicEventStream";

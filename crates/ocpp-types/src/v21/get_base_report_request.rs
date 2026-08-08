@@ -4,16 +4,16 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetBaseReportRequest {
+pub struct GetBaseReportRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "reportBase"))]
     pub report_base: ReportBaseEnum,
     /// The Id of the request.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
-impl crate::Action for GetBaseReportRequest {
+impl<CustomDataType> crate::Action for GetBaseReportRequest<CustomDataType> {
     const ACTION: &'static str = "GetBaseReport";
 }

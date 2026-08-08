@@ -183,7 +183,7 @@ pub fn generate_common(types: &[GeneratedType]) -> String {
 /// Renders a schema `description` as a sequence of `#[doc = "..."]`
 /// attributes (one per source line), which `prettyplease` prints back as
 /// `///` doc comments. Empty when there's no description to attach.
-fn doc_attrs(description: &Option<String>) -> proc_macro2::TokenStream {
+pub(crate) fn doc_attrs(description: &Option<String>) -> proc_macro2::TokenStream {
     let Some(description) = description else {
         return quote! {};
     };
@@ -419,7 +419,9 @@ fn generic_params_with_defaults(
 
     let type_decls = type_params.iter().map(|p| {
         let name = ident(&p.name);
-        quote! { #name = () }
+        let default: syn::Type =
+            syn::parse_str(&p.default).expect("type param default should be a type");
+        quote! { #name = #default }
     });
 
     let decls = params.iter().map(|p| {
@@ -476,6 +478,14 @@ fn rust_type(ty: &RustType, alloc_mode: bool, pool: GenericPool) -> proc_macro2:
         RustType::BoundedString(size) => quote! {
             heapless::String<#size>
         },
+
+        // Referenced by absolute path like `crate::Action`, since generated
+        // files sit one level below their version module.
+        RustType::CrateType(path) => {
+            let path: syn::Path =
+                syn::parse_str(path).expect("crate type should be a path");
+            quote! { #path }
+        }
 
         RustType::Primitive(name) => {
             let ident = ident(name);
@@ -577,6 +587,7 @@ mod tests {
             name: name.to_string(),
             ty: RustType::Any(TypeParam {
                 name: param.to_string(),
+                default: "()".to_string(),
             }),
             optional: true,
             description: None,

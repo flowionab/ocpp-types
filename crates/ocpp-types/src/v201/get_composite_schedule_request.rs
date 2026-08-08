@@ -4,19 +4,19 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetCompositeScheduleRequest {
+pub struct GetCompositeScheduleRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingRateUnit"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_rate_unit: Option<ChargingRateUnitEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Length of the requested schedule in seconds.
     pub duration: i64,
     /// The ID of the EVSE for which the schedule is requested. When evseid=0, the Charging Station will calculate the expected consumption for the grid connection.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
 }
-impl crate::Action for GetCompositeScheduleRequest {
+impl<CustomDataType> crate::Action for GetCompositeScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "GetCompositeSchedule";
 }

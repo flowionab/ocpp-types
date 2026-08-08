@@ -5,11 +5,11 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetLogRequest {
+pub struct GetLogRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub log: LogParameters,
+    pub custom_data: Option<CustomDataType>,
+    pub log: LogParameters<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "logType"))]
     pub log_type: LogEnum,
     /// The Id of this request
@@ -24,23 +24,20 @@ pub struct GetLogRequest {
     pub retry_interval: Option<i64>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetLogRequest {
+impl<CustomDataType> crate::Action for GetLogRequest<CustomDataType> {
     const ACTION: &'static str = "GetLog";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLogRequest<
-    const LOG_PARAMETERS_LATEST_TIMESTAMP_CAP: usize = 1024usize,
-    const LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const LOG_PARAMETERS_REMOTE_LOCATION_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub log: LogParameters<
-        LOG_PARAMETERS_LATEST_TIMESTAMP_CAP,
-        LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP,
-    >,
+    pub custom_data: Option<CustomDataType>,
+    pub log: LogParameters<CustomDataType, LOG_PARAMETERS_REMOTE_LOCATION_CAP>,
     #[cfg_attr(feature = "serde", serde(rename = "logType"))]
     pub log_type: LogEnum,
     /// The Id of this request
@@ -55,13 +52,7 @@ pub struct GetLogRequest<
     pub retry_interval: Option<i64>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const LOG_PARAMETERS_LATEST_TIMESTAMP_CAP: usize,
-    const LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP: usize,
-> crate::Action
-for GetLogRequest<
-    LOG_PARAMETERS_LATEST_TIMESTAMP_CAP,
-    LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP,
-> {
+impl<CustomDataType, const LOG_PARAMETERS_REMOTE_LOCATION_CAP: usize> crate::Action
+for GetLogRequest<CustomDataType, LOG_PARAMETERS_REMOTE_LOCATION_CAP> {
     const ACTION: &'static str = "GetLog";
 }

@@ -5,68 +5,62 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReserveNowRequest {
+pub struct ReserveNowRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "connectorType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub connector_type: Option<ConnectorEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This contains ID of the evse to be reserved.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
     /// Date and time at which the reservation expires.
     #[cfg_attr(feature = "serde", serde(rename = "expiryDateTime"))]
-    pub expiry_date_time: alloc::string::String,
+    pub expiry_date_time: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken>,
+    pub group_id_token: Option<IdToken<CustomDataType>>,
     /// Id of reservation.
     pub id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken,
+    pub id_token: IdToken<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ReserveNowRequest {
+impl<CustomDataType> crate::Action for ReserveNowRequest<CustomDataType> {
     const ACTION: &'static str = "ReserveNow";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReserveNowRequest<
-    const RESERVE_NOW_REQUEST_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "connectorType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub connector_type: Option<ConnectorEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This contains ID of the evse to be reserved.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
     /// Date and time at which the reservation expires.
     #[cfg_attr(feature = "serde", serde(rename = "expiryDateTime"))]
-    pub expiry_date_time: heapless::String<RESERVE_NOW_REQUEST_EXPIRY_DATE_TIME_CAP>,
+    pub expiry_date_time: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "groupIdToken"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub group_id_token: Option<IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>>,
+    pub group_id_token: Option<IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>>,
     /// Id of reservation.
     pub id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>,
+    pub id_token: IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const RESERVE_NOW_REQUEST_EXPIRY_DATE_TIME_CAP: usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
-> crate::Action
-for ReserveNowRequest<
-    RESERVE_NOW_REQUEST_EXPIRY_DATE_TIME_CAP,
-    ID_TOKEN_ADDITIONAL_INFO_CAP,
-> {
+impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
+for ReserveNowRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "ReserveNow";
 }

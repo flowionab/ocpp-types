@@ -9,7 +9,7 @@ pub struct TriggerMessageRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub connector_id: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "requestedMessage"))]
-    pub requested_message: RequestedMessage,
+    pub requested_message: TriggerMessageRequestRequestedMessage,
 }
 impl crate::Action for TriggerMessageRequest {
     const ACTION: &'static str = "TriggerMessage";

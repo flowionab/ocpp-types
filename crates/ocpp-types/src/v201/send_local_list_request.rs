@@ -5,13 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SendLocalListRequest {
+pub struct SendLocalListRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "localAuthorizationList"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub local_authorization_list: Option<alloc::vec::Vec<AuthorizationData>>,
+    pub local_authorization_list: Option<
+        alloc::vec::Vec<AuthorizationData<CustomDataType>>,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "updateType"))]
     pub update_type: UpdateEnum,
     /// In case of a full update this is the version number of the full list. In case of a differential update it is the version number of the list after the update has been applied.
@@ -19,28 +21,28 @@ pub struct SendLocalListRequest {
     pub version_number: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for SendLocalListRequest {
+impl<CustomDataType> crate::Action for SendLocalListRequest<CustomDataType> {
     const ACTION: &'static str = "SendLocalList";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendLocalListRequest<
-    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize = 16usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize = 1024usize,
-    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "localAuthorizationList"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub local_authorization_list: Option<
         heapless::Vec<
             AuthorizationData<
+                CustomDataType,
                 ID_TOKEN_ADDITIONAL_INFO_CAP,
-                ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
                 ID_TOKEN_INFO_EVSE_ID_CAP,
             >,
             SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP,
@@ -54,15 +56,15 @@ pub struct SendLocalListRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
-    const ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP: usize,
     const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
 > crate::Action
 for SendLocalListRequest<
+    CustomDataType,
     SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
-    ID_TOKEN_INFO_CACHE_EXPIRY_DATE_TIME_CAP,
     ID_TOKEN_INFO_EVSE_ID_CAP,
 > {
     const ACTION: &'static str = "SendLocalList";

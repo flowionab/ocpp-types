@@ -5,13 +5,13 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetMonitoringReportRequest {
+pub struct GetMonitoringReportRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "componentVariable"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub component_variable: Option<alloc::vec::Vec<ComponentVariable>>,
+    pub component_variable: Option<alloc::vec::Vec<ComponentVariable<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This field contains criteria for components for which a monitoring report is requested
     #[cfg_attr(feature = "serde", serde(rename = "monitoringCriteria"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -21,26 +21,27 @@ pub struct GetMonitoringReportRequest {
     pub request_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for GetMonitoringReportRequest {
+impl<CustomDataType> crate::Action for GetMonitoringReportRequest<CustomDataType> {
     const ACTION: &'static str = "GetMonitoringReport";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMonitoringReportRequest<
-    const GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "componentVariable"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub component_variable: Option<
         heapless::Vec<
-            ComponentVariable,
+            ComponentVariable<CustomDataType>,
             GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP,
         >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This field contains criteria for components for which a monitoring report is requested
     #[cfg_attr(feature = "serde", serde(rename = "monitoringCriteria"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -50,7 +51,13 @@ pub struct GetMonitoringReportRequest<
     pub request_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
-impl<const GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize> crate::Action
-for GetMonitoringReportRequest<GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP> {
+impl<
+    CustomDataType,
+    const GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize,
+> crate::Action
+for GetMonitoringReportRequest<
+    CustomDataType,
+    GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP,
+> {
     const ACTION: &'static str = "GetMonitoringReport";
 }

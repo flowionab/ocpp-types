@@ -9,7 +9,7 @@ pub struct UpdateFirmwareRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub retries: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "retrieveDate"))]
-    pub retrieve_date: alloc::string::String,
+    pub retrieve_date: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "retryInterval"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub retry_interval: Option<i64>,
@@ -23,25 +23,18 @@ impl crate::Action for UpdateFirmwareRequest {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdateFirmwareRequest<
     const UPDATE_FIRMWARE_REQUEST_LOCATION_CAP: usize = 1024usize,
-    const UPDATE_FIRMWARE_REQUEST_RETRIEVE_DATE_CAP: usize = 1024usize,
 > {
     pub location: heapless::String<UPDATE_FIRMWARE_REQUEST_LOCATION_CAP>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub retries: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "retrieveDate"))]
-    pub retrieve_date: heapless::String<UPDATE_FIRMWARE_REQUEST_RETRIEVE_DATE_CAP>,
+    pub retrieve_date: crate::OcppTimestamp,
     #[cfg_attr(feature = "serde", serde(rename = "retryInterval"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub retry_interval: Option<i64>,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const UPDATE_FIRMWARE_REQUEST_LOCATION_CAP: usize,
-    const UPDATE_FIRMWARE_REQUEST_RETRIEVE_DATE_CAP: usize,
-> crate::Action
-for UpdateFirmwareRequest<
-    UPDATE_FIRMWARE_REQUEST_LOCATION_CAP,
-    UPDATE_FIRMWARE_REQUEST_RETRIEVE_DATE_CAP,
-> {
+impl<const UPDATE_FIRMWARE_REQUEST_LOCATION_CAP: usize> crate::Action
+for UpdateFirmwareRequest<UPDATE_FIRMWARE_REQUEST_LOCATION_CAP> {
     const ACTION: &'static str = "UpdateFirmware";
 }

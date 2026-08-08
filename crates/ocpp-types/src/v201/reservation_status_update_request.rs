@@ -4,16 +4,16 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReservationStatusUpdateRequest {
+pub struct ReservationStatusUpdateRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The ID of the reservation.
     #[cfg_attr(feature = "serde", serde(rename = "reservationId"))]
     pub reservation_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "reservationUpdateStatus"))]
     pub reservation_update_status: ReservationUpdateStatusEnum,
 }
-impl crate::Action for ReservationStatusUpdateRequest {
+impl<CustomDataType> crate::Action for ReservationStatusUpdateRequest<CustomDataType> {
     const ACTION: &'static str = "ReservationStatusUpdate";
 }

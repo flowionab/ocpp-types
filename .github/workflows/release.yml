@@ -43,11 +43,15 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace
+      - run: cargo build -p ocpp-types --no-default-features
       - run: cargo test --workspace
       - run: cargo build -p ocpp-types --features alloc
       - run: cargo test -p ocpp-types --features serde
-      - run: cargo test -p ocpp-types --features alloc
+      - run: cargo test -p ocpp-types --no-default-features
+      - run: cargo test -p ocpp-types --no-default-features --features serde
+      - run: cargo test -p ocpp-types --features chrono
       - run: cargo test -p ocpp-types --features serde,alloc
+      - run: cargo test -p ocpp-types --features serde,alloc,chrono
       - run: ./scripts/generate.sh
       - name: Fail if generated types differ from what's committed
         run: |

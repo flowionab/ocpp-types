@@ -2,6 +2,7 @@
 name = "ocpp-types"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = true
@@ -9,6 +10,13 @@ description = "Strongly typed OCPP 1.6J, 2.0.1, and 2.1 message types for Rust. 
 readme = "../../README.md"
 keywords = ["ocpp", "ev-charging", "charging-station", "embedded", "no-std"]
 categories = ["embedded", "no-std", "encoding", "network-programming"]
+
+# Without this, docs.rs builds default features only -- which would hide the
+# `chrono` interop entirely, and document every type in its `alloc` shape with
+# no sign that the allocation-free build exists.
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 # Pinned to 0.8 on purpose: serde-json-core 0.6 (the latest) still depends on
@@ -20,9 +28,19 @@ categories = ["embedded", "no-std", "encoding", "network-programming"]
 heapless = "0.8"
 serde = { version = "1", default-features = false, features = ["derive"], optional = true }
 serde-json-core = { version = "0.6", optional = true }
+# Interop only, never the representation: `OcppTimestamp` stays the crate's
+# own 16-byte type, and this adds conversions for callers already using
+# chrono. `default-features = false` keeps it off the `std` path.
+chrono = { version = "0.4", default-features = false, optional = true }
 
 [features]
-default = []
+# `alloc` is on by default. Without it every field is stored inline at its
+# declared capacity, which is the point of the crate on an MCU but is a poor
+# default for the majority of users -- a CSMS, a simulator, a test harness --
+# who have an allocator and would otherwise meet multi-kilobyte message types
+# for no reason. Turn it off with `default-features = false` for the
+# allocation-free build; see the crate docs for sizing guidance.
+default = ["alloc"]
 serde = ["dep:serde", "dep:serde-json-core", "heapless/serde"]
 # Fields with no spec-given bound (no `maxLength`/`maxItems`) use
 # `alloc::string::String`/`alloc::vec::Vec<T>` when this is enabled, instead
@@ -31,6 +49,10 @@ serde = ["dep:serde", "dep:serde-json-core", "heapless/serde"]
 # `alloc` support (needed for `Serialize`/`Deserialize` on those types) when
 # the `serde` feature is *also* enabled, without pulling serde in on its own.
 alloc = ["serde?/alloc"]
+# `From`/`Into` between `OcppTimestamp` and `chrono::DateTime`. Additive:
+# no message type changes shape, and chrono's own (allocating) serde support
+# is not pulled onto the wire path.
+chrono = ["dep:chrono"]
 
 [[example]]
 name = "basic_usage"

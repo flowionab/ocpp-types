@@ -2,10 +2,9 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyDERAlarmRequest {
+pub struct NotifyDERAlarmRequest<CustomDataType = crate::NoCustomData> {
     /// True when error condition has ended.
     /// Absent or false when alarm has started.
     #[cfg_attr(feature = "serde", serde(rename = "alarmEnded"))]
@@ -15,7 +14,7 @@ pub struct NotifyDERAlarmRequest {
     pub control_type: DERControlEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Optional info provided by EV.
     #[cfg_attr(feature = "serde", serde(rename = "extraInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -24,40 +23,8 @@ pub struct NotifyDERAlarmRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub grid_event_fault: Option<GridEventFaultEnum>,
     /// Time of start or end of alarm.
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
 }
-#[cfg(feature = "alloc")]
-impl crate::Action for NotifyDERAlarmRequest {
-    const ACTION: &'static str = "NotifyDERAlarm";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyDERAlarmRequest<
-    const NOTIFY_D_E_R_ALARM_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
-> {
-    /// True when error condition has ended.
-    /// Absent or false when alarm has started.
-    #[cfg_attr(feature = "serde", serde(rename = "alarmEnded"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub alarm_ended: Option<bool>,
-    #[cfg_attr(feature = "serde", serde(rename = "controlType"))]
-    pub control_type: DERControlEnum,
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    /// Optional info provided by EV.
-    #[cfg_attr(feature = "serde", serde(rename = "extraInfo"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub extra_info: Option<heapless::String<200usize>>,
-    #[cfg_attr(feature = "serde", serde(rename = "gridEventFault"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub grid_event_fault: Option<GridEventFaultEnum>,
-    /// Time of start or end of alarm.
-    pub timestamp: heapless::String<NOTIFY_D_E_R_ALARM_REQUEST_TIMESTAMP_CAP>,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const NOTIFY_D_E_R_ALARM_REQUEST_TIMESTAMP_CAP: usize> crate::Action
-for NotifyDERAlarmRequest<NOTIFY_D_E_R_ALARM_REQUEST_TIMESTAMP_CAP> {
+impl<CustomDataType> crate::Action for NotifyDERAlarmRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyDERAlarm";
 }

@@ -2,20 +2,53 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Get15118EVCertificateResponse {
+pub struct Get15118EVCertificateResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Raw CertificateInstallationRes response for the EV, Base64 encoded.
     #[cfg_attr(feature = "serde", serde(rename = "exiResponse"))]
-    pub exi_response: heapless::String<5600usize>,
+    pub exi_response: alloc::string::String,
     pub status: Iso15118EVCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for Get15118EVCertificateResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for Get15118EVCertificateResponse<CustomDataType> {
+    const ACTION: &'static str = "Get15118EVCertificate";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Get15118EVCertificateResponse<
+    CustomDataType = crate::NoCustomData,
+    const GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// Raw CertificateInstallationRes response for the EV, Base64 encoded.
+    #[cfg_attr(feature = "serde", serde(rename = "exiResponse"))]
+    pub exi_response: heapless::String<
+        GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP,
+    >,
+    pub status: Iso15118EVCertificateStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP: usize,
+> crate::Action
+for Get15118EVCertificateResponse<
+    CustomDataType,
+    GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP,
+> {
     const ACTION: &'static str = "Get15118EVCertificate";
 }

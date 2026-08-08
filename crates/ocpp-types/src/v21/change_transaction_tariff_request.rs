@@ -5,52 +5,38 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChangeTransactionTariffRequest {
+pub struct ChangeTransactionTariffRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub tariff: Tariff,
+    pub custom_data: Option<CustomDataType>,
+    pub tariff: Tariff<CustomDataType>,
     /// Transaction id for new tariff.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     pub transaction_id: heapless::String<36usize>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ChangeTransactionTariffRequest {
+impl<CustomDataType> crate::Action for ChangeTransactionTariffRequest<CustomDataType> {
     const ACTION: &'static str = "ChangeTransactionTariff";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeTransactionTariffRequest<
-    const TARIFF_TIME_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_ENERGY_PRICES_CAP: usize = 16usize,
-    const TARIFF_FIXED_PRICES_CAP: usize = 16usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize = 1024usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize = 1024usize,
-    const TARIFF_VALID_FROM_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const TARIFF_TIME_PRICES_CAP: usize = 8usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize = 1024usize,
+    const TARIFF_ENERGY_PRICES_CAP: usize = 8usize,
+    const TARIFF_FIXED_PRICES_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub tariff: Tariff<
+        CustomDataType,
         TARIFF_TIME_PRICES_CAP,
-        TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-        TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
+        MESSAGE_CONTENT_CONTENT_CAP,
         TARIFF_ENERGY_PRICES_CAP,
         TARIFF_FIXED_PRICES_CAP,
-        TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-        TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-        TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-        TARIFF_VALID_FROM_CAP,
     >,
     /// Transaction id for new tariff.
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
@@ -58,32 +44,18 @@ pub struct ChangeTransactionTariffRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const TARIFF_TIME_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_VALID_TO_DATE_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
     const TARIFF_ENERGY_PRICES_CAP: usize,
     const TARIFF_FIXED_PRICES_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP: usize,
-    const TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP: usize,
-    const TARIFF_VALID_FROM_CAP: usize,
 > crate::Action
 for ChangeTransactionTariffRequest<
+    CustomDataType,
     TARIFF_TIME_PRICES_CAP,
-    TARIFF_CONDITIONS_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_VALID_TO_DATE_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
     TARIFF_ENERGY_PRICES_CAP,
     TARIFF_FIXED_PRICES_CAP,
-    TARIFF_CONDITIONS_FIXED_END_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_START_TIME_OF_DAY_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_FROM_DATE_CAP,
-    TARIFF_CONDITIONS_FIXED_VALID_TO_DATE_CAP,
-    TARIFF_VALID_FROM_CAP,
 > {
     const ACTION: &'static str = "ChangeTransactionTariff";
 }

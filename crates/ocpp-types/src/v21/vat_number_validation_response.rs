@@ -2,14 +2,15 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct VatNumberValidationResponse {
+pub struct VatNumberValidationResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub company: Option<Address>,
+    pub company: Option<Address<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// EVSE id for which check was requested.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -17,11 +18,41 @@ pub struct VatNumberValidationResponse {
     pub status: GenericStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
     /// VAT number that was requested.
     #[cfg_attr(feature = "serde", serde(rename = "vatNumber"))]
     pub vat_number: heapless::String<20usize>,
 }
-impl crate::Action for VatNumberValidationResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for VatNumberValidationResponse<CustomDataType> {
+    const ACTION: &'static str = "VatNumberValidation";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct VatNumberValidationResponse<
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub company: Option<Address<CustomDataType>>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// EVSE id for which check was requested.
+    #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub evse_id: Option<i64>,
+    pub status: GenericStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+    /// VAT number that was requested.
+    #[cfg_attr(feature = "serde", serde(rename = "vatNumber"))]
+    pub vat_number: heapless::String<20usize>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
+for VatNumberValidationResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "VatNumberValidation";
 }

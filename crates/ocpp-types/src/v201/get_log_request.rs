@@ -2,14 +2,13 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetLogRequest {
+pub struct GetLogRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub log: LogParameters,
+    pub custom_data: Option<CustomDataType>,
+    pub log: LogParameters<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "logType"))]
     pub log_type: LogEnum,
     /// The Id of this request
@@ -23,45 +22,6 @@ pub struct GetLogRequest {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub retry_interval: Option<i64>,
 }
-#[cfg(feature = "alloc")]
-impl crate::Action for GetLogRequest {
-    const ACTION: &'static str = "GetLog";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetLogRequest<
-    const LOG_PARAMETERS_LATEST_TIMESTAMP_CAP: usize = 1024usize,
-    const LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP: usize = 1024usize,
-> {
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    pub log: LogParameters<
-        LOG_PARAMETERS_LATEST_TIMESTAMP_CAP,
-        LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP,
-    >,
-    #[cfg_attr(feature = "serde", serde(rename = "logType"))]
-    pub log_type: LogEnum,
-    /// The Id of this request
-    #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
-    pub request_id: i64,
-    /// This specifies how many times the Charging Station must try to upload the log before giving up. If this field is not present, it is left to Charging Station to decide how many times it wants to retry.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub retries: Option<i64>,
-    /// The interval in seconds after which a retry may be attempted. If this field is not present, it is left to Charging Station to decide how long to wait between attempts.
-    #[cfg_attr(feature = "serde", serde(rename = "retryInterval"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub retry_interval: Option<i64>,
-}
-#[cfg(not(feature = "alloc"))]
-impl<
-    const LOG_PARAMETERS_LATEST_TIMESTAMP_CAP: usize,
-    const LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP: usize,
-> crate::Action
-for GetLogRequest<
-    LOG_PARAMETERS_LATEST_TIMESTAMP_CAP,
-    LOG_PARAMETERS_OLDEST_TIMESTAMP_CAP,
-> {
+impl<CustomDataType> crate::Action for GetLogRequest<CustomDataType> {
     const ACTION: &'static str = "GetLog";
 }

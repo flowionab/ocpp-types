@@ -2,10 +2,9 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct StatusNotificationRequest {
+pub struct StatusNotificationRequest<CustomDataType = crate::NoCustomData> {
     /// The id of the connector within the EVSE for which the status is reported.
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     pub connector_id: i64,
@@ -13,39 +12,13 @@ pub struct StatusNotificationRequest {
     pub connector_status: ConnectorStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The id of the EVSE to which the connector belongs for which the the status is reported.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
     /// The time for which the status is reported. If absent time of receipt of the message will be assumed.
-    pub timestamp: alloc::string::String,
+    pub timestamp: crate::OcppTimestamp,
 }
-#[cfg(feature = "alloc")]
-impl crate::Action for StatusNotificationRequest {
-    const ACTION: &'static str = "StatusNotification";
-}
-#[cfg(not(feature = "alloc"))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct StatusNotificationRequest<
-    const STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP: usize = 1024usize,
-> {
-    /// The id of the connector within the EVSE for which the status is reported.
-    #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
-    pub connector_id: i64,
-    #[cfg_attr(feature = "serde", serde(rename = "connectorStatus"))]
-    pub connector_status: ConnectorStatusEnum,
-    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
-    /// The id of the EVSE to which the connector belongs for which the the status is reported.
-    #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
-    pub evse_id: i64,
-    /// The time for which the status is reported. If absent time of receipt of the message will be assumed.
-    pub timestamp: heapless::String<STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP>,
-}
-#[cfg(not(feature = "alloc"))]
-impl<const STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP: usize> crate::Action
-for StatusNotificationRequest<STATUS_NOTIFICATION_REQUEST_TIMESTAMP_CAP> {
+impl<CustomDataType> crate::Action for StatusNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "StatusNotification";
 }

@@ -2,25 +2,63 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CertificateSignedRequest {
+pub struct CertificateSignedRequest<CustomDataType = crate::NoCustomData> {
     /// The signed PEM encoded X.509 certificate. This SHALL also contain the necessary sub CA certificates, when applicable. The order of the bundle follows the certificate chain, starting from the leaf certificate.
     ///
     /// The Configuration Variable &lt;&lt;configkey-max-certificate-chain-size,MaxCertificateChainSize&gt;&gt; can be used to limit the maximum size of this field.
     #[cfg_attr(feature = "serde", serde(rename = "certificateChain"))]
-    pub certificate_chain: heapless::String<10000usize>,
+    pub certificate_chain: alloc::string::String,
     #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub certificate_type: Option<CertificateSigningUseEnum>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// *(2.1)* RequestId to correlate this message with the SignCertificateRequest.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub request_id: Option<i64>,
 }
-impl crate::Action for CertificateSignedRequest {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for CertificateSignedRequest<CustomDataType> {
+    const ACTION: &'static str = "CertificateSigned";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct CertificateSignedRequest<
+    CustomDataType = crate::NoCustomData,
+    const CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP: usize = 1024usize,
+> {
+    /// The signed PEM encoded X.509 certificate. This SHALL also contain the necessary sub CA certificates, when applicable. The order of the bundle follows the certificate chain, starting from the leaf certificate.
+    ///
+    /// The Configuration Variable &lt;&lt;configkey-max-certificate-chain-size,MaxCertificateChainSize&gt;&gt; can be used to limit the maximum size of this field.
+    #[cfg_attr(feature = "serde", serde(rename = "certificateChain"))]
+    pub certificate_chain: heapless::String<
+        CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP,
+    >,
+    #[cfg_attr(feature = "serde", serde(rename = "certificateType"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub certificate_type: Option<CertificateSigningUseEnum>,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// *(2.1)* RequestId to correlate this message with the SignCertificateRequest.
+    #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub request_id: Option<i64>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP: usize,
+> crate::Action
+for CertificateSignedRequest<
+    CustomDataType,
+    CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP,
+> {
     const ACTION: &'static str = "CertificateSigned";
 }

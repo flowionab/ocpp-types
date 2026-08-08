@@ -5,13 +5,15 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PublishFirmwareStatusNotificationRequest {
+pub struct PublishFirmwareStatusNotificationRequest<
+    CustomDataType = crate::NoCustomData,
+> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Required if status is Published. Can be multiple URI’s, if the Local Controller supports e.g. HTTP, HTTPS, and FTP.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub location: Option<alloc::vec::Vec<heapless::String<2000usize>>>,
+    pub location: Option<alloc::vec::Vec<alloc::string::String>>,
     /// The request id that was
     /// provided in the
     /// PublishFirmwareRequest which
@@ -22,26 +24,32 @@ pub struct PublishFirmwareStatusNotificationRequest {
     pub status: PublishFirmwareStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for PublishFirmwareStatusNotificationRequest {
+impl<CustomDataType> crate::Action
+for PublishFirmwareStatusNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "PublishFirmwareStatusNotification";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PublishFirmwareStatusNotificationRequest<
-    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP: usize = 8usize,
+    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP: usize = 1024usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Required if status is Published. Can be multiple URI’s, if the Local Controller supports e.g. HTTP, HTTPS, and FTP.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub location: Option<
         heapless::Vec<
-            heapless::String<2000usize>,
+            heapless::String<
+                PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP,
+            >,
             PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP,
         >,
     >,
@@ -55,14 +63,20 @@ pub struct PublishFirmwareStatusNotificationRequest<
     pub status: PublishFirmwareStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP: usize,
+    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
 > crate::Action
 for PublishFirmwareStatusNotificationRequest<
+    CustomDataType,
     PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP,
+    PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "PublishFirmwareStatusNotification";
 }

@@ -5,38 +5,44 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClearVariableMonitoringResponse {
+pub struct ClearVariableMonitoringResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "clearMonitoringResult"))]
-    pub clear_monitoring_result: alloc::vec::Vec<ClearMonitoringResult>,
+    pub clear_monitoring_result: alloc::vec::Vec<ClearMonitoringResult<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ClearVariableMonitoringResponse {
+impl<CustomDataType> crate::Action for ClearVariableMonitoringResponse<CustomDataType> {
     const ACTION: &'static str = "ClearVariableMonitoring";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClearVariableMonitoringResponse<
-    const CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP: usize = 8usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "clearMonitoringResult"))]
     pub clear_monitoring_result: heapless::Vec<
-        ClearMonitoringResult,
+        ClearMonitoringResult<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>,
         CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
 > crate::Action
 for ClearVariableMonitoringResponse<
+    CustomDataType,
     CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "ClearVariableMonitoring";
 }

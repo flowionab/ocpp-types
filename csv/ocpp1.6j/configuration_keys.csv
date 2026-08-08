@@ -1,0 +1,51 @@
+Key;Accessibility;Type;Required;Feature Profile;Description
+AllowOfflineTxForUnknownId;RW;boolean;No;Core;If this key exists, the Charge Point supports Unknown Offline Authorization. If this key reports a value of true, Unknown Offline Authorization is enabled.
+AuthorizationCacheEnabled;RW;boolean;No;Core;If this key exists, the Charge Point supports an Authorization Cache. If this key reports a value of true, the Authorization Cache is enabled.
+AuthorizeRemoteTxRequests;R or RW;boolean;Yes;Core;Whether a remote request to start a transaction in the form of a RemoteStartTransaction.req message should be authorized beforehand like a local action to start a transaction.
+BlinkRepeat;RW;integer;No;Core;Number of times to blink Charge Point lighting when signalling.
+ClockAlignedDataInterval;RW;integer;Yes;Core;Size (in seconds) of the clock-aligned data interval. This is the size (in seconds) of the set of evenly spaced aggregation intervals per day, starting at 00:00:00 (midnight).
+ConnectionTimeOut;RW;integer;Yes;Core;Interval (from successful authorization) until incipient transaction is automatically cancelled, due to failure of EV driver to (correctly) insert the charging cable connector(s) into the appropriate socket(s).
+ConnectorPhaseRotation;RW;CSL;Yes;Core;The phase rotation per connector in respect to the connector's electrical meter (or if absent, the grid connection). Possible values per connector are RST, RTS, SRT, STR, TRS and TSR.
+ConnectorPhaseRotationMaxLength;R;integer;No;Core;Maximum number of items in a ConnectorPhaseRotation Configuration Key.
+GetConfigurationMaxKeys;R;integer;Yes;Core;Maximum number of requested configuration keys in a GetConfiguration.req PDU.
+HeartbeatInterval;RW;integer;Yes;Core;Interval (in seconds) of inactivity (no OCPP exchanges) with Central System after which the Charge Point should send a Heartbeat.req PDU.
+LightIntensity;RW;integer;No;Core;Percentage of maximum intensity at which to illuminate Charge Point lighting.
+LocalAuthorizeOffline;RW;boolean;Yes;Core;Whether the Charge Point, when offline, will start a transaction for locally-authorized identifiers.
+LocalPreAuthorize;RW;boolean;Yes;Core;Whether the Charge Point, when online, will start a transaction for locally-authorized identifiers without waiting for or requesting an Authorize.conf from the Central System.
+MaxEnergyOnInvalidId;RW;integer;No;Core;Maximum energy in Wh delivered when an identifier is invalidated by the Central System after start of a transaction.
+MeterValuesAlignedData;RW;CSL;Yes;Core;Clock-aligned measurand(s) to be included in a MeterValues.req PDU, every ClockAlignedDataInterval seconds.
+MeterValuesAlignedDataMaxLength;R;integer;No;Core;Maximum number of items in a MeterValuesAlignedData Configuration Key.
+MeterValuesSampledData;RW;CSL;Yes;Core;Sampled measurands to be included in a MeterValues.req PDU, every MeterValueSampleInterval seconds. Where applicable, the Measurand is combined with the optional phase; for instance: Voltage.L1.
+MeterValuesSampledDataMaxLength;R;integer;No;Core;Maximum number of items in a MeterValuesSampledData Configuration Key.
+MeterValueSampleInterval;RW;integer;Yes;Core;Interval (in seconds) between sampling of metering (or other) data, intended to be transmitted by MeterValues.req PDUs.
+MinimumStatusDuration;RW;integer;No;Core;The minimum duration that a Charge Point or Connector status is stable before a StatusNotification.req PDU is sent to the Central System.
+NumberOfConnectors;R;integer;Yes;Core;The number of physical charging connectors of this Charge Point.
+ResetRetries;RW;integer;Yes;Core;Number of times to retry an unsuccessful reset of the Charge Point.
+StopTransactionOnEVSideDisconnect;RW;boolean;Yes;Core;When set to true, the Charge Point SHALL administratively stop the transaction when the cable is unplugged from the EV.
+StopTransactionOnInvalidId;RW;boolean;Yes;Core;Whether the Charge Point will stop an ongoing transaction when it receives a non-Accepted authorization status in a StartTransaction.conf for this transaction.
+StopTxnAlignedData;RW;CSL;Yes;Core;Clock-aligned periodic measurand(s) to be included in the TransactionData element of StopTransaction.req MeterValues.req PDU for every ClockAlignedDataInterval of the transaction.
+StopTxnAlignedDataMaxLength;R;integer;No;Core;Maximum number of items in a StopTxnAlignedData Configuration Key.
+StopTxnSampledData;RW;CSL;Yes;Core;Sampled measurands to be included in the TransactionData element of StopTransaction.req PDU, every MeterValueSampleInterval seconds from the start of the transaction.
+StopTxnSampledDataMaxLength;R;integer;No;Core;Maximum number of items in a StopTxnSampledData Configuration Key.
+SupportedFeatureProfiles;R;CSL;Yes;Core;A list of supported Feature Profiles. Possible values are Core, FirmwareManagement, LocalAuthListManagement, Reservation, SmartCharging and RemoteTrigger.
+SupportedFeatureProfilesMaxLength;R;integer;No;Core;Maximum number of items in a SupportedFeatureProfiles Configuration Key.
+TransactionMessageAttempts;RW;integer;Yes;Core;How often the Charge Point should try to submit a transaction-related message when the Central System fails to process it.
+TransactionMessageRetryInterval;RW;integer;Yes;Core;How long the Charge Point should wait before resubmitting a transaction-related message that the Central System failed to process.
+UnlockConnectorOnEVSideDisconnect;RW;boolean;Yes;Core;When set to true, the Charge Point SHALL unlock the cable on the Charge Point side when the cable is unplugged at the EV.
+WebSocketPingInterval;RW;integer;No;Core;Only relevant for websocket implementations. 0 disables client side websocket ping/pong. In this case there is either no ping/pong or the server initiates the ping and client responds with Pong.
+LocalAuthListEnabled;RW;boolean;Yes;LocalAuthListManagement;Whether the Local Authorization List is enabled.
+LocalAuthListMaxLength;R;integer;Yes;LocalAuthListManagement;Maximum number of identifications that can be stored in the Local Authorization List.
+SendLocalListMaxLength;R;integer;Yes;LocalAuthListManagement;Maximum number of identifications that can be sent in a single SendLocalList.req.
+ReserveConnectorZeroSupported;R;boolean;No;Reservation;If this configuration key is present and set to true, Charge Point support reservations on connector 0.
+ChargeProfileMaxStackLevel;R;integer;Yes;SmartCharging;Max StackLevel of a ChargingProfile. The number defined also indicates the max allowed number of installed charging schedules per Charging Profile Purposes.
+ChargingScheduleAllowedChargingRateUnit;R;CSL;Yes;SmartCharging;A list of supported quantities for use in a ChargingSchedule. Allowed values: Current and Power.
+ChargingScheduleMaxPeriods;R;integer;Yes;SmartCharging;Maximum number of periods that may be defined per ChargingSchedule.
+ConnectorSwitch3to1PhaseSupported;R;boolean;No;SmartCharging;If defined and true, this Charge Point support switching from 3 to 1 phase during a Transaction.
+MaxChargingProfilesInstalled;R;integer;Yes;SmartCharging;Maximum number of Charging profiles installed at a time.
+AdditionalRootCertificateCheck;R;boolean;Yes;Security;Whether a Charge Point should double-check whether a certificate is not revoked, in addition to the standard certificate chain check. When true, the Charge Point MUST verify the certificate against a Certificate Revocation List or an OCSP responder.
+AuthorizationKey;RW;string;Yes;Security;The basic authentication password used for HTTP Basic Authentication. Is write-only: reading it back returns no value. Minimal length is 16 bytes and it is not allowed to be set to an empty string.
+CertificateSignedMaxChainSize;R;integer;No;Security;This configuration key can be used to limit the size of the 'certificateChain' field from the CertificateSigned.req PDU. The value of this configuration key has a maximum limit of 10000 characters.
+CertificateStoreMaxLength;R;integer;No;Security;Maximum number of Root/CA certificates that can be installed in the Charge Point.
+CpoName;RW;string;Yes;Security;The Charge Point identity that is used as the value of the 'organizationName' field in the Certificate Signing Request when a Charge Point requests a new certificate.
+SecurityProfile;RW;integer;Yes;Security;This configuration key is used to set the security profile the Charge Point should use. It is not allowed to lower the security level of an existing connection.
+SupportedFileTransferProtocols;R;CSL;Yes;Security;The transfer protocols supported for uploading a diagnostics or security log and for downloading firmware. Allowed values are FTP, FTPS, HTTP and HTTPS.

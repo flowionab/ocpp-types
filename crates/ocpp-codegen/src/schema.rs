@@ -8,6 +8,7 @@ use crate::model::RustStruct;
 use crate::model::RustType;
 use crate::model::RustVariant;
 use crate::model::TypeParam;
+use crate::naming::CUSTOM_DATA_PARAM;
 use crate::pool::TypePool;
 use serde_json::Map;
 use serde_json::Value;
@@ -109,12 +110,99 @@ fn visit_property_for_signatures(
 /// generic parameter.
 const DEFAULT_STRING_CAPACITY: usize = 1024;
 
-/// Default capacity for a `heapless::Vec<T, N>` backing a field with no
-/// spec-given `maxItems`, when the caller doesn't override the const
-/// generic parameter. Smaller than the string default: OCPP arrays without
-/// a stated bound (sampled values, schedule periods, tariff entries, ...)
-/// are typically short lists, unlike free-text fields.
-const DEFAULT_VEC_CAPACITY: usize = 16;
+/// Default capacity for a `heapless::Vec<T, N>` when the caller doesn't
+/// override the const generic parameter -- both for arrays with no
+/// spec-given `maxItems` and for those whose `maxItems` exceeds
+/// [`MAX_INLINE_VEC_CAPACITY`].
+///
+/// Much smaller than the string default, because OCPP's telemetry messages
+/// are arrays *of* arrays: a `MeterValuesRequest` holds meter values, each
+/// holding sampled values, so this number is squared before it reaches the
+/// message. At 16 that was 256 sampled values reserved inline (267 KB for
+/// 1.6J's `MeterValuesRequest`); at 8 it is 64.
+///
+/// Not lowered further, though 4 would be another 4x: five measurands on one
+/// meter value -- energy, power, current, voltage, state of charge -- is an
+/// ordinary configuration, and a capacity of 4 would reject it. 8 leaves
+/// headroom over what deployments actually send. Callers who know their own
+/// bound can still name it.
+const DEFAULT_VEC_CAPACITY: usize = 8;
+
+/// A spec-bounded array larger than this becomes a caller-chosen const
+/// generic rather than being inlined at its `maxItems`.
+///
+/// Inlining the spec's ceiling is what makes the charging-profile family
+/// unusable without `alloc`: `chargingSchedulePeriod` declares
+/// `maxItems: 1024`, and 2.1's `ChargingSchedulePeriod` is itself 12 KB
+/// (two spec-bounded 20-element V2X curves), so one schedule reserves
+/// ~12 MB by value before any nesting. Seventeen 2.1 arrays declare 1024.
+///
+/// Reserving the protocol ceiling is also not what OCPP asks of a station:
+/// `SmartChargingCtrlr.PeriodsPerSchedule` is a *required* 2.x variable and
+/// 1.6 has `ChargingScheduleMaxPeriods`, i.e. every station must declare its
+/// own, lower, limit. A station that compiles in the capacity it advertises
+/// is conformant; one that reserves 1024 periods it will never accept is
+/// merely large.
+///
+/// Set below the smallest array worth parameterizing (2.1's 20-element V2X
+/// curves), so arrays of 10 or fewer -- which cost little inline -- keep
+/// their fixed capacity and don't add a const parameter to every ancestor.
+const MAX_INLINE_VEC_CAPACITY: usize = 16;
+
+/// A spec-bounded string longer than this becomes a caller-chosen const
+/// generic rather than being inlined at its `maxLength`, defaulting to
+/// [`DEFAULT_STRING_CAPACITY`] (clamped to the spec's own ceiling).
+///
+/// The same asymmetry the array rule fixes, for strings: the specification
+/// states generous ceilings for fields that are usually short or absent, and
+/// inlining them costs that ceiling on every value. 2.1 alone has
+/// `signedMeterData` at 32,768, `ocspResult` at 18,000, `exiResponse` at
+/// 17,000, five `certificate`/`certificateChain` fields at 10,000, and
+/// sixteen at 2,000. `signedMeterData` sits inside `SampledValue`, so it is
+/// multiplied by both the sampled-value and meter-value arrays -- which is
+/// most of what made `TransactionEventRequest` megabytes.
+///
+/// Set at 512 so identifiers, hashes and short free text keep their exact
+/// spec bound and add no parameter; only the genuinely large fields become
+/// tunable.
+///
+/// The default is deliberately the same 1024 as an unbounded string rather
+/// than something smaller: one number to reason about, and safe for the URLs,
+/// meter readings and identifiers that make up most of these fields. It is
+/// *not* enough for a PEM certificate chain -- a deployment doing Plug and
+/// Charge must raise `certificate`, `certificateChain`, `csr`,
+/// `signingCertificate`, `exiRequest`/`exiResponse` and `signedMeterData`
+/// explicitly. Erring low here is deliberate: the cost of the small default
+/// is a deserialize failure a Plug and Charge deployment hits immediately in
+/// testing, while erring high costs every deployment that never sees a
+/// certificate.
+const MAX_INLINE_STRING_CAPACITY: usize = 512;
+
+/// Schema properties whose *description* states an exact civil-time format
+/// the schema itself never bounds, mapped to the crate type that models it.
+///
+/// Unlike `date-time`, these declare no `format`, so they can only be matched
+/// by name -- which is more fragile than the `format` rule, and why
+/// `schema::tests::the_civil_format_fields_still_exist_in_the_vendored_schemas`
+/// fails loudly if a schema revision renames one. Without that guard a rename
+/// would silently revert the field to a 1024-byte string.
+///
+/// 2.1's tariff conditions are the whole set: `startTimeOfDay`/`endTimeOfDay`
+/// are `HH:MM` and `validFromDate`/`validToDate` are `YYYY-MM-DD`, with the
+/// regex given in each property's own description. Four of them sit in
+/// `TariffConditions`, multiplied through three tariff kinds and their price
+/// arrays.
+const CIVIL_FORMAT_FIELDS: &[(&str, &str)] = &[
+    ("startTimeOfDay", "crate::OcppTimeOfDay"),
+    ("endTimeOfDay", "crate::OcppTimeOfDay"),
+    ("validFromDate", "crate::OcppDate"),
+    ("validToDate", "crate::OcppDate"),
+];
+
+/// The 2.x vendor-extension property, whose type is the caller's choice
+/// rather than the spec's shape. See [`SchemaParser::resolve_type`].
+const CUSTOM_DATA_FIELD: &str = "customData";
+
 
 pub struct SchemaParser<'a> {
     definitions: Map<String, Value>,
@@ -300,6 +388,42 @@ impl<'a> SchemaParser<'a> {
     }
 
     fn resolve_type(&mut self, owner: &str, field_name: &str, schema: &Value) -> anyhow::Result<RustType> {
+        // 2.x hangs an optional `customData` on nearly every object -- 151
+        // structs in 2.1 -- as a vendor extension point. Inlining the spec's
+        // shape costs 264 bytes at every one of those nodes, and by-value
+        // nesting multiplies that by the whole type graph rather than paying
+        // it once, which is most of what makes `ChargingProfile` large.
+        //
+        // So the field's type is the caller's, defaulting to a zero-sized
+        // stand-in. Deliberately ONE shared parameter name for every
+        // `customData` in the version, not the usual owner-qualified one:
+        // `collect_type_params` dedupes by name, so a struct containing ten
+        // others that each carry `customData` still declares a single
+        // parameter. Owner-qualified names would give it ten, and the count
+        // would compound at every level.
+        if let Some((_, path)) = CIVIL_FORMAT_FIELDS
+            .iter()
+            .find(|(name, _)| *name == field_name)
+        {
+            return Ok(RustType::CrateType((*path).to_string()));
+        }
+
+        if field_name == CUSTOM_DATA_FIELD {
+            // Resolve the reference anyway, for its side effect: it registers
+            // the specification's own `CustomData` shape in the pool so the
+            // struct is still generated. Nothing references it now, but a
+            // caller opting back in names it -- `ChargingProfile<CustomData>`
+            // -- and it would otherwise vanish from the crate entirely.
+            if let Some(reference) = schema["$ref"].as_str() {
+                self.resolve_ref(reference)?;
+            }
+
+            return Ok(RustType::Any(TypeParam {
+                name: CUSTOM_DATA_PARAM.to_string(),
+                default: "crate::NoCustomData".to_string(),
+            }));
+        }
+
         if let Some(reference) = schema["$ref"].as_str() {
             return self.resolve_ref(reference);
         }
@@ -316,6 +440,15 @@ impl<'a> SchemaParser<'a> {
             // name so each message gets its own correctly-shaped enum
             // instead of silently sharing (or overwriting) another
             // message's.
+            // Every version's timestamps are `{"type": "string", "format":
+            // "date-time"}` and none states a `maxLength`, so as strings
+            // they each took the 1024-byte unbounded default -- 142 fields
+            // across the three versions. `OcppTimestamp` is 16 bytes, needs
+            // no const parameter, and is comparable, which a string is not.
+            Some("string") if schema["format"].as_str() == Some("date-time") => {
+                RustType::CrateType("crate::OcppTimestamp".to_string())
+            }
+
             Some("string") if schema["enum"].is_array() => {
                 let candidate = crate::naming::pascal_case(field_name);
                 let rust_name = if self.ambiguous_inline_enum_names.contains(&candidate) {
@@ -332,6 +465,15 @@ impl<'a> SchemaParser<'a> {
             // caller picks the bound instead of us guessing one -- or, with
             // the `alloc` feature, this becomes a plain growable `String`.
             Some("string") => match schema["maxLength"].as_u64() {
+                // The string mirror of the array rule below: a large
+                // spec-bounded string becomes a caller-chosen capacity rather
+                // than being inlined at its ceiling.
+                Some(max) if max as usize > MAX_INLINE_STRING_CAPACITY => {
+                    RustType::UnboundedString(ConstParam {
+                        name: crate::naming::const_param_name(owner, field_name),
+                        default: DEFAULT_STRING_CAPACITY.min(max as usize),
+                    })
+                }
                 Some(max) => RustType::BoundedString(max as usize),
                 None => RustType::UnboundedString(ConstParam {
                     name: crate::naming::const_param_name(owner, field_name),
@@ -353,6 +495,20 @@ impl<'a> SchemaParser<'a> {
             Some("array") => {
                 let item_field_name = format!("{field_name}Item");
                 match schema["maxItems"].as_u64() {
+                    // Large spec-bounded arrays are parameterized like
+                    // unbounded ones (see `MAX_INLINE_VEC_CAPACITY`): the
+                    // ceiling stays reachable, but the default is one a
+                    // no-`alloc` target can actually hold.
+                    Some(max) if max as usize > MAX_INLINE_VEC_CAPACITY => {
+                        let item_ty = self.resolve_type(owner, &item_field_name, &schema["items"])?;
+                        RustType::UnboundedVec(
+                            Box::new(item_ty),
+                            ConstParam {
+                                name: crate::naming::const_param_name(owner, field_name),
+                                default: DEFAULT_VEC_CAPACITY.min(max as usize),
+                            },
+                        )
+                    }
                     Some(max) => {
                         let item_ty = self.resolve_type(owner, &item_field_name, &schema["items"])?;
                         RustType::Vec(Box::new(item_ty), max as usize)
@@ -389,6 +545,7 @@ impl<'a> SchemaParser<'a> {
             // the caller picks the type (see `RustType::Any`).
             None => RustType::Any(TypeParam {
                 name: crate::naming::type_param_name(owner, field_name),
+                default: "()".to_string(),
             }),
 
             // A `type` the generator doesn't recognize. Nothing sensible to
@@ -503,7 +660,8 @@ mod tests {
         assert_eq!(
             data.ty,
             RustType::Any(TypeParam {
-                name: "DataTransferRequestData".to_string()
+                name: "DataTransferRequestData".to_string(),
+                default: "()".to_string(),
             })
         );
     }
@@ -874,7 +1032,7 @@ mod tests {
                 }
             },
             "properties": {
-                "customData": { "$ref": "#/definitions/CustomDataType" },
+                "someData": { "$ref": "#/definitions/CustomDataType" },
                 "otherData": { "$ref": "#/definitions/CustomDataType" }
             },
             "required": []
@@ -961,9 +1119,221 @@ mod tests {
         match &parsed.message.fields[0].ty {
             RustType::UnboundedVec(inner, param) => {
                 assert_eq!(param.name, "SOME_REQUEST_TAGS_CAP");
-                assert_eq!(param.default, 16);
+                assert_eq!(param.default, 8);
                 assert!(matches!(**inner, RustType::BoundedString(10)));
             }
+            other => panic!("expected UnboundedVec, got {other:?}"),
+        }
+    }
+
+    /// [`CIVIL_FORMAT_FIELDS`] matches on field *name*, because these
+    /// properties declare no `format` for the generator to key off. That is
+    /// fragile in one specific way: if a schema revision renames one, the
+    /// mapping silently stops applying and the field reverts to a 1024-byte
+    /// string with a const parameter -- a regression nothing else would
+    /// notice. So assert the names still exist, and still look like the
+    /// unbounded strings the mapping assumes.
+    #[test]
+    fn the_civil_format_fields_still_exist_in_the_vendored_schemas() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../schemas/ocpp2.1");
+        let mut seen: HashSet<&str> = HashSet::new();
+
+        fn visit(node: &Value, seen: &mut HashSet<&'static str>) {
+            if let Some(properties) = node["properties"].as_object() {
+                for (name, property) in properties {
+                    if let Some((known, _)) = CIVIL_FORMAT_FIELDS
+                        .iter()
+                        .find(|(candidate, _)| candidate == name)
+                    {
+                        assert_eq!(
+                            property["type"].as_str(),
+                            Some("string"),
+                            "`{name}` is no longer a string"
+                        );
+                        assert!(
+                            property["maxLength"].is_null(),
+                            "`{name}` now declares a maxLength; revisit the mapping"
+                        );
+                        seen.insert(known);
+                    }
+                }
+            }
+
+            match node {
+                Value::Object(map) => map.values().for_each(|v| visit(v, seen)),
+                Value::Array(items) => items.iter().for_each(|v| visit(v, seen)),
+                _ => {}
+            }
+        }
+
+        for entry in std::fs::read_dir(&root).expect("schemas/ocpp2.1 should exist") {
+            let path = entry.unwrap().path();
+
+            if path.extension().is_some_and(|ext| ext == "json") {
+                let schema: Value =
+                    serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+                visit(&schema, &mut seen);
+            }
+        }
+
+        for (name, _) in CIVIL_FORMAT_FIELDS {
+            assert!(
+                seen.contains(name),
+                "`{name}` is mapped to a crate type but no longer appears in the 2.1 \
+                 schemas -- the mapping is dead and the field it replaced is back to \
+                 an unbounded string"
+            );
+        }
+    }
+
+    /// 2.1's `chargingSchedulePeriod` declares `maxItems: 1024`, and its
+    /// element is 12 KB, so inlining the ceiling reserves ~12 MB per
+    /// schedule. Above the threshold the capacity becomes the caller's, with
+    /// the spec ceiling still reachable by naming it.
+    #[test]
+    fn a_large_spec_bounded_array_becomes_a_caller_chosen_capacity() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "periods": {
+                    "type": "array",
+                    "maxItems": 1024,
+                    "items": { "type": "string", "maxLength": 10 }
+                }
+            },
+            "required": ["periods"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        match &parsed.message.fields[0].ty {
+            RustType::UnboundedVec(inner, param) => {
+                assert_eq!(param.name, "SOME_REQUEST_PERIODS_CAP");
+                assert_eq!(param.default, 8, "should default well below the spec ceiling");
+                assert!(matches!(**inner, RustType::BoundedString(10)));
+            }
+            other => panic!("expected UnboundedVec for a 1024-item array, got {other:?}"),
+        }
+    }
+
+    /// 2.1's `signedMeterData` states `maxLength: 32768` and sits inside
+    /// `SampledValue`, so inlining the ceiling is multiplied by both the
+    /// sampled-value and meter-value arrays above it.
+    #[test]
+    fn a_large_spec_bounded_string_becomes_a_caller_chosen_capacity() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "signedMeterData": { "type": "string", "maxLength": 32768 }
+            },
+            "required": ["signedMeterData"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        match &parsed.message.fields[0].ty {
+            RustType::UnboundedString(param) => {
+                assert_eq!(param.name, "SOME_REQUEST_SIGNED_METER_DATA_CAP");
+                assert_eq!(param.default, 1024, "should default well below the ceiling");
+            }
+            other => panic!("expected UnboundedString, got {other:?}"),
+        }
+    }
+
+    /// An identifier or hash costs little inlined and keeps its exact spec
+    /// bound, so no parameter appears where it wouldn't pay for itself.
+    #[test]
+    fn a_small_spec_bounded_string_keeps_its_exact_capacity() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "idToken": { "type": "string", "maxLength": 255 }
+            },
+            "required": ["idToken"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        assert!(
+            matches!(&parsed.message.fields[0].ty, RustType::BoundedString(255)),
+            "got {:?}",
+            parsed.message.fields[0].ty
+        );
+    }
+
+    /// The default never exceeds the spec's own ceiling, so a caller relying
+    /// on it can't build a value the field forbids.
+    #[test]
+    fn the_default_string_capacity_is_clamped_to_the_spec_ceiling() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "signature": { "type": "string", "maxLength": 800 }
+            },
+            "required": ["signature"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        match &parsed.message.fields[0].ty {
+            RustType::UnboundedString(param) => assert_eq!(param.default, 800),
+            other => panic!("expected UnboundedString, got {other:?}"),
+        }
+    }
+
+    /// A small array costs little inlined, and parameterizing it would add a
+    /// const parameter to every ancestor struct for no benefit.
+    #[test]
+    fn a_small_spec_bounded_array_keeps_its_fixed_capacity() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "schedules": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "items": { "type": "string", "maxLength": 10 }
+                }
+            },
+            "required": ["schedules"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        assert!(
+            matches!(&parsed.message.fields[0].ty, RustType::Vec(_, 3)),
+            "got {:?}",
+            parsed.message.fields[0].ty
+        );
+    }
+
+    /// The default never exceeds the spec's own ceiling. Uses a ceiling
+    /// below `DEFAULT_VEC_CAPACITY` so the clamp is actually exercised
+    /// rather than passing because the default happened to be smaller.
+    #[test]
+    fn the_default_capacity_is_clamped_to_the_spec_ceiling() {
+        let schema = json!({
+            "title": "SomeRequest",
+            "type": "object",
+            "properties": {
+                "curve": {
+                    "type": "array",
+                    "maxItems": 17,
+                    "items": { "type": "number" }
+                }
+            },
+            "required": ["curve"]
+        });
+
+        let parsed = SchemaParser::parse(&schema, OcppVersion::V16).unwrap();
+
+        match &parsed.message.fields[0].ty {
+            RustType::UnboundedVec(_, param) => assert_eq!(param.default, 8),
             other => panic!("expected UnboundedVec, got {other:?}"),
         }
     }
@@ -1066,22 +1436,25 @@ mod tests {
             .any(|t| matches!(t, GeneratedType::Struct(s) if s.name == "MeterValue")));
     }
 
-    fn schema_with_custom_data(title: &str) -> Value {
+    fn schema_with_shared_definition(title: &str) -> Value {
+        // Deliberately not `customData`: that property is a type parameter
+        // now, not a `$ref` to a pooled definition, so it would no longer
+        // exercise sharing at all.
         json!({
             "title": title,
             "type": "object",
             "definitions": {
-                "CustomDataType": {
-                    "javaType": "CustomData",
+                "StatusInfoType": {
+                    "javaType": "StatusInfo",
                     "type": "object",
                     "properties": {
-                        "vendorId": { "type": "string", "maxLength": 255 }
+                        "reasonCode": { "type": "string", "maxLength": 20 }
                     },
-                    "required": ["vendorId"]
+                    "required": ["reasonCode"]
                 }
             },
             "properties": {
-                "customData": { "$ref": "#/definitions/CustomDataType" }
+                "statusInfo": { "$ref": "#/definitions/StatusInfoType" }
             },
             "required": []
         })
@@ -1092,25 +1465,25 @@ mod tests {
         let mut pool = crate::pool::TypePool::new();
 
         let first = SchemaParser::parse_with_pool(
-            &schema_with_custom_data("FirstRequest"),
+            &schema_with_shared_definition("FirstRequest"),
             &mut pool,
             OcppVersion::V16,
         )
         .unwrap();
         let second = SchemaParser::parse_with_pool(
-            &schema_with_custom_data("SecondRequest"),
+            &schema_with_shared_definition("SecondRequest"),
             &mut pool,
             OcppVersion::V16,
         )
         .unwrap();
 
-        assert!(matches!(&first.fields[0].ty, RustType::Local(name) if name == "CustomData"));
-        assert!(matches!(&second.fields[0].ty, RustType::Local(name) if name == "CustomData"));
+        assert!(matches!(&first.fields[0].ty, RustType::Local(name) if name == "StatusInfo"));
+        assert!(matches!(&second.fields[0].ty, RustType::Local(name) if name == "StatusInfo"));
 
         let count = pool
             .types()
             .iter()
-            .filter(|t| matches!(t, GeneratedType::Struct(s) if s.name == "CustomData"))
+            .filter(|t| matches!(t, GeneratedType::Struct(s) if s.name == "StatusInfo"))
             .count();
 
         assert_eq!(count, 1);

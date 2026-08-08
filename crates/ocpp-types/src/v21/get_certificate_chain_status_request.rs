@@ -2,15 +2,50 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetCertificateChainStatusRequest {
+pub struct GetCertificateChainStatusRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "certificateStatusRequests"))]
-    pub certificate_status_requests: heapless::Vec<CertificateStatusRequestInfo, 4usize>,
+    pub certificate_status_requests: heapless::Vec<
+        CertificateStatusRequestInfo<CustomDataType>,
+        4usize,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
 }
-impl crate::Action for GetCertificateChainStatusRequest {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for GetCertificateChainStatusRequest<CustomDataType> {
+    const ACTION: &'static str = "GetCertificateChainStatus";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GetCertificateChainStatusRequest<
+    CustomDataType = crate::NoCustomData,
+    const CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "certificateStatusRequests"))]
+    pub certificate_status_requests: heapless::Vec<
+        CertificateStatusRequestInfo<
+            CustomDataType,
+            CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP,
+        >,
+        4usize,
+    >,
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP: usize,
+> crate::Action
+for GetCertificateChainStatusRequest<
+    CustomDataType,
+    CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP,
+> {
     const ACTION: &'static str = "GetCertificateChainStatus";
 }

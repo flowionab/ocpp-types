@@ -4,16 +4,16 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ResetRequest {
+pub struct ResetRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// This contains the ID of a specific EVSE that needs to be reset, instead of the entire Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub evse_id: Option<i64>,
     pub r#type: ResetEnum,
 }
-impl crate::Action for ResetRequest {
+impl<CustomDataType> crate::Action for ResetRequest<CustomDataType> {
     const ACTION: &'static str = "Reset";
 }

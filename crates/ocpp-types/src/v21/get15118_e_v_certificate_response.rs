@@ -2,16 +2,17 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Get15118EVCertificateResponse {
+pub struct Get15118EVCertificateResponse<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// *(2/1)* Raw CertificateInstallationRes response for the EV, Base64 encoded. +
     /// Extended to support ISO 15118-20 certificates. The minimum supported length is 17000. If a longer _exiResponse_ is supported, then the supported length must be communicated in variable OCPPCommCtrlr.FieldLength\[ "Get15118EVCertificateResponse.exiResponse" \].
     #[cfg_attr(feature = "serde", serde(rename = "exiResponse"))]
-    pub exi_response: heapless::String<17000usize>,
+    pub exi_response: alloc::string::String,
     /// *(2.1)* Number of contracts that can be retrieved with additional requests.
     #[cfg_attr(feature = "serde", serde(rename = "remainingContracts"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -19,8 +20,48 @@ pub struct Get15118EVCertificateResponse {
     pub status: Iso15118EVCertificateStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl crate::Action for Get15118EVCertificateResponse {
+#[cfg(feature = "alloc")]
+impl<CustomDataType> crate::Action for Get15118EVCertificateResponse<CustomDataType> {
+    const ACTION: &'static str = "Get15118EVCertificate";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Get15118EVCertificateResponse<
+    CustomDataType = crate::NoCustomData,
+    const GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP: usize = 1024usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// *(2/1)* Raw CertificateInstallationRes response for the EV, Base64 encoded. +
+    /// Extended to support ISO 15118-20 certificates. The minimum supported length is 17000. If a longer _exiResponse_ is supported, then the supported length must be communicated in variable OCPPCommCtrlr.FieldLength\[ "Get15118EVCertificateResponse.exiResponse" \].
+    #[cfg_attr(feature = "serde", serde(rename = "exiResponse"))]
+    pub exi_response: heapless::String<
+        GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP,
+    >,
+    /// *(2.1)* Number of contracts that can be retrieved with additional requests.
+    #[cfg_attr(feature = "serde", serde(rename = "remainingContracts"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub remaining_contracts: Option<i64>,
+    pub status: Iso15118EVCertificateStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    CustomDataType,
+    const GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::Action
+for Get15118EVCertificateResponse<
+    CustomDataType,
+    GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
     const ACTION: &'static str = "Get15118EVCertificate";
 }

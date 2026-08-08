@@ -5,32 +5,34 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReportDERControlRequest {
+pub struct ReportDERControlRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub curve: Option<heapless::Vec<DERCurveGet, 24usize>>,
+    pub curve: Option<alloc::vec::Vec<DERCurveGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "enterService"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub enter_service: Option<heapless::Vec<EnterServiceGet, 24usize>>,
+    pub enter_service: Option<alloc::vec::Vec<EnterServiceGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "fixedPFAbsorb"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub fixed_p_f_absorb: Option<heapless::Vec<FixedPFGet, 24usize>>,
+    pub fixed_p_f_absorb: Option<alloc::vec::Vec<FixedPFGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "fixedPFInject"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub fixed_p_f_inject: Option<heapless::Vec<FixedPFGet, 24usize>>,
+    pub fixed_p_f_inject: Option<alloc::vec::Vec<FixedPFGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "fixedVar"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub fixed_var: Option<heapless::Vec<FixedVarGet, 24usize>>,
+    pub fixed_var: Option<alloc::vec::Vec<FixedVarGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "freqDroop"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub freq_droop: Option<heapless::Vec<FreqDroopGet, 24usize>>,
+    pub freq_droop: Option<alloc::vec::Vec<FreqDroopGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub gradient: Option<heapless::Vec<GradientGet, 24usize>>,
+    pub gradient: Option<alloc::vec::Vec<GradientGet<CustomDataType>>>,
     #[cfg_attr(feature = "serde", serde(rename = "limitMaxDischarge"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub limit_max_discharge: Option<heapless::Vec<LimitMaxDischargeGet, 24usize>>,
+    pub limit_max_discharge: Option<
+        alloc::vec::Vec<LimitMaxDischargeGet<CustomDataType>>,
+    >,
     /// RequestId from GetDERControlRequest.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
@@ -40,56 +42,86 @@ pub struct ReportDERControlRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ReportDERControlRequest {
+impl<CustomDataType> crate::Action for ReportDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "ReportDERControl";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReportDERControlRequest<
-    const D_E_R_CURVE_START_TIME_CAP: usize = 1024usize,
-    const FIXED_P_F_START_TIME_CAP: usize = 1024usize,
-    const FIXED_VAR_START_TIME_CAP: usize = 1024usize,
-    const FREQ_DROOP_START_TIME_CAP: usize = 1024usize,
-    const LIMIT_MAX_DISCHARGE_START_TIME_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP: usize = 8usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub curve: Option<heapless::Vec<DERCurveGet<D_E_R_CURVE_START_TIME_CAP>, 24usize>>,
+    pub curve: Option<
+        heapless::Vec<
+            DERCurveGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP,
+        >,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "enterService"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub enter_service: Option<heapless::Vec<EnterServiceGet, 24usize>>,
+    pub enter_service: Option<
+        heapless::Vec<
+            EnterServiceGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP,
+        >,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "fixedPFAbsorb"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub fixed_p_f_absorb: Option<
-        heapless::Vec<FixedPFGet<FIXED_P_F_START_TIME_CAP>, 24usize>,
+        heapless::Vec<
+            FixedPFGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP,
+        >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "fixedPFInject"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub fixed_p_f_inject: Option<
-        heapless::Vec<FixedPFGet<FIXED_P_F_START_TIME_CAP>, 24usize>,
+        heapless::Vec<
+            FixedPFGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP,
+        >,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "fixedVar"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub fixed_var: Option<heapless::Vec<FixedVarGet<FIXED_VAR_START_TIME_CAP>, 24usize>>,
+    pub fixed_var: Option<
+        heapless::Vec<
+            FixedVarGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP,
+        >,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "freqDroop"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub freq_droop: Option<
-        heapless::Vec<FreqDroopGet<FREQ_DROOP_START_TIME_CAP>, 24usize>,
+        heapless::Vec<
+            FreqDroopGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP,
+        >,
     >,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub gradient: Option<heapless::Vec<GradientGet, 24usize>>,
+    pub gradient: Option<
+        heapless::Vec<
+            GradientGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP,
+        >,
+    >,
     #[cfg_attr(feature = "serde", serde(rename = "limitMaxDischarge"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub limit_max_discharge: Option<
         heapless::Vec<
-            LimitMaxDischargeGet<
-                D_E_R_CURVE_START_TIME_CAP,
-                LIMIT_MAX_DISCHARGE_START_TIME_CAP,
-            >,
-            24usize,
+            LimitMaxDischargeGet<CustomDataType>,
+            REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP,
         >,
     >,
     /// RequestId from GetDERControlRequest.
@@ -102,18 +134,26 @@ pub struct ReportDERControlRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const D_E_R_CURVE_START_TIME_CAP: usize,
-    const FIXED_P_F_START_TIME_CAP: usize,
-    const FIXED_VAR_START_TIME_CAP: usize,
-    const FREQ_DROOP_START_TIME_CAP: usize,
-    const LIMIT_MAX_DISCHARGE_START_TIME_CAP: usize,
+    CustomDataType,
+    const REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP: usize,
 > crate::Action
 for ReportDERControlRequest<
-    D_E_R_CURVE_START_TIME_CAP,
-    FIXED_P_F_START_TIME_CAP,
-    FIXED_VAR_START_TIME_CAP,
-    FREQ_DROOP_START_TIME_CAP,
-    LIMIT_MAX_DISCHARGE_START_TIME_CAP,
+    CustomDataType,
+    REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP,
 > {
     const ACTION: &'static str = "ReportDERControl";
 }

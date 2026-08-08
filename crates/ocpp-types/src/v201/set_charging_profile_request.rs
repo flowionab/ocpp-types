@@ -5,51 +5,51 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetChargingProfileRequest {
+pub struct SetChargingProfileRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
-    pub charging_profile: ChargingProfile,
+    pub charging_profile: ChargingProfile<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// For TxDefaultProfile an evseId=0 applies the profile to each individual evse. For ChargingStationMaxProfile and ChargingStationExternalConstraints an evseId=0 contains an overal limit for the whole Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for SetChargingProfileRequest {
+impl<CustomDataType> crate::Action for SetChargingProfileRequest<CustomDataType> {
     const ACTION: &'static str = "SetChargingProfile";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetChargingProfileRequest<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     pub charging_profile: ChargingProfile<
-        CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-        CHARGING_PROFILE_VALID_FROM_CAP,
-        CHARGING_PROFILE_VALID_TO_CAP,
+        CustomDataType,
+        CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+        SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// For TxDefaultProfile an evseId=0 applies the profile to each individual evse. For ChargingStationMaxProfile and ChargingStationExternalConstraints an evseId=0 contains an overal limit for the whole Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize,
+    CustomDataType,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
 > crate::Action
 for SetChargingProfileRequest<
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CHARGING_PROFILE_VALID_FROM_CAP,
-    CHARGING_PROFILE_VALID_TO_CAP,
+    CustomDataType,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "SetChargingProfile";
 }

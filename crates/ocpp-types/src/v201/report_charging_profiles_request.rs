@@ -5,14 +5,14 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReportChargingProfilesRequest {
+pub struct ReportChargingProfilesRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
     pub charging_limit_source: ChargingLimitSourceEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
-    pub charging_profile: alloc::vec::Vec<ChargingProfile>,
+    pub charging_profile: alloc::vec::Vec<ChargingProfile<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The evse to which the charging profile applies. If evseId = 0, the message contains an overall limit for the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -24,32 +24,32 @@ pub struct ReportChargingProfilesRequest {
     pub tbc: Option<bool>,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for ReportChargingProfilesRequest {
+impl<CustomDataType> crate::Action for ReportChargingProfilesRequest<CustomDataType> {
     const ACTION: &'static str = "ReportChargingProfiles";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReportChargingProfilesRequest<
-    const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    CustomDataType = crate::NoCustomData,
+    const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize = 8usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingLimitSource"))]
     pub charging_limit_source: ChargingLimitSourceEnum,
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     pub charging_profile: heapless::Vec<
         ChargingProfile<
-            CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-            CHARGING_PROFILE_VALID_FROM_CAP,
-            CHARGING_PROFILE_VALID_TO_CAP,
+            CustomDataType,
+            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+            SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
         >,
         REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The evse to which the charging profile applies. If evseId = 0, the message contains an overall limit for the Charging Station.
     #[cfg_attr(feature = "serde", serde(rename = "evseId"))]
     pub evse_id: i64,
@@ -62,16 +62,16 @@ pub struct ReportChargingProfilesRequest<
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
 > crate::Action
 for ReportChargingProfilesRequest<
+    CustomDataType,
     REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CHARGING_PROFILE_VALID_FROM_CAP,
-    CHARGING_PROFILE_VALID_TO_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "ReportChargingProfiles";
 }

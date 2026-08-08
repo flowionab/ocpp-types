@@ -19,33 +19,17 @@ impl crate::Action for SetChargingProfileRequest {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetChargingProfileRequest<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CS_CHARGING_PROFILES_VALID_FROM_CAP: usize = 1024usize,
-    const CS_CHARGING_PROFILES_VALID_TO_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     pub connector_id: i64,
     #[cfg_attr(feature = "serde", serde(rename = "csChargingProfiles"))]
     pub cs_charging_profiles: CsChargingProfiles<
         CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-        CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-        CS_CHARGING_PROFILES_VALID_FROM_CAP,
-        CS_CHARGING_PROFILES_VALID_TO_CAP,
     >,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CS_CHARGING_PROFILES_VALID_FROM_CAP: usize,
-    const CS_CHARGING_PROFILES_VALID_TO_CAP: usize,
-> crate::Action
-for SetChargingProfileRequest<
-    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CS_CHARGING_PROFILES_VALID_FROM_CAP,
-    CS_CHARGING_PROFILES_VALID_TO_CAP,
-> {
+impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
+for SetChargingProfileRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "SetChargingProfile";
 }

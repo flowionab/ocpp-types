@@ -21,16 +21,19 @@
 //! ```
 //! # #[cfg(not(feature = "alloc"))]
 //! # {
-//! use ocpp_types::v16::HeartbeatResponse;
+//! use ocpp_types::v16::DataTransferResponse;
+//! use ocpp_types::v16::common::DataTransferResponseStatus;
 //!
 //! // Uses the default capacity (1024):
-//! let response: HeartbeatResponse = HeartbeatResponse {
-//!     current_time: heapless::String::try_from("2024-01-01T00:00:00Z").unwrap(),
+//! let response: DataTransferResponse = DataTransferResponse {
+//!     data: Some(heapless::String::try_from("vendor payload").unwrap()),
+//!     status: DataTransferResponseStatus::Accepted,
 //! };
 //!
 //! // Or pick a smaller one explicitly:
-//! let response: HeartbeatResponse<64> = HeartbeatResponse {
-//!     current_time: heapless::String::try_from("2024-01-01T00:00:00Z").unwrap(),
+//! let response: DataTransferResponse<64> = DataTransferResponse {
+//!     data: Some(heapless::String::try_from("vendor payload").unwrap()),
+//!     status: DataTransferResponseStatus::Accepted,
 //! };
 //! # }
 //! ```
@@ -39,6 +42,72 @@
 //! `alloc::string::String`/`alloc::vec::Vec<T>` instead, and the const
 //! generic disappears entirely -- useful on targets with a real allocator
 //! (a CSMS backend, a simulator) that would rather not pick a bound at all.
+//!
+//! # Timestamps
+//!
+//! Every version types its `dateTime` fields as `{"type": "string",
+//! "format": "date-time"}` without a `maxLength`, so they would fall under
+//! the rule above and reserve 1024 bytes each. They are [`OcppTimestamp`]
+//! instead: 16 bytes, no const generic, no allocator, and comparable --
+//! which a string is not.
+//!
+//! ```
+//! use ocpp_types::{OcppTimestamp, v16::HeartbeatResponse};
+//!
+//! let response = HeartbeatResponse {
+//!     current_time: OcppTimestamp::parse_rfc3339("2024-01-01T00:00:00Z").unwrap(),
+//! };
+//!
+//! assert_eq!(response.current_time.unix_seconds(), 1_704_067_200);
+//! ```
+//!
+//! Enable the `chrono` feature for `From`/`Into` conversions with
+//! `chrono::DateTime`. That is interop only -- chrono is never on the wire
+//! path, since its own serde support formats through an allocating
+//! `to_rfc3339`, which the no-`alloc` build cannot use.
+//!
+//! # Sizing for allocation-free targets
+//!
+//! With `default-features = false` every field is stored inline at its
+//! declared capacity, so a message's `size_of` is the sum of what it *could*
+//! hold, not what it does. Most of the protocol is small under that rule --
+//! the median message is a few hundred bytes and around 85% are under 4 KB --
+//! but a few families reserve far more, and those need their capacities
+//! named rather than defaulted.
+//!
+//! Every capacity below is a const generic with a default, so nothing has to
+//! be specified to compile; specifying them is how a station trades unused
+//! headroom for stack space.
+//!
+//! | If your station does | Set | Because the default is |
+//! | --- | --- | --- |
+//! | Smart charging | `chargingSchedulePeriod`, `chargingProfile` caps | 8 each, and they nest three deep |
+//! | V2X / bidirectional | `v2xFreqWattCurve`, `v2xSignalWattCurve` | 8 points each, on every schedule period |
+//! | ISO 15118-20 pricing | `priceRuleStacks`, `priceLevelScheduleEntries`, `salesTariffEntry` | 8 each; set to 0 if unused |
+//! | Tariffs (2.1) | `energyPrices`, `timePrices`, `fixedPrices` | 8 each, per tariff kind |
+//! | Plug and Charge | `certificate`, `certificateChain`, `csr`, `signingCertificate` | 1024 -- *too small for a real PEM chain* |
+//! | Signed metering | `signedMeterData` | 1024; the spec allows 32768 |
+//! | Local auth lists | `localAuthorizationList` | 8 entries |
+//! | Metering | `meterValue`, `sampledValue` | 8 each, and they multiply |
+//!
+//! Two of these are worth calling out for opposite reasons. The Plug and
+//! Charge fields are the only ones whose default is deliberately *too small*:
+//! a PEM chain will not fit in 1024 bytes, so a deployment that uses
+//! certificates must raise them and will discover this immediately in
+//! testing. Erring the other way would have cost every deployment that never
+//! sees a certificate. Conversely, capacities you set to `0` cost nothing at
+//! all, which is the cheapest way to exclude a feature you do not implement.
+//!
+//! As a worked example, `ReportChargingProfilesRequest` defaults to 530 KB.
+//! A station that advertises `PeriodsPerSchedule = 8`, reports one profile at
+//! a time, and implements neither V2X nor ISO 15118-20 pricing compiles the
+//! same message at 18 KB by naming those capacities.
+//!
+//! The specification expects this: `SmartChargingCtrlr.PeriodsPerSchedule` is
+//! a required 2.x variable and 1.6 has `ChargingScheduleMaxPeriods`, so every
+//! station already declares its own limits. Compiling in the capacity you
+//! advertise is conformant; reserving the protocol ceiling you will never
+//! accept is merely large.
 //!
 //! # Fields the spec leaves untyped
 //!
@@ -129,13 +198,24 @@
 extern crate alloc;
 
 mod action;
+mod custom_data;
 mod envelope;
+mod timestamp;
 
 #[cfg(test)]
 mod generics_test;
 
 #[cfg(test)]
+mod size_test;
+
+#[cfg(test)]
+mod standard_test;
+
+#[cfg(test)]
 mod untyped_data_test;
+
+#[cfg(test)]
+mod v16_security_test;
 
 pub mod v16;
 pub mod v201;
@@ -144,7 +224,9 @@ pub mod v21;
 pub use action::Action;
 #[cfg(feature = "serde")]
 pub use envelope::{Call, CallError, CallResult, CallResultError, EmptyPayload, SendMessage};
+pub use custom_data::NoCustomData;
 pub use envelope::MessageId;
+pub use timestamp::{MAX_RFC3339_LEN, OcppDate, OcppTimeOfDay, OcppTimestamp, TimestampError};
 
 #[cfg(test)]
 mod tests {

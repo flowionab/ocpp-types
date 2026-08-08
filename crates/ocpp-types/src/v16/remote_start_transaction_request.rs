@@ -23,20 +23,12 @@ impl crate::Action for RemoteStartTransactionRequest {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RemoteStartTransactionRequest<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 16usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize = 1024usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize = 1024usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "chargingProfile"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub charging_profile: Option<
-        ChargingProfile<
-            CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-            CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-            CHARGING_PROFILE_VALID_FROM_CAP,
-            CHARGING_PROFILE_VALID_TO_CAP,
-        >,
+        ChargingProfile<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP>,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "connectorId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -45,17 +37,7 @@ pub struct RemoteStartTransactionRequest<
     pub id_tag: super::IdTag,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
-    const CHARGING_SCHEDULE_START_SCHEDULE_CAP: usize,
-    const CHARGING_PROFILE_VALID_FROM_CAP: usize,
-    const CHARGING_PROFILE_VALID_TO_CAP: usize,
-> crate::Action
-for RemoteStartTransactionRequest<
-    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
-    CHARGING_SCHEDULE_START_SCHEDULE_CAP,
-    CHARGING_PROFILE_VALID_FROM_CAP,
-    CHARGING_PROFILE_VALID_TO_CAP,
-> {
+impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
+for RemoteStartTransactionRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "RemoteStartTransaction";
 }

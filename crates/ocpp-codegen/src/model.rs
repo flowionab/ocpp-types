@@ -84,6 +84,13 @@ pub struct ConstParam {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeParam {
     pub name: String,
+    /// The default type, rendered verbatim into `<T = ...>`.
+    ///
+    /// `()` for a property the spec leaves untyped ("this deployment sends
+    /// nothing here"). `crate::NoCustomData` for `customData`, which needs a
+    /// default that still *deserializes* -- a peer may send an extension at
+    /// any time, and `()` accepts only `null`.
+    pub default: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -93,6 +100,17 @@ pub enum RustType {
     Number,
 
     BoundedString(usize),
+
+    /// A hand-written type in `ocpp-types` itself, named by absolute path
+    /// (e.g. `crate::OcppTimestamp`), for schema strings that carry a fixed
+    /// format the crate models properly.
+    ///
+    /// These are version-independent -- a `date-time` means the same thing in
+    /// 1.6J and 2.1 -- which is why they are addressed by crate path rather
+    /// than through the per-version `primitives` module. Each replaces a
+    /// string that stated no `maxLength` and so took the 1024-byte unbounded
+    /// default, removing the size and the const parameter together.
+    CrateType(String),
 
     /// A hand-written type in the target OCPP version's `primitives`
     /// module (e.g. `v16::primitives::IdTag`), referenced as `super::Name`

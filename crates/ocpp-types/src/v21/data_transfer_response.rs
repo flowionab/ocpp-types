@@ -2,21 +2,58 @@
 // `scripts/generate.sh` to regenerate; manual changes will be overwritten.
 
 use super::common::*;
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DataTransferResponse<DataTransferResponseData = ()> {
+pub struct DataTransferResponse<
+    DataTransferResponseData = (),
+    CustomDataType = crate::NoCustomData,
+> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// Data without specified length or format, in response to request.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub data: Option<DataTransferResponseData>,
     pub status: DataTransferStatusEnum,
     #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub status_info: Option<StatusInfo>,
+    pub status_info: Option<StatusInfo<CustomDataType>>,
 }
-impl<DataTransferResponseData> crate::Action
-for DataTransferResponse<DataTransferResponseData> {
+#[cfg(feature = "alloc")]
+impl<DataTransferResponseData, CustomDataType> crate::Action
+for DataTransferResponse<DataTransferResponseData, CustomDataType> {
+    const ACTION: &'static str = "DataTransfer";
+}
+#[cfg(not(feature = "alloc"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DataTransferResponse<
+    DataTransferResponseData = (),
+    CustomDataType = crate::NoCustomData,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize = 1024usize,
+> {
+    #[cfg_attr(feature = "serde", serde(rename = "customData"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub custom_data: Option<CustomDataType>,
+    /// Data without specified length or format, in response to request.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub data: Option<DataTransferResponseData>,
+    pub status: DataTransferStatusEnum,
+    #[cfg_attr(feature = "serde", serde(rename = "statusInfo"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub status_info: Option<StatusInfo<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP>>,
+}
+#[cfg(not(feature = "alloc"))]
+impl<
+    DataTransferResponseData,
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::Action
+for DataTransferResponse<
+    DataTransferResponseData,
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
     const ACTION: &'static str = "DataTransfer";
 }

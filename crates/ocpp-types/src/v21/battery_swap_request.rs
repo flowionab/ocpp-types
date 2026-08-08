@@ -5,57 +5,57 @@ use super::common::*;
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BatterySwapRequest {
+pub struct BatterySwapRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "batteryData"))]
-    pub battery_data: alloc::vec::Vec<BatteryData>,
+    pub battery_data: alloc::vec::Vec<BatteryData<CustomDataType>>,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventType"))]
     pub event_type: BatterySwapEventEnum,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken,
+    pub id_token: IdToken<CustomDataType>,
     /// RequestId to correlate BatteryIn/Out events and optional RequestBatterySwapRequest.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
 #[cfg(feature = "alloc")]
-impl crate::Action for BatterySwapRequest {
+impl<CustomDataType> crate::Action for BatterySwapRequest<CustomDataType> {
     const ACTION: &'static str = "BatterySwap";
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BatterySwapRequest<
-    const BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP: usize = 16usize,
-    const BATTERY_DATA_PRODUCTION_DATE_CAP: usize = 1024usize,
-    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 16usize,
+    CustomDataType = crate::NoCustomData,
+    const BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP: usize = 8usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "batteryData"))]
     pub battery_data: heapless::Vec<
-        BatteryData<BATTERY_DATA_PRODUCTION_DATE_CAP>,
+        BatteryData<CustomDataType>,
         BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP,
     >,
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "eventType"))]
     pub event_type: BatterySwapEventEnum,
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
-    pub id_token: IdToken<ID_TOKEN_ADDITIONAL_INFO_CAP>,
+    pub id_token: IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP>,
     /// RequestId to correlate BatteryIn/Out events and optional RequestBatterySwapRequest.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
     pub request_id: i64,
 }
 #[cfg(not(feature = "alloc"))]
 impl<
+    CustomDataType,
     const BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP: usize,
-    const BATTERY_DATA_PRODUCTION_DATE_CAP: usize,
     const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
 > crate::Action
 for BatterySwapRequest<
+    CustomDataType,
     BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP,
-    BATTERY_DATA_PRODUCTION_DATE_CAP,
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "BatterySwap";

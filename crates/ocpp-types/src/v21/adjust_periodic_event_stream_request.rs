@@ -4,13 +4,13 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AdjustPeriodicEventStreamRequest {
+pub struct AdjustPeriodicEventStreamRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     pub id: i64,
-    pub params: PeriodicEventStreamParams,
+    pub params: PeriodicEventStreamParams<CustomDataType>,
 }
-impl crate::Action for AdjustPeriodicEventStreamRequest {
+impl<CustomDataType> crate::Action for AdjustPeriodicEventStreamRequest<CustomDataType> {
     const ACTION: &'static str = "AdjustPeriodicEventStream";
 }

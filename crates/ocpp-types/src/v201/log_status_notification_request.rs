@@ -4,10 +4,10 @@
 use super::common::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LogStatusNotificationRequest {
+pub struct LogStatusNotificationRequest<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "customData"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub custom_data: Option<CustomData>,
+    pub custom_data: Option<CustomDataType>,
     /// The request id that was provided in GetLogRequest that started this log upload. This field is mandatory,
     /// unless the message was triggered by a TriggerMessageRequest AND there is no log upload ongoing.
     #[cfg_attr(feature = "serde", serde(rename = "requestId"))]
@@ -15,6 +15,6 @@ pub struct LogStatusNotificationRequest {
     pub request_id: Option<i64>,
     pub status: UploadLogStatusEnum,
 }
-impl crate::Action for LogStatusNotificationRequest {
+impl<CustomDataType> crate::Action for LogStatusNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "LogStatusNotification";
 }

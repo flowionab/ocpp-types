@@ -22,8 +22,7 @@ impl crate::Action for SendLocalListRequest {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendLocalListRequest<
-    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize = 16usize,
-    const ID_TAG_INFO_EXPIRY_DATE_CAP: usize = 1024usize,
+    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize = 8usize,
 > {
     #[cfg_attr(feature = "serde", serde(rename = "listVersion"))]
     pub list_version: i64,
@@ -31,7 +30,7 @@ pub struct SendLocalListRequest<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub local_authorization_list: Option<
         heapless::Vec<
-            LocalAuthorizationListItem<ID_TAG_INFO_EXPIRY_DATE_CAP>,
+            LocalAuthorizationListItem,
             SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP,
         >,
     >,
@@ -39,13 +38,7 @@ pub struct SendLocalListRequest<
     pub update_type: UpdateType,
 }
 #[cfg(not(feature = "alloc"))]
-impl<
-    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize,
-    const ID_TAG_INFO_EXPIRY_DATE_CAP: usize,
-> crate::Action
-for SendLocalListRequest<
-    SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP,
-    ID_TAG_INFO_EXPIRY_DATE_CAP,
-> {
+impl<const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize> crate::Action
+for SendLocalListRequest<SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP> {
     const ACTION: &'static str = "SendLocalList";
 }
