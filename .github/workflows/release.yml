@@ -52,6 +52,9 @@ jobs:
       - run: cargo test -p ocpp-types --features chrono
       - run: cargo test -p ocpp-types --features serde,alloc
       - run: cargo test -p ocpp-types --features serde,alloc,chrono
+      - run: cargo test -p ocpp-types --features validate
+      - run: cargo test -p ocpp-types --no-default-features --features validate
+      - run: cargo test -p ocpp-types --features validate,serde,alloc
       - run: ./scripts/generate.sh
       - name: Fail if generated types differ from what's committed
         run: |
