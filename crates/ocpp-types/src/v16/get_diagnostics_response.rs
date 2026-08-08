@@ -11,3 +11,9 @@ pub struct GetDiagnosticsResponse {
 impl crate::Action for GetDiagnosticsResponse {
     const ACTION: &'static str = "GetDiagnostics";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetDiagnosticsResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

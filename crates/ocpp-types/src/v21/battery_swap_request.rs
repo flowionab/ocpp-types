@@ -23,6 +23,22 @@ pub struct BatterySwapRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for BatterySwapRequest<CustomDataType> {
     const ACTION: &'static str = "BatterySwap";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for BatterySwapRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.battery_data.len(), 1usize)
+            .map_err(|error| error.in_field("batteryData"))?;
+        for (index, item) in self.battery_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("batteryData"))?;
+        }
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -59,4 +75,29 @@ for BatterySwapRequest<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "BatterySwap";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for BatterySwapRequest<
+    CustomDataType,
+    BATTERY_SWAP_REQUEST_BATTERY_DATA_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.battery_data.len(), 1usize)
+            .map_err(|error| error.in_field("batteryData"))?;
+        for (index, item) in self.battery_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("batteryData"))?;
+        }
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
 }

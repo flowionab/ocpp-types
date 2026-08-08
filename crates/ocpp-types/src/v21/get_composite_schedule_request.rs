@@ -20,3 +20,16 @@ pub struct GetCompositeScheduleRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetCompositeScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "GetCompositeSchedule";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetCompositeScheduleRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_rate_unit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingRateUnit"))?;
+        }
+        crate::validate::check_min_i64(self.evse_id, 0i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        Ok(())
+    }
+}

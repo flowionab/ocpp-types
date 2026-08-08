@@ -21,3 +21,12 @@ pub struct NotifyEVChargingNeedsRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyEVChargingNeedsRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyEVChargingNeedsRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_needs)
+            .map_err(|error| error.in_field("chargingNeeds"))?;
+        Ok(())
+    }
+}

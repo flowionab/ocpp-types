@@ -18,3 +18,9 @@ pub struct StartTransactionRequest {
 impl crate::Action for StartTransactionRequest {
     const ACTION: &'static str = "StartTransaction";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StartTransactionRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

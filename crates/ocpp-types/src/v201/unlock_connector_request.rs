@@ -17,3 +17,10 @@ pub struct UnlockConnectorRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for UnlockConnectorRequest<CustomDataType> {
     const ACTION: &'static str = "UnlockConnector";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for UnlockConnectorRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

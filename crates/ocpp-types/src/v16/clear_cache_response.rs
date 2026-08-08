@@ -10,3 +10,11 @@ pub struct ClearCacheResponse {
 impl crate::Action for ClearCacheResponse {
     const ACTION: &'static str = "ClearCache";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearCacheResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

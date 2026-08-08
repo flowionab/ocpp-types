@@ -10,3 +10,9 @@ pub struct ChangeConfigurationRequest {
 impl crate::Action for ChangeConfigurationRequest {
     const ACTION: &'static str = "ChangeConfiguration";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChangeConfigurationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

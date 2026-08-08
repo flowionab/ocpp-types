@@ -11,6 +11,14 @@ pub struct SignCertificateRequest {
 impl crate::Action for SignCertificateRequest {
     const ACTION: &'static str = "SignCertificate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for SignCertificateRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.csr, 5500usize)
+            .map_err(|error| error.in_field("csr"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23,4 +31,13 @@ pub struct SignCertificateRequest<
 impl<const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize> crate::Action
 for SignCertificateRequest<SIGN_CERTIFICATE_REQUEST_CSR_CAP> {
     const ACTION: &'static str = "SignCertificate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize> crate::validate::Validate
+for SignCertificateRequest<SIGN_CERTIFICATE_REQUEST_CSR_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.csr, 5500usize)
+            .map_err(|error| error.in_field("csr"))?;
+        Ok(())
+    }
 }

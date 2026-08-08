@@ -49,6 +49,15 @@ serde = ["dep:serde", "dep:serde-json-core", "heapless/serde"]
 # `alloc` support (needed for `Serialize`/`Deserialize` on those types) when
 # the `serde` feature is *also* enabled, without pulling serde in on its own.
 alloc = ["serde?/alloc"]
+# Spec-conformance checks the type system cannot carry: the `maxLength` of a
+# string too large to inline as a `heapless::String` (which is a plain
+# `alloc::string::String` under `alloc`, and a caller-chosen capacity
+# without it), plus every `minItems`/`minimum`/`maximum`/`multipleOf` in the
+# schemas, none of which a collection type can express. Off by default: a
+# station that only ever *builds* messages from bounded fields pays nothing,
+# while a CSMS -- which is where over-long payloads actually originate --
+# turns it on. See the `validate` module.
+validate = []
 # `From`/`Into` between `OcppTimestamp` and `chrono::DateTime`. Additive:
 # no message type changes shape, and chrono's own (allocating) serde support
 # is not pulled onto the wire path.
@@ -70,3 +79,7 @@ name = "unbounded_fields"
 [[example]]
 name = "envelope"
 required-features = ["serde"]
+
+[[example]]
+name = "validate"
+required-features = ["validate", "alloc"]

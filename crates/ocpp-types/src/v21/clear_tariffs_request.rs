@@ -21,6 +21,20 @@ pub struct ClearTariffsRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearTariffsRequest<CustomDataType> {
     const ACTION: &'static str = "ClearTariffs";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ClearTariffsRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.tariff_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("tariffIds"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -46,4 +60,22 @@ pub struct ClearTariffsRequest<
 impl<CustomDataType, const CLEAR_TARIFFS_REQUEST_TARIFF_IDS_CAP: usize> crate::Action
 for ClearTariffsRequest<CustomDataType, CLEAR_TARIFFS_REQUEST_TARIFF_IDS_CAP> {
     const ACTION: &'static str = "ClearTariffs";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CLEAR_TARIFFS_REQUEST_TARIFF_IDS_CAP: usize,
+> crate::validate::Validate
+for ClearTariffsRequest<CustomDataType, CLEAR_TARIFFS_REQUEST_TARIFF_IDS_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.tariff_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("tariffIds"))?;
+        }
+        Ok(())
+    }
 }

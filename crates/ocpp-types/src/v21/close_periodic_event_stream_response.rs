@@ -11,3 +11,10 @@ pub struct ClosePeriodicEventStreamResponse<CustomDataType = crate::NoCustomData
 impl<CustomDataType> crate::Action for ClosePeriodicEventStreamResponse<CustomDataType> {
     const ACTION: &'static str = "ClosePeriodicEventStream";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClosePeriodicEventStreamResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

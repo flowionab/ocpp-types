@@ -21,6 +21,17 @@ pub struct Get15118EVCertificateRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for Get15118EVCertificateRequest<CustomDataType> {
     const ACTION: &'static str = "Get15118EVCertificate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for Get15118EVCertificateRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.action)
+            .map_err(|error| error.in_field("action"))?;
+        crate::validate::check_max_length(&self.exi_request, 5600usize)
+            .map_err(|error| error.in_field("exiRequest"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -49,4 +60,21 @@ for Get15118EVCertificateRequest<
     GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP,
 > {
     const ACTION: &'static str = "Get15118EVCertificate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP: usize,
+> crate::validate::Validate
+for Get15118EVCertificateRequest<
+    CustomDataType,
+    GET15118_E_V_CERTIFICATE_REQUEST_EXI_REQUEST_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.action)
+            .map_err(|error| error.in_field("action"))?;
+        crate::validate::check_max_length(&self.exi_request, 5600usize)
+            .map_err(|error| error.in_field("exiRequest"))?;
+        Ok(())
+    }
 }

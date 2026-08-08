@@ -13,3 +13,10 @@ pub struct ClearDisplayMessageRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearDisplayMessageRequest<CustomDataType> {
     const ACTION: &'static str = "ClearDisplayMessage";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClearDisplayMessageRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

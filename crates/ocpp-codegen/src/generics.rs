@@ -192,6 +192,7 @@ fn push_unique_type(out: &mut Vec<TypeParam>, param: TypeParam) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::Constraints;
     use crate::model::RustStruct;
 
     fn struct_with_field(name: &str, field_name: &str, ty: RustType) -> GeneratedType {
@@ -204,6 +205,7 @@ mod tests {
                 ty,
                 optional: false,
                 description: None,
+                constraints: Constraints::default(),
             }],
         })
     }
@@ -302,12 +304,14 @@ mod tests {
                     ty: RustType::UnboundedString(param("TwoFieldsACap", 1024)),
                     optional: false,
                     description: None,
+                    constraints: Constraints::default(),
                 },
                 RustField {
                     name: "b".to_string(),
                     ty: RustType::UnboundedString(param("TwoFieldsBCap", 1024)),
                     optional: false,
                     description: None,
+                    constraints: Constraints::default(),
                 },
             ],
         })];

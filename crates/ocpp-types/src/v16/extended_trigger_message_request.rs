@@ -14,3 +14,11 @@ pub struct ExtendedTriggerMessageRequest {
 impl crate::Action for ExtendedTriggerMessageRequest {
     const ACTION: &'static str = "ExtendedTriggerMessage";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ExtendedTriggerMessageRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.requested_message)
+            .map_err(|error| error.in_field("requestedMessage"))?;
+        Ok(())
+    }
+}

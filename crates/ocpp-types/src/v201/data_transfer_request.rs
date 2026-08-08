@@ -25,3 +25,10 @@ impl<DataTransferRequestData, CustomDataType> crate::Action
 for DataTransferRequest<DataTransferRequestData, CustomDataType> {
     const ACTION: &'static str = "DataTransfer";
 }
+#[cfg(feature = "validate")]
+impl<DataTransferRequestData, CustomDataType> crate::validate::Validate
+for DataTransferRequest<DataTransferRequestData, CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

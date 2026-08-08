@@ -11,3 +11,9 @@ pub struct HeartbeatRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for HeartbeatRequest<CustomDataType> {
     const ACTION: &'static str = "Heartbeat";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for HeartbeatRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

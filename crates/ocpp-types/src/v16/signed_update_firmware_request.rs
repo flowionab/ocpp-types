@@ -19,6 +19,14 @@ pub struct SignedUpdateFirmwareRequest {
 impl crate::Action for SignedUpdateFirmwareRequest {
     const ACTION: &'static str = "SignedUpdateFirmware";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for SignedUpdateFirmwareRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.firmware)
+            .map_err(|error| error.in_field("firmware"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +53,19 @@ for SignedUpdateFirmwareRequest<
     FIRMWARE_SIGNING_CERTIFICATE_CAP,
 > {
     const ACTION: &'static str = "SignedUpdateFirmware";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const FIRMWARE_SIGNATURE_CAP: usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize,
+> crate::validate::Validate
+for SignedUpdateFirmwareRequest<
+    FIRMWARE_SIGNATURE_CAP,
+    FIRMWARE_SIGNING_CERTIFICATE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.firmware)
+            .map_err(|error| error.in_field("firmware"))?;
+        Ok(())
+    }
 }

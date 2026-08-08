@@ -16,6 +16,15 @@ pub struct GetCertificateStatusRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetCertificateStatusRequest<CustomDataType> {
     const ACTION: &'static str = "GetCertificateStatus";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetCertificateStatusRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.ocsp_request_data)
+            .map_err(|error| error.in_field("ocspRequestData"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -39,4 +48,19 @@ for GetCertificateStatusRequest<
     O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP,
 > {
     const ACTION: &'static str = "GetCertificateStatus";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP: usize,
+> crate::validate::Validate
+for GetCertificateStatusRequest<
+    CustomDataType,
+    O_C_S_P_REQUEST_DATA_RESPONDER_U_R_L_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.ocsp_request_data)
+            .map_err(|error| error.in_field("ocspRequestData"))?;
+        Ok(())
+    }
 }

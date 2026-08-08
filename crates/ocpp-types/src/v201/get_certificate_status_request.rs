@@ -14,3 +14,12 @@ pub struct GetCertificateStatusRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetCertificateStatusRequest<CustomDataType> {
     const ACTION: &'static str = "GetCertificateStatus";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetCertificateStatusRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.ocsp_request_data)
+            .map_err(|error| error.in_field("ocspRequestData"))?;
+        Ok(())
+    }
+}

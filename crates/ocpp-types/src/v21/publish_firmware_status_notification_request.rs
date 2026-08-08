@@ -31,6 +31,31 @@ impl<CustomDataType> crate::Action
 for PublishFirmwareStatusNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "PublishFirmwareStatusNotification";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for PublishFirmwareStatusNotificationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.location {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("location"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::check_max_length(item, 2000usize)
+                    .map_err(|error| error.in_index(index).in_field("location"))?;
+            }
+        }
+        if let Some(value) = self.request_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("requestId"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -79,4 +104,39 @@ for PublishFirmwareStatusNotificationRequest<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "PublishFirmwareStatusNotification";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP: usize,
+    const PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for PublishFirmwareStatusNotificationRequest<
+    CustomDataType,
+    PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_CAP,
+    PUBLISH_FIRMWARE_STATUS_NOTIFICATION_REQUEST_LOCATION_ITEM_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.location {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("location"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::check_max_length(item, 2000usize)
+                    .map_err(|error| error.in_index(index).in_field("location"))?;
+            }
+        }
+        if let Some(value) = self.request_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("requestId"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

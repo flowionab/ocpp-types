@@ -21,6 +21,18 @@ pub struct GetCompositeScheduleResponse {
 impl crate::Action for GetCompositeScheduleResponse {
     const ACTION: &'static str = "GetCompositeSchedule";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for GetCompositeScheduleResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_schedule {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingSchedule"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -44,4 +56,19 @@ pub struct GetCompositeScheduleResponse<
 impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
 for GetCompositeScheduleResponse<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "GetCompositeSchedule";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for GetCompositeScheduleResponse<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_schedule {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingSchedule"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
 }

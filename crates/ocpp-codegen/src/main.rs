@@ -8,6 +8,7 @@ mod pool;
 mod rust;
 mod schema;
 mod standard;
+mod validate;
 
 use clap::Parser;
 use model::OcppVersion;

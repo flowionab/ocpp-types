@@ -11,3 +11,10 @@ pub struct NotifyDERStartStopResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyDERStartStopResponse<CustomDataType> {
     const ACTION: &'static str = "NotifyDERStartStop";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyDERStartStopResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

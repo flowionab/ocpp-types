@@ -19,3 +19,14 @@ pub struct ClearChargingProfileRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearChargingProfileRequest<CustomDataType> {
     const ACTION: &'static str = "ClearChargingProfile";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClearChargingProfileRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile_criteria {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfileCriteria"))?;
+        }
+        Ok(())
+    }
+}

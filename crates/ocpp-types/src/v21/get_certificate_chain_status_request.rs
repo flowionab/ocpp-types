@@ -19,6 +19,21 @@ pub struct GetCertificateChainStatusRequest<CustomDataType = crate::NoCustomData
 impl<CustomDataType> crate::Action for GetCertificateChainStatusRequest<CustomDataType> {
     const ACTION: &'static str = "GetCertificateChainStatus";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetCertificateChainStatusRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.certificate_status_requests.len(), 1usize)
+            .map_err(|error| error.in_field("certificateStatusRequests"))?;
+        for (index, item) in self.certificate_status_requests.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("certificateStatusRequests")
+                })?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -48,4 +63,25 @@ for GetCertificateChainStatusRequest<
     CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP,
 > {
     const ACTION: &'static str = "GetCertificateChainStatus";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP: usize,
+> crate::validate::Validate
+for GetCertificateChainStatusRequest<
+    CustomDataType,
+    CERTIFICATE_STATUS_REQUEST_INFO_URLS_ITEM_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.certificate_status_requests.len(), 1usize)
+            .map_err(|error| error.in_field("certificateStatusRequests"))?;
+        for (index, item) in self.certificate_status_requests.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("certificateStatusRequests")
+                })?;
+        }
+        Ok(())
+    }
 }

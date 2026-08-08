@@ -19,6 +19,21 @@ impl<CustomDataType> crate::Action
 for GetInstalledCertificateIdsRequest<CustomDataType> {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetInstalledCertificateIdsRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_type {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("certificateType"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("certificateType"))?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -49,4 +64,25 @@ for GetInstalledCertificateIdsRequest<
     GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP,
 > {
     const ACTION: &'static str = "GetInstalledCertificateIds";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP: usize,
+> crate::validate::Validate
+for GetInstalledCertificateIdsRequest<
+    CustomDataType,
+    GET_INSTALLED_CERTIFICATE_IDS_REQUEST_CERTIFICATE_TYPE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_type {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("certificateType"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("certificateType"))?;
+            }
+        }
+        Ok(())
+    }
 }

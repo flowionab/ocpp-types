@@ -10,3 +10,11 @@ pub struct CancelReservationResponse {
 impl crate::Action for CancelReservationResponse {
     const ACTION: &'static str = "CancelReservation";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CancelReservationResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

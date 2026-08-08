@@ -10,3 +10,9 @@ pub struct AuthorizeRequest {
 impl crate::Action for AuthorizeRequest {
     const ACTION: &'static str = "Authorize";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for AuthorizeRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

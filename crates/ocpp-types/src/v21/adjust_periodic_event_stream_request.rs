@@ -14,3 +14,14 @@ pub struct AdjustPeriodicEventStreamRequest<CustomDataType = crate::NoCustomData
 impl<CustomDataType> crate::Action for AdjustPeriodicEventStreamRequest<CustomDataType> {
     const ACTION: &'static str = "AdjustPeriodicEventStream";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for AdjustPeriodicEventStreamRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        crate::validate::Validate::validate(&self.params)
+            .map_err(|error| error.in_field("params"))?;
+        Ok(())
+    }
+}

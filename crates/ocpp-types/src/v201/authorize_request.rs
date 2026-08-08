@@ -24,6 +24,28 @@ pub struct AuthorizeRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for AuthorizeRequest<CustomDataType> {
     const ACTION: &'static str = "Authorize";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for AuthorizeRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("certificate"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        if let Some(value) = &self.iso15118_certificate_hash_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("iso15118CertificateHashData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("iso15118CertificateHashData")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -58,4 +80,35 @@ for AuthorizeRequest<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "Authorize";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const AUTHORIZE_REQUEST_CERTIFICATE_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for AuthorizeRequest<
+    CustomDataType,
+    AUTHORIZE_REQUEST_CERTIFICATE_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("certificate"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        if let Some(value) = &self.iso15118_certificate_hash_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("iso15118CertificateHashData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("iso15118CertificateHashData")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

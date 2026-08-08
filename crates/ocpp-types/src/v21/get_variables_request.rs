@@ -16,6 +16,18 @@ pub struct GetVariablesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetVariablesRequest<CustomDataType> {
     const ACTION: &'static str = "GetVariables";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for GetVariablesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.get_variable_data.len(), 1usize)
+            .map_err(|error| error.in_field("getVariableData"))?;
+        for (index, item) in self.get_variable_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("getVariableData"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -39,4 +51,20 @@ impl<
 > crate::Action
 for GetVariablesRequest<CustomDataType, GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP> {
     const ACTION: &'static str = "GetVariables";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP: usize,
+> crate::validate::Validate
+for GetVariablesRequest<CustomDataType, GET_VARIABLES_REQUEST_GET_VARIABLE_DATA_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.get_variable_data.len(), 1usize)
+            .map_err(|error| error.in_field("getVariableData"))?;
+        for (index, item) in self.get_variable_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("getVariableData"))?;
+        }
+        Ok(())
+    }
 }

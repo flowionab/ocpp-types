@@ -21,6 +21,23 @@ pub struct NotifyPeriodicEventStream<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyPeriodicEventStream<CustomDataType> {
     const ACTION: &'static str = "NotifyPeriodicEventStream";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyPeriodicEventStream<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.data.len(), 1usize)
+            .map_err(|error| error.in_field("data"))?;
+        for (index, item) in self.data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("data"))?;
+        }
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        crate::validate::check_min_i64(self.pending, 0i64)
+            .map_err(|error| error.in_field("pending"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -55,4 +72,29 @@ for NotifyPeriodicEventStream<
     STREAM_DATA_ELEMENT_V_CAP,
 > {
     const ACTION: &'static str = "NotifyPeriodicEventStream";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP: usize,
+    const STREAM_DATA_ELEMENT_V_CAP: usize,
+> crate::validate::Validate
+for NotifyPeriodicEventStream<
+    CustomDataType,
+    NOTIFY_PERIODIC_EVENT_STREAM_DATA_CAP,
+    STREAM_DATA_ELEMENT_V_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.data.len(), 1usize)
+            .map_err(|error| error.in_field("data"))?;
+        for (index, item) in self.data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("data"))?;
+        }
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        crate::validate::check_min_i64(self.pending, 0i64)
+            .map_err(|error| error.in_field("pending"))?;
+        Ok(())
+    }
 }

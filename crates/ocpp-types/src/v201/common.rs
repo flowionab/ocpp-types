@@ -8,6 +8,12 @@ pub struct CustomData {
     #[cfg_attr(feature = "serde", serde(rename = "vendorId"))]
     pub vendor_id: heapless::String<255usize>,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CustomData {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -20,6 +26,12 @@ pub struct AdditionalInfo<CustomDataType = crate::NoCustomData> {
     pub custom_data: Option<CustomDataType>,
     /// This defines the type of the additionalIdToken. This is a custom type, so the implementation needs to be agreed upon by all involved parties.
     pub r#type: heapless::String<50usize>,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for AdditionalInfo<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Enumeration of possible idToken types.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,6 +46,12 @@ pub enum IdTokenEnum {
     Local,
     MacAddress,
     NoAuthorization,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for IdTokenEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
@@ -50,6 +68,22 @@ pub struct IdToken<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "idToken"))]
     pub id_token: heapless::String<36usize>,
     pub r#type: IdTokenEnum,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for IdToken<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.additional_info {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("additionalInfo"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("additionalInfo"))?;
+            }
+        }
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Contains a case insensitive identifier to use for the authorization and the type of authorization to support multiple forms of identifiers.
@@ -72,6 +106,23 @@ pub struct IdToken<
     pub id_token: heapless::String<36usize>,
     pub r#type: IdTokenEnum,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::validate::Validate
+for IdToken<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.additional_info {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("additionalInfo"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("additionalInfo"))?;
+            }
+        }
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        Ok(())
+    }
+}
 /// Used algorithms for the hashes provided.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -79,6 +130,12 @@ pub enum HashAlgorithmEnum {
     SHA256,
     SHA384,
     SHA512,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for HashAlgorithmEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -101,6 +158,14 @@ pub struct OCSPRequestData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "serialNumber"))]
     pub serial_number: heapless::String<40usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for OCSPRequestData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.hash_algorithm)
+            .map_err(|error| error.in_field("hashAlgorithm"))?;
+        Ok(())
+    }
+}
 /// Certificate status information.
 /// - if all certificates are valid: return 'Accepted'.
 /// - if one of the certificates was revoked, return 'CertificateRevoked'.
@@ -115,6 +180,12 @@ pub enum AuthorizeCertificateStatusEnum {
     CertChainError,
     ContractCancelled,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for AuthorizeCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Message_ Content. Format. Message_ Format_ Code
 /// urn:x-enexis:ecdm:uid:1:570848
 /// Format of the message.
@@ -125,6 +196,12 @@ pub enum MessageFormatEnum {
     HTML,
     URI,
     UTF8,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MessageFormatEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Message_ Content
 /// urn:x-enexis:ecdm:uid:2:234490
@@ -146,6 +223,14 @@ pub struct MessageContent<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub language: Option<heapless::String<8usize>>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for MessageContent<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.format)
+            .map_err(|error| error.in_field("format"))?;
+        Ok(())
+    }
+}
 /// ID_ Token. Status. Authorization_ Status
 /// urn:x-oca:ocpp:uid:1:569372
 /// Current status of the ID Token.
@@ -162,6 +247,12 @@ pub enum AuthorizationStatusEnum {
     NotAtThisLocation,
     NotAtThisTime,
     Unknown,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for AuthorizationStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// ID_ Token
@@ -205,6 +296,26 @@ pub struct IdTokenInfo<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub personal_message: Option<MessageContent<CustomDataType>>,
     pub status: AuthorizationStatusEnum,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for IdTokenInfo<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.evse_id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        if let Some(value) = &self.personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("personalMessage"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// ID_ Token
@@ -253,6 +364,35 @@ pub struct IdTokenInfo<
     pub personal_message: Option<MessageContent<CustomDataType>>,
     pub status: AuthorizationStatusEnum,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for IdTokenInfo<
+    CustomDataType,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.evse_id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        if let Some(value) = &self.personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("personalMessage"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}
 /// Wireless_ Communication_ Module
 /// urn:x-oca:ocpp:uid:2:233306
 /// Defines parameters required for initiating and maintaining wireless communication with other devices.
@@ -272,6 +412,12 @@ pub struct Modem<CustomDataType = crate::NoCustomData> {
     /// This contains the IMSI of the modem’s SIM card.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub imsi: Option<heapless::String<20usize>>,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for Modem<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Charge_ Point
 /// urn:x-oca:ocpp:uid:2:233122
@@ -302,6 +448,16 @@ pub struct ChargingStation<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "vendorName"))]
     pub vendor_name: heapless::String<50usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ChargingStation<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.modem {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("modem"))?;
+        }
+        Ok(())
+    }
+}
 /// This contains the reason for sending this message to the CSMS.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -316,6 +472,12 @@ pub enum BootReasonEnum {
     Unknown,
     Watchdog,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for BootReasonEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This contains whether the Charging Station has been registered
 /// within the CSMS.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -324,6 +486,12 @@ pub enum RegistrationStatusEnum {
     Accepted,
     Pending,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RegistrationStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Element providing more information about the status.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -340,12 +508,24 @@ pub struct StatusInfo<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "reasonCode"))]
     pub reason_code: heapless::String<20usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for StatusInfo<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This indicates the success or failure of the canceling of a reservation by CSMS.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CancelReservationStatusEnum {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CancelReservationStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Indicates the type of the signed certificate that is returned. When omitted the certificate is used for both the 15118 connection (if implemented) and the Charging Station to CSMS connection. This field is required when a typeOfCertificate was included in the &lt;&lt;signcertificaterequest,SignCertificateRequest&gt;&gt; that requested this certificate to be signed AND both the 15118 connection and the Charging Station connection are implemented.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -354,12 +534,24 @@ pub enum CertificateSigningUseEnum {
     ChargingStationCertificate,
     V2GCertificate,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateSigningUseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Returns whether certificate signing has been accepted, otherwise rejected.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CertificateSignedStatusEnum {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateSignedStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// EVSE
 /// urn:x-oca:ocpp:uid:2:233123
@@ -379,12 +571,24 @@ pub struct EVSE<CustomDataType = crate::NoCustomData> {
     /// EVSE Identifier. This contains a number (&gt; 0) designating an EVSE of the Charging Station.
     pub id: i64,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for EVSE<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This contains the type of availability change that the Charging Station should perform.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum OperationalStatusEnum {
     Inoperative,
     Operative,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for OperationalStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station is able to perform the availability change.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -394,12 +598,24 @@ pub enum ChangeAvailabilityStatusEnum {
     Rejected,
     Scheduled,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChangeAvailabilityStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Accepted if the Charging Station has executed the request, otherwise rejected.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClearCacheStatusEnum {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearCacheStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Charging_ Profile. Charging_ Profile_ Purpose. Charging_ Profile_ Purpose_ Code
 /// urn:x-oca:ocpp:uid:1:569231
@@ -411,6 +627,12 @@ pub enum ChargingProfilePurposeEnum {
     ChargingStationMaxProfile,
     TxDefaultProfile,
     TxProfile,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingProfilePurposeEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Charging_ Profile
 /// urn:x-oca:ocpp:uid:2:233255
@@ -437,12 +659,28 @@ pub struct ClearChargingProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub stack_level: Option<i64>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ClearChargingProfile<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile_purpose {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        }
+        Ok(())
+    }
+}
 /// Indicates if the Charging Station was able to execute the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClearChargingProfileStatusEnum {
     Accepted,
     Unknown,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearChargingProfileStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Returns whether the Charging Station has been able to remove the message.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -451,6 +689,12 @@ pub enum ClearMessageStatusEnum {
     Accepted,
     Unknown,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearMessageStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Result of the clear request for this monitor, identified by its Id.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -458,6 +702,12 @@ pub enum ClearMonitoringStatusEnum {
     Accepted,
     Rejected,
     NotFound,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearMonitoringStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -472,6 +722,19 @@ pub struct ClearMonitoringResult<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub status_info: Option<StatusInfo<CustomDataType>>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClearMonitoringResult<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 /// Source of the charging limit.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -480,6 +743,12 @@ pub enum ChargingLimitSourceEnum {
     Other,
     SO,
     CSO,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingLimitSourceEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -499,6 +768,14 @@ pub struct CertificateHashData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "serialNumber"))]
     pub serial_number: heapless::String<40usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for CertificateHashData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.hash_algorithm)
+            .map_err(|error| error.in_field("hashAlgorithm"))?;
+        Ok(())
+    }
+}
 /// Indicates whether the request was accepted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -506,6 +783,12 @@ pub enum CustomerInformationStatusEnum {
     Accepted,
     Rejected,
     Invalid,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CustomerInformationStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates the success or failure of the data transfer.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -516,6 +799,12 @@ pub enum DataTransferStatusEnum {
     UnknownMessageId,
     UnknownVendorId,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DataTransferStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Charging Station indicates if it can process the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -523,6 +812,12 @@ pub enum DeleteCertificateStatusEnum {
     Accepted,
     Failed,
     NotFound,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DeleteCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This contains the progress status of the firmware installation.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -543,12 +838,24 @@ pub enum FirmwareStatusEnum {
     InvalidSignature,
     SignatureVerified,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for FirmwareStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Defines whether certificate needs to be installed or updated.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CertificateActionEnum {
     Install,
     Update,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateActionEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Indicates whether the message was processed properly.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -557,6 +864,12 @@ pub enum Iso15118EVCertificateStatusEnum {
     Accepted,
     Failed,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Iso15118EVCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This field specifies the report base.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -564,6 +877,12 @@ pub enum ReportBaseEnum {
     ConfigurationInventory,
     FullInventory,
     SummaryInventory,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReportBaseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station is able to accept this request.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -574,12 +893,24 @@ pub enum GenericDeviceModelStatusEnum {
     NotSupported,
     EmptyResultSet,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GenericDeviceModelStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This indicates whether the charging station was able to retrieve the OCSP certificate status.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetCertificateStatusEnum {
     Accepted,
     Failed,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Charging_ Profile
@@ -608,6 +939,31 @@ pub struct ChargingProfileCriterion<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "stackLevel"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub stack_level: Option<i64>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for ChargingProfileCriterion<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_limit_source {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingLimitSource"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("chargingLimitSource")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.charging_profile_id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingProfileId"))?;
+        }
+        if let Some(value) = &self.charging_profile_purpose {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Charging_ Profile
@@ -642,6 +998,37 @@ pub struct ChargingProfileCriterion<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub stack_level: Option<i64>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize,
+> crate::validate::Validate
+for ChargingProfileCriterion<
+    CustomDataType,
+    CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_limit_source {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingLimitSource"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("chargingLimitSource")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.charging_profile_id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingProfileId"))?;
+        }
+        if let Some(value) = &self.charging_profile_purpose {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        }
+        Ok(())
+    }
+}
 /// This indicates whether the Charging Station is able to process this request and will send &lt;&lt;reportchargingprofilesrequest, ReportChargingProfilesRequest&gt;&gt; messages.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -649,12 +1036,24 @@ pub enum GetChargingProfileStatusEnum {
     Accepted,
     NoProfiles,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetChargingProfileStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Can be used to force a power or current profile.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChargingRateUnitEnum {
     W,
     A,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingRateUnitEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Charging_ Schedule_ Period
 /// urn:x-oca:ocpp:uid:2:233257
@@ -685,6 +1084,13 @@ pub struct ChargingSchedulePeriod<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "startPeriod"))]
     pub start_period: i64,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ChargingSchedulePeriod<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 /// Composite_ Schedule
 /// urn:x-oca:ocpp:uid:2:233362
@@ -713,6 +1119,22 @@ pub struct CompositeSchedule<CustomDataType = crate::NoCustomData> {
     /// Date and time at which the schedule becomes active. All time measurements within the schedule are relative to this timestamp.
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
     pub schedule_start: crate::OcppTimestamp,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for CompositeSchedule<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        crate::validate::check_min_items(self.charging_schedule_period.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Composite_ Schedule
@@ -747,6 +1169,26 @@ pub struct CompositeSchedule<
     #[cfg_attr(feature = "serde", serde(rename = "scheduleStart"))]
     pub schedule_start: crate::OcppTimestamp,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for CompositeSchedule<CustomDataType, COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        crate::validate::check_min_items(self.charging_schedule_period.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        Ok(())
+    }
+}
 /// The Charging Station will indicate if it was
 /// able to process the request
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -755,6 +1197,12 @@ pub enum GenericStatusEnum {
     Accepted,
     Rejected,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GenericStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// If provided the Charging Station shall return Display Messages with the given priority only.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -762,6 +1210,12 @@ pub enum MessagePriorityEnum {
     AlwaysFront,
     InFront,
     NormalCycle,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MessagePriorityEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// If provided the Charging Station shall return Display Messages with the given state only.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -772,12 +1226,24 @@ pub enum MessageStateEnum {
     Idle,
     Unavailable,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MessageStateEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Indicates if the Charging Station has Display Messages that match the request criteria in the &lt;&lt;getdisplaymessagesrequest,GetDisplayMessagesRequest&gt;&gt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetDisplayMessagesStatusEnum {
     Accepted,
     Unknown,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetDisplayMessagesStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -787,6 +1253,12 @@ pub enum GetCertificateIdUseEnum {
     CSMSRootCertificate,
     V2GCertificateChain,
     ManufacturerRootCertificate,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetCertificateIdUseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -804,12 +1276,39 @@ pub struct CertificateHashDataChain<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for CertificateHashDataChain<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.certificate_hash_data)
+            .map_err(|error| error.in_field("certificateHashData"))?;
+        crate::validate::Validate::validate(&self.certificate_type)
+            .map_err(|error| error.in_field("certificateType"))?;
+        if let Some(value) = &self.child_certificate_hash_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("childCertificateHashData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("childCertificateHashData")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 /// Charging Station indicates if it can process the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetInstalledCertificateStatusEnum {
     Accepted,
     NotFound,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetInstalledCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Log
 /// urn:x-enexis:ecdm:uid:2:233373
@@ -838,6 +1337,12 @@ pub struct LogParameters<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "remoteLocation"))]
     pub remote_location: heapless::String<512usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for LogParameters<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This contains the type of log file that the Charging Station
 /// should send.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -846,6 +1351,12 @@ pub enum LogEnum {
     DiagnosticsLog,
     SecurityLog,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LogEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This field indicates whether the Charging Station was able to accept the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -853,6 +1364,12 @@ pub enum LogStatusEnum {
     Accepted,
     Rejected,
     AcceptedCanceled,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LogStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// A physical or logical component
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -869,6 +1386,16 @@ pub struct Component<CustomDataType = crate::NoCustomData> {
     /// Name of the component. Name should be taken from the list of standardized component names whenever possible. Case Insensitive. strongly advised to use Camel Case.
     pub name: heapless::String<50usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for Component<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        Ok(())
+    }
+}
 /// Reference key to a component-variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -882,6 +1409,12 @@ pub struct Variable<CustomDataType = crate::NoCustomData> {
     /// Name of the variable. Name should be taken from the list of standardized variable names whenever possible. Case Insensitive. strongly advised to use Camel Case.
     pub name: heapless::String<50usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for Variable<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Class to report components, variables and variable attributes and characteristics.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -893,12 +1426,30 @@ pub struct ComponentVariable<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub variable: Option<Variable<CustomDataType>>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ComponentVariable<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        if let Some(value) = &self.variable {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("variable"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MonitoringCriterionEnum {
     ThresholdMonitoring,
     DeltaMonitoring,
     PeriodicMonitoring,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MonitoringCriterionEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -908,6 +1459,12 @@ pub enum ComponentCriterionEnum {
     Enabled,
     Problem,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ComponentCriterionEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Attribute type for which value is requested. When absent, default Actual is assumed.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -916,6 +1473,12 @@ pub enum AttributeEnum {
     Target,
     MinSet,
     MaxSet,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for AttributeEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Class to hold parameters for GetVariables request.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -930,6 +1493,20 @@ pub struct GetVariableData<CustomDataType = crate::NoCustomData> {
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for GetVariableData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// Result status of getting the variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -939,6 +1516,12 @@ pub enum GetVariableStatusEnum {
     UnknownComponent,
     UnknownVariable,
     NotSupportedAttributeType,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetVariableStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Class to hold results of GetVariables request.
@@ -964,6 +1547,30 @@ pub struct GetVariableResult<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for GetVariableResult<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.attribute_status)
+            .map_err(|error| error.in_field("attributeStatus"))?;
+        if let Some(value) = &self.attribute_status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeStatusInfo"))?;
+        }
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        if let Some(value) = &self.attribute_value {
+            crate::validate::check_max_length(value, 2500usize)
+                .map_err(|error| error.in_field("attributeValue"))?;
+        }
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Class to hold results of GetVariables request.
@@ -995,6 +1602,34 @@ pub struct GetVariableResult<
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_VARIABLE_RESULT_ATTRIBUTE_VALUE_CAP: usize,
+> crate::validate::Validate
+for GetVariableResult<CustomDataType, GET_VARIABLE_RESULT_ATTRIBUTE_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.attribute_status)
+            .map_err(|error| error.in_field("attributeStatus"))?;
+        if let Some(value) = &self.attribute_status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeStatusInfo"))?;
+        }
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        if let Some(value) = &self.attribute_value {
+            crate::validate::check_max_length(value, 2500usize)
+                .map_err(|error| error.in_field("attributeValue"))?;
+        }
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// Indicates the certificate type that is sent.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1004,6 +1639,12 @@ pub enum InstallCertificateUseEnum {
     CSMSRootCertificate,
     ManufacturerRootCertificate,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for InstallCertificateUseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Charging Station indicates if installation was successful.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1011,6 +1652,12 @@ pub enum InstallCertificateStatusEnum {
     Accepted,
     Rejected,
     Failed,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for InstallCertificateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This contains the status of the log upload.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1024,6 +1671,12 @@ pub enum UploadLogStatusEnum {
     UploadFailure,
     Uploading,
     AcceptedCanceled,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UploadLogStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Sampled_ Value. Context. Reading_ Context_ Code
 /// urn:x-oca:ocpp:uid:1:569261
@@ -1046,6 +1699,12 @@ pub enum ReadingContextEnum {
     TransactionEnd,
     Trigger,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReadingContextEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Sampled_ Value. Location. Location_ Code
 /// urn:x-oca:ocpp:uid:1:569265
 /// Indicates where the measured value has been sampled. Default =  "Outlet"
@@ -1057,6 +1716,12 @@ pub enum LocationEnum {
     EV,
     Inlet,
     Outlet,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LocationEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Sampled_ Value. Measurand. Measurand_ Code
 /// urn:x-oca:ocpp:uid:1:569263
@@ -1112,6 +1777,12 @@ pub enum MeasurandEnum {
     SoC,
     Voltage,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MeasurandEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Sampled_ Value. Phase. Phase_ Code
 /// urn:x-oca:ocpp:uid:1:569264
 /// Indicates how the measured value is to be interpreted. For instance between L1 and neutral (L1-N) Please note that not all values of phase are applicable to all Measurands. When phase is absent, the measured value is interpreted as an overall value.
@@ -1135,6 +1806,12 @@ pub enum PhaseEnum {
     #[cfg_attr(feature = "serde", serde(rename = "L3-L1"))]
     L3L1,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for PhaseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 /// Represent a signed version of the meter value.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1155,6 +1832,16 @@ pub struct SignedMeterValue<CustomDataType = crate::NoCustomData> {
     /// Method used to create the digital signature.
     #[cfg_attr(feature = "serde", serde(rename = "signingMethod"))]
     pub signing_method: heapless::String<50usize>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SignedMeterValue<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.public_key, 2500usize)
+            .map_err(|error| error.in_field("publicKey"))?;
+        crate::validate::check_max_length(&self.signed_meter_data, 2500usize)
+            .map_err(|error| error.in_field("signedMeterData"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Represent a signed version of the meter value.
@@ -1181,6 +1868,25 @@ pub struct SignedMeterValue<
     #[cfg_attr(feature = "serde", serde(rename = "signingMethod"))]
     pub signing_method: heapless::String<50usize>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for SignedMeterValue<
+    CustomDataType,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.public_key, 2500usize)
+            .map_err(|error| error.in_field("publicKey"))?;
+        crate::validate::check_max_length(&self.signed_meter_data, 2500usize)
+            .map_err(|error| error.in_field("signedMeterData"))?;
+        Ok(())
+    }
+}
 /// Represents a UnitOfMeasure with a multiplier
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1196,6 +1902,12 @@ pub struct UnitOfMeasure<CustomDataType = crate::NoCustomData> {
     /// If an applicable unit is available in that list, otherwise a "custom" unit might be used.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub unit: Option<heapless::String<20usize>>,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for UnitOfMeasure<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Sampled_ Value
@@ -1227,6 +1939,36 @@ pub struct SampledValue<CustomDataType = crate::NoCustomData> {
     /// urn:x-oca:ocpp:uid:1:569260
     /// Indicates the measured value.
     pub value: f64,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SampledValue<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.context {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("context"))?;
+        }
+        if let Some(value) = &self.location {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("location"))?;
+        }
+        if let Some(value) = &self.measurand {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("measurand"))?;
+        }
+        if let Some(value) = &self.phase {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("phase"))?;
+        }
+        if let Some(value) = &self.signed_meter_value {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("signedMeterValue"))?;
+        }
+        if let Some(value) = &self.unit_of_measure {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("unitOfMeasure"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Sampled_ Value
@@ -1269,6 +2011,45 @@ pub struct SampledValue<
     /// Indicates the measured value.
     pub value: f64,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for SampledValue<
+    CustomDataType,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.context {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("context"))?;
+        }
+        if let Some(value) = &self.location {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("location"))?;
+        }
+        if let Some(value) = &self.measurand {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("measurand"))?;
+        }
+        if let Some(value) = &self.phase {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("phase"))?;
+        }
+        if let Some(value) = &self.signed_meter_value {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("signedMeterValue"))?;
+        }
+        if let Some(value) = &self.unit_of_measure {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("unitOfMeasure"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 /// Meter_ Value
 /// urn:x-oca:ocpp:uid:2:233265
@@ -1285,6 +2066,18 @@ pub struct MeterValue<CustomDataType = crate::NoCustomData> {
     /// urn:x-oca:ocpp:uid:1:569259
     /// Timestamp for measured value(s).
     pub timestamp: crate::OcppTimestamp,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for MeterValue<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.sampled_value.len(), 1usize)
+            .map_err(|error| error.in_field("sampledValue"))?;
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Meter_ Value
@@ -1315,6 +2108,29 @@ pub struct MeterValue<
     /// Timestamp for measured value(s).
     pub timestamp: crate::OcppTimestamp,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for MeterValue<
+    CustomDataType,
+    METER_VALUE_SAMPLED_VALUE_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.sampled_value.len(), 1usize)
+            .map_err(|error| error.in_field("sampledValue"))?;
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
+}
 /// Charging_ Limit
 /// urn:x-enexis:ecdm:uid:2:234489
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1332,6 +2148,14 @@ pub struct ChargingLimit<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub is_grid_critical: Option<bool>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ChargingLimit<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_limit_source)
+            .map_err(|error| error.in_field("chargingLimitSource"))?;
+        Ok(())
+    }
+}
 /// Cost. Cost_ Kind. Cost_ Kind_ Code
 /// urn:x-oca:ocpp:uid:1:569243
 /// The kind of cost referred to in the message element amount
@@ -1341,6 +2165,12 @@ pub enum CostKindEnum {
     CarbonDioxideEmission,
     RelativePricePercentage,
     RenewableGenerationPercentage,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CostKindEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Cost
 /// urn:x-oca:ocpp:uid:2:233258
@@ -1363,6 +2193,14 @@ pub struct Cost<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for Cost<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.cost_kind)
+            .map_err(|error| error.in_field("costKind"))?;
+        Ok(())
+    }
+}
 /// Consumption_ Cost
 /// urn:x-oca:ocpp:uid:2:233259
 #[derive(Debug, Clone, PartialEq)]
@@ -1377,6 +2215,18 @@ pub struct ConsumptionCost<CustomDataType = crate::NoCustomData> {
     /// The lowest level of consumption that defines the starting point of this consumption block. The block interval extends to the start of the next interval.
     #[cfg_attr(feature = "serde", serde(rename = "startValue"))]
     pub start_value: f64,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ConsumptionCost<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.cost.len(), 1usize)
+            .map_err(|error| error.in_field("cost"))?;
+        for (index, item) in self.cost.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("cost"))?;
+        }
+        Ok(())
+    }
 }
 /// Relative_ Timer_ Interval
 /// urn:x-oca:ocpp:uid:2:233270
@@ -1395,6 +2245,12 @@ pub struct RelativeTimeInterval<CustomDataType = crate::NoCustomData> {
     /// urn:x-oca:ocpp:uid:1:569279
     /// Start of the interval, in seconds from NOW.
     pub start: i64,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for RelativeTimeInterval<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Sales_ Tariff_ Entry
 /// urn:x-oca:ocpp:uid:2:233271
@@ -1415,6 +2271,26 @@ pub struct SalesTariffEntry<CustomDataType = crate::NoCustomData> {
     pub e_price_level: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "relativeTimeInterval"))]
     pub relative_time_interval: RelativeTimeInterval<CustomDataType>,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for SalesTariffEntry<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.consumption_cost {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("consumptionCost"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("consumptionCost"))?;
+            }
+        }
+        if let Some(value) = self.e_price_level {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("ePriceLevel"))?;
+        }
+        crate::validate::Validate::validate(&self.relative_time_interval)
+            .map_err(|error| error.in_field("relativeTimeInterval"))?;
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Sales_ Tariff
@@ -1444,6 +2320,20 @@ pub struct SalesTariff<CustomDataType = crate::NoCustomData> {
     pub sales_tariff_description: Option<heapless::String<32usize>>,
     #[cfg_attr(feature = "serde", serde(rename = "salesTariffEntry"))]
     pub sales_tariff_entry: alloc::vec::Vec<SalesTariffEntry<CustomDataType>>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SalesTariff<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.sales_tariff_entry.len(), 1usize)
+            .map_err(|error| error.in_field("salesTariffEntry"))?;
+        crate::validate::check_max_items(self.sales_tariff_entry.len(), 1024usize)
+            .map_err(|error| error.in_field("salesTariffEntry"))?;
+        for (index, item) in self.sales_tariff_entry.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("salesTariffEntry"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Sales_ Tariff
@@ -1479,6 +2369,24 @@ pub struct SalesTariff<
         SalesTariffEntry<CustomDataType>,
         SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
     >,
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for SalesTariff<CustomDataType, SALES_TARIFF_SALES_TARIFF_ENTRY_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.sales_tariff_entry.len(), 1usize)
+            .map_err(|error| error.in_field("salesTariffEntry"))?;
+        crate::validate::check_max_items(self.sales_tariff_entry.len(), 1024usize)
+            .map_err(|error| error.in_field("salesTariffEntry"))?;
+        for (index, item) in self.sales_tariff_entry.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("salesTariffEntry"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Charging_ Schedule
@@ -1518,6 +2426,28 @@ pub struct ChargingSchedule<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub start_schedule: Option<crate::OcppTimestamp>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ChargingSchedule<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        crate::validate::check_min_items(self.charging_schedule_period.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        crate::validate::check_max_items(self.charging_schedule_period.len(), 1024usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        if let Some(value) = &self.sales_tariff {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("salesTariff"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Charging_ Schedule
@@ -1565,6 +2495,37 @@ pub struct ChargingSchedule<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub start_schedule: Option<crate::OcppTimestamp>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for ChargingSchedule<
+    CustomDataType,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        crate::validate::check_min_items(self.charging_schedule_period.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        crate::validate::check_max_items(self.charging_schedule_period.len(), 1024usize)
+            .map_err(|error| error.in_field("chargingSchedulePeriod"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        if let Some(value) = &self.sales_tariff {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("salesTariff"))?;
+        }
+        Ok(())
+    }
+}
 /// Message_ Info
 /// urn:x-enexis:ecdm:uid:2:233264
 /// Contains message details, for a message to be displayed on a Charging Station.
@@ -1603,6 +2564,24 @@ pub struct MessageInfo<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub transaction_id: Option<heapless::String<36usize>>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for MessageInfo<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.display {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("display"))?;
+        }
+        crate::validate::Validate::validate(&self.message)
+            .map_err(|error| error.in_field("message"))?;
+        crate::validate::Validate::validate(&self.priority)
+            .map_err(|error| error.in_field("priority"))?;
+        if let Some(value) = &self.state {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("state"))?;
+        }
+        Ok(())
+    }
+}
 /// AC_ Charging_ Parameters
 /// urn:x-oca:ocpp:uid:2:233250
 /// EV AC charging parameters.
@@ -1632,6 +2611,12 @@ pub struct ACChargingParameters<CustomDataType = crate::NoCustomData> {
     /// Minimum current (amps) supported by the electric vehicle (per phase).
     #[cfg_attr(feature = "serde", serde(rename = "evMinCurrent"))]
     pub ev_min_current: i64,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ACChargingParameters<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// DC_ Charging_ Parameters
 /// urn:x-oca:ocpp:uid:2:233251
@@ -1689,6 +2674,30 @@ pub struct DCChargingParameters<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub state_of_charge: Option<i64>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for DCChargingParameters<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.bulk_so_c {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("bulkSoC"))?;
+            crate::validate::check_max_i64(value, 100i64)
+                .map_err(|error| error.in_field("bulkSoC"))?;
+        }
+        if let Some(value) = self.full_so_c {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("fullSoC"))?;
+            crate::validate::check_max_i64(value, 100i64)
+                .map_err(|error| error.in_field("fullSoC"))?;
+        }
+        if let Some(value) = self.state_of_charge {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("stateOfCharge"))?;
+            crate::validate::check_max_i64(value, 100i64)
+                .map_err(|error| error.in_field("stateOfCharge"))?;
+        }
+        Ok(())
+    }
+}
 /// Charging_ Needs. Requested. Energy_ Transfer_ Mode_ Code
 /// urn:x-oca:ocpp:uid:1:569209
 /// Mode of energy transfer requested by the EV.
@@ -1702,6 +2711,12 @@ pub enum EnergyTransferModeEnum {
     ACtwophase,
     #[cfg_attr(feature = "serde", serde(rename = "AC_three_phase"))]
     ACthreephase,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for EnergyTransferModeEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Charging_ Needs
 /// urn:x-oca:ocpp:uid:2:233249
@@ -1726,6 +2741,22 @@ pub struct ChargingNeeds<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "requestedEnergyTransfer"))]
     pub requested_energy_transfer: EnergyTransferModeEnum,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ChargingNeeds<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.ac_charging_parameters {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("acChargingParameters"))?;
+        }
+        if let Some(value) = &self.dc_charging_parameters {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("dcChargingParameters"))?;
+        }
+        crate::validate::Validate::validate(&self.requested_energy_transfer)
+            .map_err(|error| error.in_field("requestedEnergyTransfer"))?;
+        Ok(())
+    }
+}
 /// Returns whether the CSMS has been able to process the message successfully. It does not imply that the evChargingNeeds can be met with the current charging profile.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1733,6 +2764,12 @@ pub enum NotifyEVChargingNeedsStatusEnum {
     Accepted,
     Rejected,
     Processing,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for NotifyEVChargingNeedsStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Specifies the event notification type of the message.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1743,6 +2780,12 @@ pub enum EventNotificationEnum {
     PreconfiguredMonitor,
     CustomMonitor,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for EventNotificationEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Type of monitor that triggered this event, e.g. exceeding a threshold value.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1750,6 +2793,12 @@ pub enum EventTriggerEnum {
     Alerting,
     Delta,
     Periodic,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for EventTriggerEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Class to report an event notification for a component-variable.
@@ -1796,6 +2845,22 @@ pub struct EventData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoringId"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub variable_monitoring_id: Option<i64>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for EventData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.actual_value, 2500usize)
+            .map_err(|error| error.in_field("actualValue"))?;
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.event_notification_type)
+            .map_err(|error| error.in_field("eventNotificationType"))?;
+        crate::validate::Validate::validate(&self.trigger)
+            .map_err(|error| error.in_field("trigger"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Class to report an event notification for a component-variable.
@@ -1846,6 +2911,23 @@ pub struct EventData<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub variable_monitoring_id: Option<i64>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const EVENT_DATA_ACTUAL_VALUE_CAP: usize> crate::validate::Validate
+for EventData<CustomDataType, EVENT_DATA_ACTUAL_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.actual_value, 2500usize)
+            .map_err(|error| error.in_field("actualValue"))?;
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.event_notification_type)
+            .map_err(|error| error.in_field("eventNotificationType"))?;
+        crate::validate::Validate::validate(&self.trigger)
+            .map_err(|error| error.in_field("trigger"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// The type of this monitor, e.g. a threshold, delta or periodic monitor.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1855,6 +2937,12 @@ pub enum MonitorEnum {
     Delta,
     Periodic,
     PeriodicClockAligned,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MonitorEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// A monitoring setting for a variable.
 #[derive(Debug, Clone, PartialEq)]
@@ -1896,6 +2984,14 @@ pub struct VariableMonitoring<CustomDataType = crate::NoCustomData> {
     /// For Periodic or PeriodicClockAligned this is the interval in seconds.
     pub value: f64,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for VariableMonitoring<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 /// Class to hold parameters of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq)]
@@ -1908,6 +3004,22 @@ pub struct MonitoringData<CustomDataType = crate::NoCustomData> {
     pub variable: Variable<CustomDataType>,
     #[cfg_attr(feature = "serde", serde(rename = "variableMonitoring"))]
     pub variable_monitoring: alloc::vec::Vec<VariableMonitoring<CustomDataType>>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for MonitoringData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        crate::validate::check_min_items(self.variable_monitoring.len(), 1usize)
+            .map_err(|error| error.in_field("variableMonitoring"))?;
+        for (index, item) in self.variable_monitoring.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("variableMonitoring"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Class to hold parameters of SetVariableMonitoring request.
@@ -1928,6 +3040,26 @@ pub struct MonitoringData<
         MONITORING_DATA_VARIABLE_MONITORING_CAP,
     >,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize,
+> crate::validate::Validate
+for MonitoringData<CustomDataType, MONITORING_DATA_VARIABLE_MONITORING_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        crate::validate::check_min_items(self.variable_monitoring.len(), 1usize)
+            .map_err(|error| error.in_field("variableMonitoring"))?;
+        for (index, item) in self.variable_monitoring.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("variableMonitoring"))?;
+        }
+        Ok(())
+    }
+}
 /// Defines the mutability of this attribute. Default is ReadWrite when omitted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1935,6 +3067,12 @@ pub enum MutabilityEnum {
     ReadOnly,
     WriteOnly,
     ReadWrite,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MutabilityEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Attribute data of a variable.
@@ -1959,6 +3097,24 @@ pub struct VariableAttribute<CustomDataType = crate::NoCustomData> {
     /// The Configuration Variable &lt;&lt;configkey-reporting-value-size,ReportingValueSize&gt;&gt; can be used to limit GetVariableResult.attributeValue, VariableAttribute.value and EventData.actualValue. The max size of these values will always remain equal.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub value: Option<alloc::string::String>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for VariableAttribute<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.mutability {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("mutability"))?;
+        }
+        if let Some(value) = &self.r#type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("type"))?;
+        }
+        if let Some(value) = &self.value {
+            crate::validate::check_max_length(value, 2500usize)
+                .map_err(|error| error.in_field("value"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Attribute data of a variable.
@@ -1987,6 +3143,25 @@ pub struct VariableAttribute<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub value: Option<heapless::String<VARIABLE_ATTRIBUTE_VALUE_CAP>>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const VARIABLE_ATTRIBUTE_VALUE_CAP: usize> crate::validate::Validate
+for VariableAttribute<CustomDataType, VARIABLE_ATTRIBUTE_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.mutability {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("mutability"))?;
+        }
+        if let Some(value) = &self.r#type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("type"))?;
+        }
+        if let Some(value) = &self.value {
+            crate::validate::check_max_length(value, 2500usize)
+                .map_err(|error| error.in_field("value"))?;
+        }
+        Ok(())
+    }
+}
 /// Data type of this variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2004,6 +3179,12 @@ pub enum DataEnum {
     OptionList,
     SequenceList,
     MemberList,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DataEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Fixed read-only parameters of a variable.
@@ -2043,6 +3224,19 @@ pub struct VariableCharacteristics<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "valuesList"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub values_list: Option<alloc::string::String>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for VariableCharacteristics<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.data_type)
+            .map_err(|error| error.in_field("dataType"))?;
+        if let Some(value) = &self.values_list {
+            crate::validate::check_max_length(value, 1000usize)
+                .map_err(|error| error.in_field("valuesList"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Fixed read-only parameters of a variable.
@@ -2086,6 +3280,22 @@ pub struct VariableCharacteristics<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub values_list: Option<heapless::String<VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP>>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize,
+> crate::validate::Validate
+for VariableCharacteristics<CustomDataType, VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.data_type)
+            .map_err(|error| error.in_field("dataType"))?;
+        if let Some(value) = &self.values_list {
+            crate::validate::check_max_length(value, 1000usize)
+                .map_err(|error| error.in_field("valuesList"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 /// Class to report components, variables and variable attributes and characteristics.
 #[derive(Debug, Clone, PartialEq)]
@@ -2101,6 +3311,26 @@ pub struct ReportData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "variableCharacteristics"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub variable_characteristics: Option<VariableCharacteristics<CustomDataType>>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ReportData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        crate::validate::check_min_items(self.variable_attribute.len(), 1usize)
+            .map_err(|error| error.in_field("variableAttribute"))?;
+        for (index, item) in self.variable_attribute.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("variableAttribute"))?;
+        }
+        if let Some(value) = &self.variable_characteristics {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("variableCharacteristics"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Class to report components, variables and variable attributes and characteristics.
@@ -2127,6 +3357,35 @@ pub struct ReportData<
         VariableCharacteristics<CustomDataType, VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP>,
     >,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize,
+> crate::validate::Validate
+for ReportData<
+    CustomDataType,
+    VARIABLE_ATTRIBUTE_VALUE_CAP,
+    VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        crate::validate::check_min_items(self.variable_attribute.len(), 1usize)
+            .map_err(|error| error.in_field("variableAttribute"))?;
+        for (index, item) in self.variable_attribute.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("variableAttribute"))?;
+        }
+        if let Some(value) = &self.variable_characteristics {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("variableCharacteristics"))?;
+        }
+        Ok(())
+    }
+}
 /// This contains the progress status of the publishfirmware
 /// installation.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2143,6 +3402,12 @@ pub enum PublishFirmwareStatusEnum {
     ChecksumVerified,
     PublishFailed,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for PublishFirmwareStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Charging_ Profile. Charging_ Profile_ Kind. Charging_ Profile_ Kind_ Code
 /// urn:x-oca:ocpp:uid:1:569232
 /// Indicates the kind of schedule.
@@ -2153,6 +3418,12 @@ pub enum ChargingProfileKindEnum {
     Recurring,
     Relative,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingProfileKindEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Charging_ Profile. Recurrency_ Kind. Recurrency_ Kind_ Code
 /// urn:x-oca:ocpp:uid:1:569233
 /// Indicates the start point of a recurrence.
@@ -2161,6 +3432,12 @@ pub enum ChargingProfileKindEnum {
 pub enum RecurrencyKindEnum {
     Daily,
     Weekly,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RecurrencyKindEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Charging_ Profile
@@ -2206,6 +3483,26 @@ pub struct ChargingProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ChargingProfile<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::check_min_items(self.charging_schedule.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        for (index, item) in self.charging_schedule.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("chargingSchedule"))?;
+        }
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Charging_ Profile
@@ -2263,6 +3560,35 @@ pub struct ChargingProfile<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for ChargingProfile<
+    CustomDataType,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::check_min_items(self.charging_schedule.len(), 1usize)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        for (index, item) in self.charging_schedule.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("chargingSchedule"))?;
+        }
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
+}
 /// Status indicating whether the Charging Station accepts the request to start a transaction.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2270,12 +3596,24 @@ pub enum RequestStartStopStatusEnum {
     Accepted,
     Rejected,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RequestStartStopStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// The updated reservation status.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ReservationUpdateStatusEnum {
     Expired,
     Removed,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReservationUpdateStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This field specifies the connector type.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2320,6 +3658,12 @@ pub enum ConnectorEnum {
     Undetermined,
     Unknown,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ConnectorEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This indicates the success or failure of the reservation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2330,12 +3674,24 @@ pub enum ReserveNowStatusEnum {
     Rejected,
     Unavailable,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReserveNowStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This contains the type of reset that the Charging Station or EVSE should perform.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ResetEnum {
     Immediate,
     OnIdle,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ResetEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station is able to perform the reset.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2344,6 +3700,12 @@ pub enum ResetStatusEnum {
     Accepted,
     Rejected,
     Scheduled,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ResetStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Contains the identifier to use for authorization.
@@ -2358,6 +3720,18 @@ pub struct AuthorizationData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "idTokenInfo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id_token_info: Option<IdTokenInfo<CustomDataType>>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for AuthorizationData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Contains the identifier to use for authorization.
@@ -2383,12 +3757,39 @@ pub struct AuthorizationData<
         >,
     >,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+> crate::validate::Validate
+for AuthorizationData<
+    CustomDataType,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        Ok(())
+    }
+}
 /// This contains the type of update (full or differential) of this request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum UpdateEnum {
     Differential,
     Full,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UpdateEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station has successfully received and applied the update of the Local Authorization List.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2398,12 +3799,24 @@ pub enum SendLocalListStatusEnum {
     Failed,
     VersionMismatch,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SendLocalListStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Returns whether the Charging Station has been able to process the message successfully. This does not guarantee the schedule will be followed to the letter. There might be other constraints the Charging Station may need to take into account.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChargingProfileStatusEnum {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingProfileStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station is able to display the message.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2416,6 +3829,12 @@ pub enum DisplayMessageStatusEnum {
     NotSupportedState,
     UnknownTransaction,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DisplayMessageStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Specify which monitoring base will be set
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2423,6 +3842,12 @@ pub enum MonitoringBaseEnum {
     All,
     FactoryDefault,
     HardWiredOnly,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MonitoringBaseEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// APN. APN_ Authentication. APN_ Authentication_ Code
 /// urn:x-oca:ocpp:uid:1:568828
@@ -2434,6 +3859,12 @@ pub enum APNAuthenticationEnum {
     NONE,
     PAP,
     AUTO,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for APNAuthenticationEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// APN
 /// urn:x-oca:ocpp:uid:2:233134
@@ -2484,6 +3915,14 @@ pub struct APN<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub use_only_preferred_network: Option<bool>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for APN<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.apn_authentication)
+            .map_err(|error| error.in_field("apnAuthentication"))?;
+        Ok(())
+    }
+}
 /// Applicable Network Interface.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2497,6 +3936,12 @@ pub enum OCPPInterfaceEnum {
     Wireless2,
     Wireless3,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for OCPPInterfaceEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Communication_ Function. OCPP_ Transport. OCPP_ Transport_ Code
 /// urn:x-oca:ocpp:uid:1:569356
 /// Defines the transport protocol (e.g. SOAP or JSON). Note: SOAP is not supported in OCPP 2.0, but is supported by other versions of OCPP.
@@ -2505,6 +3950,12 @@ pub enum OCPPInterfaceEnum {
 pub enum OCPPTransportEnum {
     JSON,
     SOAP,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for OCPPTransportEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Communication_ Function. OCPP_ Version. OCPP_ Version_ Code
 /// urn:x-oca:ocpp:uid:1:569355
@@ -2517,6 +3968,12 @@ pub enum OCPPVersionEnum {
     OCPP16,
     OCPP20,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for OCPPVersionEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// VPN. Type. VPN_ Code
 /// urn:x-oca:ocpp:uid:1:569277
 /// Type of VPN
@@ -2527,6 +3984,12 @@ pub enum VPNEnum {
     IPSec,
     L2TP,
     PPTP,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for VPNEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// VPN
 /// urn:x-oca:ocpp:uid:2:233268
@@ -2559,6 +4022,14 @@ pub struct VPN<CustomDataType = crate::NoCustomData> {
     /// urn:x-oca:ocpp:uid:1:569273
     /// VPN User
     pub user: heapless::String<20usize>,
+}
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for VPN<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        Ok(())
+    }
 }
 /// Communication_ Function
 /// urn:x-oca:ocpp:uid:2:233304
@@ -2593,6 +4064,27 @@ pub struct NetworkConnectionProfile<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub vpn: Option<VPN<CustomDataType>>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NetworkConnectionProfile<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.apn {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("apn"))?;
+        }
+        crate::validate::Validate::validate(&self.ocpp_interface)
+            .map_err(|error| error.in_field("ocppInterface"))?;
+        crate::validate::Validate::validate(&self.ocpp_transport)
+            .map_err(|error| error.in_field("ocppTransport"))?;
+        crate::validate::Validate::validate(&self.ocpp_version)
+            .map_err(|error| error.in_field("ocppVersion"))?;
+        if let Some(value) = &self.vpn {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("vpn"))?;
+        }
+        Ok(())
+    }
+}
 /// Result of operation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2600,6 +4092,12 @@ pub enum SetNetworkProfileStatusEnum {
     Accepted,
     Rejected,
     Failed,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SetNetworkProfileStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Class to hold parameters of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq)]
@@ -2645,6 +4143,18 @@ pub struct SetMonitoringData<CustomDataType = crate::NoCustomData> {
     pub value: f64,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for SetMonitoringData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// Status is OK if a value could be returned. Otherwise this will indicate the reason why a value could not be returned.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2655,6 +4165,12 @@ pub enum SetMonitoringStatusEnum {
     UnsupportedMonitorType,
     Rejected,
     Duplicate,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SetMonitoringStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Class to hold result of SetVariableMonitoring request.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2698,6 +4214,24 @@ pub struct SetMonitoringResult<CustomDataType = crate::NoCustomData> {
     pub r#type: MonitorEnum,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for SetMonitoringResult<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2715,6 +4249,22 @@ pub struct SetVariableData<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SetVariableData<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        crate::validate::check_max_length(&self.attribute_value, 1000usize)
+            .map_err(|error| error.in_field("attributeValue"))?;
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2737,6 +4287,26 @@ pub struct SetVariableData<
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP: usize,
+> crate::validate::Validate
+for SetVariableData<CustomDataType, SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        crate::validate::check_max_length(&self.attribute_value, 1000usize)
+            .map_err(|error| error.in_field("attributeValue"))?;
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// Result status of setting the variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2747,6 +4317,12 @@ pub enum SetVariableStatusEnum {
     UnknownVariable,
     NotSupportedAttributeType,
     RebootRequired,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SetVariableStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2765,6 +4341,26 @@ pub struct SetVariableResult<CustomDataType = crate::NoCustomData> {
     pub custom_data: Option<CustomDataType>,
     pub variable: Variable<CustomDataType>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for SetVariableResult<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.attribute_status)
+            .map_err(|error| error.in_field("attributeStatus"))?;
+        if let Some(value) = &self.attribute_status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeStatusInfo"))?;
+        }
+        if let Some(value) = &self.attribute_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("attributeType"))?;
+        }
+        crate::validate::Validate::validate(&self.component)
+            .map_err(|error| error.in_field("component"))?;
+        crate::validate::Validate::validate(&self.variable)
+            .map_err(|error| error.in_field("variable"))?;
+        Ok(())
+    }
+}
 /// This contains the current status of the Connector.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2775,6 +4371,12 @@ pub enum ConnectorStatusEnum {
     Unavailable,
     Faulted,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ConnectorStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// This contains the type of this event.
 /// The first TransactionEvent of a transaction SHALL contain: "Started" The last TransactionEvent of a transaction SHALL contain: "Ended" All others SHALL contain: "Updated"
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2783,6 +4385,12 @@ pub enum TransactionEventEnum {
     Ended,
     Started,
     Updated,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TransactionEventEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Transaction. State. Transaction_ State_ Code
 /// urn:x-oca:ocpp:uid:1:569419
@@ -2796,6 +4404,12 @@ pub enum ChargingStateEnum {
     SuspendedEV,
     SuspendedEVSE,
     Idle,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingStateEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Transaction. Stopped_ Reason. EOT_ Reason_ Code
 /// urn:x-oca:ocpp:uid:1:569413
@@ -2822,6 +4436,12 @@ pub enum ReasonEnum {
     StoppedByEV,
     TimeLimitReached,
     Timeout,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReasonEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// Transaction
 /// urn:x-oca:ocpp:uid:2:233318
@@ -2851,6 +4471,20 @@ pub struct Transaction<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "transactionId"))]
     pub transaction_id: heapless::String<36usize>,
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for Transaction<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_state {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingState"))?;
+        }
+        if let Some(value) = &self.stopped_reason {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("stoppedReason"))?;
+        }
+        Ok(())
+    }
+}
 /// Reason the Charging Station sends this message to the CSMS
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2877,6 +4511,12 @@ pub enum TriggerReasonEnum {
     SignedDataReceived,
     ResetCommand,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerReasonEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Type of message to be triggered.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2893,6 +4533,12 @@ pub enum MessageTriggerEnum {
     SignCombinedCertificate,
     PublishFirmwareStatusNotification,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MessageTriggerEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Indicates whether the Charging Station will send the requested notification or not.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2900,6 +4546,12 @@ pub enum TriggerMessageStatusEnum {
     Accepted,
     Rejected,
     NotImplemented,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerMessageStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 /// This indicates whether the Charging Station has unlocked the connector.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2910,6 +4562,12 @@ pub enum UnlockStatusEnum {
     OngoingAuthorizedTransaction,
     UnknownConnector,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UnlockStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 /// Indicates whether the Local Controller succeeded in unpublishing the firmware.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2917,6 +4575,12 @@ pub enum UnpublishFirmwareStatusEnum {
     DownloadOngoing,
     NoFirmware,
     Unpublished,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UnpublishFirmwareStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 /// Firmware
@@ -2953,6 +4617,20 @@ pub struct Firmware<CustomDataType = crate::NoCustomData> {
     #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub signing_certificate: Option<alloc::string::String>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for Firmware<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.signature {
+            crate::validate::check_max_length(value, 800usize)
+                .map_err(|error| error.in_field("signature"))?;
+        }
+        if let Some(value) = &self.signing_certificate {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("signingCertificate"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 /// Firmware
@@ -2994,6 +4672,25 @@ pub struct Firmware<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub signing_certificate: Option<heapless::String<FIRMWARE_SIGNING_CERTIFICATE_CAP>>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const FIRMWARE_SIGNATURE_CAP: usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize,
+> crate::validate::Validate
+for Firmware<CustomDataType, FIRMWARE_SIGNATURE_CAP, FIRMWARE_SIGNING_CERTIFICATE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.signature {
+            crate::validate::check_max_length(value, 800usize)
+                .map_err(|error| error.in_field("signature"))?;
+        }
+        if let Some(value) = &self.signing_certificate {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("signingCertificate"))?;
+        }
+        Ok(())
+    }
+}
 /// This field indicates whether the Charging Station was able to accept the request.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3003,4 +4700,10 @@ pub enum UpdateFirmwareStatusEnum {
     AcceptedCanceled,
     InvalidCertificate,
     RevokedCertificate,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UpdateFirmwareStatusEnum {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }

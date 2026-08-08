@@ -26,3 +26,13 @@ pub struct GetDERControlRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "GetDERControl";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for GetDERControlRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.control_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("controlType"))?;
+        }
+        Ok(())
+    }
+}

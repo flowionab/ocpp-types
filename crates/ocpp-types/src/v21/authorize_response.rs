@@ -25,6 +25,32 @@ pub struct AuthorizeResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for AuthorizeResponse<CustomDataType> {
     const ACTION: &'static str = "Authorize";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for AuthorizeResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.allowed_energy_transfer {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("allowedEnergyTransfer"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("allowedEnergyTransfer")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.certificate_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateStatus"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token_info)
+            .map_err(|error| error.in_field("idTokenInfo"))?;
+        if let Some(value) = &self.tariff {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("tariff"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -93,4 +119,49 @@ for AuthorizeResponse<
     TARIFF_FIXED_PRICES_CAP,
 > {
     const ACTION: &'static str = "Authorize";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP: usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
+    const TARIFF_TIME_PRICES_CAP: usize,
+    const TARIFF_ENERGY_PRICES_CAP: usize,
+    const TARIFF_FIXED_PRICES_CAP: usize,
+> crate::validate::Validate
+for AuthorizeResponse<
+    CustomDataType,
+    AUTHORIZE_RESPONSE_ALLOWED_ENERGY_TRANSFER_CAP,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
+    TARIFF_TIME_PRICES_CAP,
+    TARIFF_ENERGY_PRICES_CAP,
+    TARIFF_FIXED_PRICES_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.allowed_energy_transfer {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("allowedEnergyTransfer"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("allowedEnergyTransfer")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.certificate_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateStatus"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token_info)
+            .map_err(|error| error.in_field("idTokenInfo"))?;
+        if let Some(value) = &self.tariff {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("tariff"))?;
+        }
+        Ok(())
+    }
 }

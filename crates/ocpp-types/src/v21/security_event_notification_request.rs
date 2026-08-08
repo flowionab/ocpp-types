@@ -19,3 +19,10 @@ pub struct SecurityEventNotificationRequest<CustomDataType = crate::NoCustomData
 impl<CustomDataType> crate::Action for SecurityEventNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "SecurityEventNotification";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for SecurityEventNotificationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

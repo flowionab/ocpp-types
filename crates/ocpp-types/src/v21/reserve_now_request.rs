@@ -32,6 +32,24 @@ pub struct ReserveNowRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ReserveNowRequest<CustomDataType> {
     const ACTION: &'static str = "ReserveNow";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ReserveNowRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -65,4 +83,23 @@ pub struct ReserveNowRequest<
 impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
 for ReserveNowRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "ReserveNow";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::validate::Validate
+for ReserveNowRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
 }

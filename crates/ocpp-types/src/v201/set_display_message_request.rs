@@ -13,3 +13,12 @@ pub struct SetDisplayMessageRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetDisplayMessageRequest<CustomDataType> {
     const ACTION: &'static str = "SetDisplayMessage";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for SetDisplayMessageRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.message)
+            .map_err(|error| error.in_field("message"))?;
+        Ok(())
+    }
+}

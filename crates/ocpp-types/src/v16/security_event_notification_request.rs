@@ -13,3 +13,9 @@ pub struct SecurityEventNotificationRequest {
 impl crate::Action for SecurityEventNotificationRequest {
     const ACTION: &'static str = "SecurityEventNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SecurityEventNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

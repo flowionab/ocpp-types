@@ -16,3 +16,16 @@ pub struct ChangeAvailabilityRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ChangeAvailabilityRequest<CustomDataType> {
     const ACTION: &'static str = "ChangeAvailability";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ChangeAvailabilityRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        crate::validate::Validate::validate(&self.operational_status)
+            .map_err(|error| error.in_field("operationalStatus"))?;
+        Ok(())
+    }
+}

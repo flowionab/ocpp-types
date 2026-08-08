@@ -28,6 +28,21 @@ pub struct TransactionEventResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for TransactionEventResponse<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for TransactionEventResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        if let Some(value) = &self.updated_personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("updatedPersonalMessage"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -72,4 +87,27 @@ for TransactionEventResponse<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for TransactionEventResponse<
+    CustomDataType,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        if let Some(value) = &self.updated_personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("updatedPersonalMessage"))?;
+        }
+        Ok(())
+    }
 }

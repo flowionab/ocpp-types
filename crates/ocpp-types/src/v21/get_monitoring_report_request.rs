@@ -24,6 +24,33 @@ pub struct GetMonitoringReportRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetMonitoringReportRequest<CustomDataType> {
     const ACTION: &'static str = "GetMonitoringReport";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetMonitoringReportRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.component_variable {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("componentVariable"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("componentVariable")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.monitoring_criteria {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("monitoringCriteria"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("monitoringCriteria")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -60,4 +87,37 @@ for GetMonitoringReportRequest<
     GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP,
 > {
     const ACTION: &'static str = "GetMonitoringReport";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP: usize,
+> crate::validate::Validate
+for GetMonitoringReportRequest<
+    CustomDataType,
+    GET_MONITORING_REPORT_REQUEST_COMPONENT_VARIABLE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.component_variable {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("componentVariable"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("componentVariable")
+                    })?;
+            }
+        }
+        if let Some(value) = &self.monitoring_criteria {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("monitoringCriteria"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("monitoringCriteria")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

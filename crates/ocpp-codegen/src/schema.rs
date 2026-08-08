@@ -1,4 +1,5 @@
 use crate::model::ConstParam;
+use crate::model::Constraints;
 use crate::model::GeneratedType;
 use crate::model::OcppVersion;
 use crate::model::ParsedSchema;
@@ -366,12 +367,45 @@ impl<'a> SchemaParser<'a> {
                     optional: !required.contains(name.as_str()),
                     name: name.to_string(),
                     description: Self::description(property),
+                    constraints: Self::constraints(property),
                     ty,
                 });
             }
         }
 
         Ok(fields)
+    }
+
+    /// The value constraints a property states, verbatim -- what a
+    /// conformant value may be, independent of how the generated type
+    /// happens to store it. Consumed by [`crate::validate`], which emits
+    /// checks for the ones the type cannot enforce on its own.
+    ///
+    /// A `$ref` property carries none of its own: OCPP's definitions are
+    /// objects and enums, whose constraints live on their properties and
+    /// are picked up when *those* are parsed.
+    fn constraints(property: &Value) -> Constraints {
+        let number = |key: &str| property[key].as_f64();
+        let count = |key: &str| property[key].as_u64().map(|value| value as usize);
+
+        // Only arrays have items to constrain, and an array whose items
+        // state nothing (the usual `$ref` case) keeps `None` rather than a
+        // box full of `None`s.
+        let item = property
+            .get("items")
+            .map(Self::constraints)
+            .filter(|item: &Constraints| !item.is_empty())
+            .map(Box::new);
+
+        Constraints {
+            max_length: count("maxLength"),
+            min_items: count("minItems"),
+            max_items: count("maxItems"),
+            minimum: number("minimum"),
+            maximum: number("maximum"),
+            multiple_of: number("multipleOf"),
+            item,
+        }
     }
 
     fn parse_field_type(

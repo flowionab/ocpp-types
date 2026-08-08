@@ -10,3 +10,11 @@ pub struct DeleteCertificateResponse {
 impl crate::Action for DeleteCertificateResponse {
     const ACTION: &'static str = "DeleteCertificate";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DeleteCertificateResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

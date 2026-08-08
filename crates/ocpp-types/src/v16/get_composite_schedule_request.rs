@@ -15,3 +15,13 @@ pub struct GetCompositeScheduleRequest {
 impl crate::Action for GetCompositeScheduleRequest {
     const ACTION: &'static str = "GetCompositeSchedule";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetCompositeScheduleRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_rate_unit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingRateUnit"))?;
+        }
+        Ok(())
+    }
+}

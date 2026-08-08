@@ -10,3 +10,11 @@ pub struct ReserveNowResponse {
 impl crate::Action for ReserveNowResponse {
     const ACTION: &'static str = "ReserveNow";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReserveNowResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

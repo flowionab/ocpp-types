@@ -18,6 +18,22 @@ pub struct SendLocalListRequest {
 impl crate::Action for SendLocalListRequest {
     const ACTION: &'static str = "SendLocalList";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for SendLocalListRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.local_authorization_list {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("localAuthorizationList")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.update_type)
+            .map_err(|error| error.in_field("updateType"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -41,4 +57,23 @@ pub struct SendLocalListRequest<
 impl<const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize> crate::Action
 for SendLocalListRequest<SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP> {
     const ACTION: &'static str = "SendLocalList";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize,
+> crate::validate::Validate
+for SendLocalListRequest<SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.local_authorization_list {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("localAuthorizationList")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.update_type)
+            .map_err(|error| error.in_field("updateType"))?;
+        Ok(())
+    }
 }

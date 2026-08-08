@@ -23,6 +23,18 @@ pub struct MeterValuesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for MeterValuesRequest<CustomDataType> {
     const ACTION: &'static str = "MeterValues";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for MeterValuesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.meter_value.len(), 1usize)
+            .map_err(|error| error.in_field("meterValue"))?;
+        for (index, item) in self.meter_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 /// Request_ Body
 /// urn:x-enexis:ecdm:uid:2:234744
@@ -70,4 +82,29 @@ for MeterValuesRequest<
     SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
 > {
     const ACTION: &'static str = "MeterValues";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for MeterValuesRequest<
+    CustomDataType,
+    METER_VALUES_REQUEST_METER_VALUE_CAP,
+    METER_VALUE_SAMPLED_VALUE_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.meter_value.len(), 1usize)
+            .map_err(|error| error.in_field("meterValue"))?;
+        for (index, item) in self.meter_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+        }
+        Ok(())
+    }
 }

@@ -28,6 +28,21 @@ pub struct ReportChargingProfilesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ReportChargingProfilesRequest<CustomDataType> {
     const ACTION: &'static str = "ReportChargingProfiles";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for ReportChargingProfilesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.charging_profile.len(), 1usize)
+            .map_err(|error| error.in_field("chargingProfile"))?;
+        for (index, item) in self.charging_profile.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("chargingProfile"))?;
+        }
+        crate::validate::check_min_i64(self.evse_id, 0i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -96,4 +111,39 @@ for ReportChargingProfilesRequest<
     SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "ReportChargingProfiles";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for ReportChargingProfilesRequest<
+    CustomDataType,
+    REPORT_CHARGING_PROFILES_REQUEST_CHARGING_PROFILE_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.charging_profile.len(), 1usize)
+            .map_err(|error| error.in_field("chargingProfile"))?;
+        for (index, item) in self.charging_profile.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("chargingProfile"))?;
+        }
+        crate::validate::check_min_i64(self.evse_id, 0i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        Ok(())
+    }
 }

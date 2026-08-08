@@ -31,6 +31,21 @@ pub struct NotifyEVChargingScheduleRequest<CustomDataType = crate::NoCustomData>
 impl<CustomDataType> crate::Action for NotifyEVChargingScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingSchedule";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyEVChargingScheduleRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        crate::validate::check_min_i64(self.evse_id, 1i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        if let Some(value) = self.selected_charging_schedule_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("selectedChargingScheduleId"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -96,4 +111,37 @@ for NotifyEVChargingScheduleRequest<
     SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "NotifyEVChargingSchedule";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for NotifyEVChargingScheduleRequest<
+    CustomDataType,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        crate::validate::check_min_i64(self.evse_id, 1i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        if let Some(value) = self.selected_charging_schedule_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("selectedChargingScheduleId"))?;
+        }
+        Ok(())
+    }
 }

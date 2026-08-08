@@ -15,3 +15,16 @@ impl<CustomDataType> crate::Action
 for GetCertificateChainStatusResponse<CustomDataType> {
     const ACTION: &'static str = "GetCertificateChainStatus";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetCertificateChainStatusResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.certificate_status.len(), 1usize)
+            .map_err(|error| error.in_field("certificateStatus"))?;
+        for (index, item) in self.certificate_status.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("certificateStatus"))?;
+        }
+        Ok(())
+    }
+}

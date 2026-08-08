@@ -18,6 +18,17 @@ pub struct InstallCertificateRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for InstallCertificateRequest<CustomDataType> {
     const ACTION: &'static str = "InstallCertificate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for InstallCertificateRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.certificate, 10000usize)
+            .map_err(|error| error.in_field("certificate"))?;
+        crate::validate::Validate::validate(&self.certificate_type)
+            .map_err(|error| error.in_field("certificateType"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -43,4 +54,21 @@ for InstallCertificateRequest<
     INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP,
 > {
     const ACTION: &'static str = "InstallCertificate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP: usize,
+> crate::validate::Validate
+for InstallCertificateRequest<
+    CustomDataType,
+    INSTALL_CERTIFICATE_REQUEST_CERTIFICATE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.certificate, 10000usize)
+            .map_err(|error| error.in_field("certificate"))?;
+        crate::validate::Validate::validate(&self.certificate_type)
+            .map_err(|error| error.in_field("certificateType"))?;
+        Ok(())
+    }
 }

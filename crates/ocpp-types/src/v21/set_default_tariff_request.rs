@@ -18,6 +18,17 @@ pub struct SetDefaultTariffRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetDefaultTariffRequest<CustomDataType> {
     const ACTION: &'static str = "SetDefaultTariff";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetDefaultTariffRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_i64(self.evse_id, 0i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        crate::validate::Validate::validate(&self.tariff)
+            .map_err(|error| error.in_field("tariff"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -58,4 +69,27 @@ for SetDefaultTariffRequest<
     TARIFF_FIXED_PRICES_CAP,
 > {
     const ACTION: &'static str = "SetDefaultTariff";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const TARIFF_TIME_PRICES_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
+    const TARIFF_ENERGY_PRICES_CAP: usize,
+    const TARIFF_FIXED_PRICES_CAP: usize,
+> crate::validate::Validate
+for SetDefaultTariffRequest<
+    CustomDataType,
+    TARIFF_TIME_PRICES_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
+    TARIFF_ENERGY_PRICES_CAP,
+    TARIFF_FIXED_PRICES_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_i64(self.evse_id, 0i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        crate::validate::Validate::validate(&self.tariff)
+            .map_err(|error| error.in_field("tariff"))?;
+        Ok(())
+    }
 }

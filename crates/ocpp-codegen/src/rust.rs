@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use crate::eqcheck::compute_eq_derivable;
 use crate::model::*;
+use crate::validate::Gate;
 
 /// Prepended to every generated file (including hand-assembled ones like
 /// `mod.rs`, see `main.rs`). Comments aren't tokens, so this can't be baked
@@ -26,7 +27,7 @@ fn with_generated_banner(code: String) -> String {
 /// same as a genuinely unbounded field; the `heapless` capacity is still
 /// enforced in the `no_std`/no-`alloc` build, where there's no heap to fall
 /// back to.
-const MAX_STACK_VEC_CAPACITY: usize = 64;
+pub const MAX_STACK_VEC_CAPACITY: usize = 64;
 
 /// The generic parameters every named type in scope requires, computed over
 /// the whole type graph by [`crate::generics`]. Carried around together
@@ -238,7 +239,7 @@ fn generate_struct(
                 const_params: &[],
                 type_params: own.type_params,
             },
-            &quote! {},
+            Gate::Always,
         );
     }
 
@@ -250,9 +251,6 @@ fn generate_struct(
     // explicitly-applied) type. So the gate is threaded *into*
     // `generate_struct_body` and applied to each item there individually,
     // rather than wrapped around the outside of a multi-item stream here.
-    let alloc_cfg = quote! { #[cfg(feature = "alloc")] };
-    let no_alloc_cfg = quote! { #[cfg(not(feature = "alloc"))] };
-
     let alloc_body = generate_struct_body(
         model,
         eq_by_name,
@@ -262,9 +260,9 @@ fn generate_struct(
             const_params: &[],
             type_params: own.type_params,
         },
-        &alloc_cfg,
+        Gate::Alloc,
     );
-    let no_alloc_body = generate_struct_body(model, eq_by_name, pool, false, own, &no_alloc_cfg);
+    let no_alloc_body = generate_struct_body(model, eq_by_name, pool, false, own, Gate::NoAlloc);
 
     quote! {
         #alloc_body
@@ -278,8 +276,9 @@ fn generate_struct_body(
     pool: GenericPool,
     alloc_mode: bool,
     own: OwnGenerics,
-    cfg_gate: &proc_macro2::TokenStream,
+    gate: Gate,
 ) -> proc_macro2::TokenStream {
+    let cfg_gate = gate.item_attr();
     let name = ident(&model.name);
     let struct_doc = doc_attrs(&model.description);
     let struct_generics = generic_params_with_defaults(own.type_params, own.const_params);
@@ -330,12 +329,13 @@ fn generate_struct_body(
         quote! {}
     };
 
+    // `impl<const N: usize = 8> ...` isn't legal -- defaults are only
+    // allowed on the type definition itself, so an impl header repeats the
+    // same params without them.
+    let impl_generics = generic_params_without_defaults(own.type_params, own.const_params);
+    let type_generics = generic_args(own.type_params, own.const_params);
+
     let action_impl = model.action.as_ref().map(|action| {
-        // `impl<const N: usize = 8> ...` isn't legal -- defaults are only
-        // allowed on the type definition itself, so the impl header
-        // repeats the same params without them.
-        let impl_generics = generic_params_without_defaults(own.type_params, own.const_params);
-        let type_generics = generic_args(own.type_params, own.const_params);
         quote! {
             #cfg_gate
             impl #impl_generics crate::Action for #name #type_generics {
@@ -343,6 +343,14 @@ fn generate_struct_body(
             }
         }
     });
+
+    let validate_impl = crate::validate::generate_struct_impl(
+        model,
+        &impl_generics,
+        &type_generics,
+        alloc_mode,
+        gate,
+    );
 
     quote! {
         #cfg_gate
@@ -357,12 +365,15 @@ fn generate_struct_body(
         }
 
         #action_impl
+
+        #validate_impl
     }
 }
 
 fn generate_enum(model: &RustEnum) -> proc_macro2::TokenStream {
     let name = ident(&model.name);
     let enum_doc = doc_attrs(&model.description);
+    let validate_impl = crate::validate::generate_enum_impl(model);
 
     let variants = model.variants.iter().map(|variant| {
         let vident = ident(&variant.ident);
@@ -388,14 +399,16 @@ fn generate_enum(model: &RustEnum) -> proc_macro2::TokenStream {
                 #variants,
             )*
         }
+
+        #validate_impl
     }
 }
 
-fn ident(name: &str) -> proc_macro2::Ident {
+pub fn ident(name: &str) -> proc_macro2::Ident {
     proc_macro2::Ident::new(name, proc_macro2::Span::call_site())
 }
 
-fn field_ident(name: &str) -> proc_macro2::Ident {
+pub fn field_ident(name: &str) -> proc_macro2::Ident {
     if crate::naming::is_rust_keyword(name) {
         proc_macro2::Ident::new_raw(name, proc_macro2::Span::call_site())
     } else {
@@ -563,6 +576,7 @@ mod tests {
                     ty: RustType::Primitive("IdTag".to_string()),
                     optional: false,
                     description: None,
+                    constraints: Constraints::default(),
                 }],
             },
             types: Vec::new(),
@@ -591,6 +605,7 @@ mod tests {
             }),
             optional: true,
             description: None,
+            constraints: Constraints::default(),
         }
     }
 
@@ -647,6 +662,7 @@ mod tests {
             }),
             optional: false,
             description: None,
+            constraints: Constraints::default(),
         });
 
         let code = generate(schema);
@@ -861,6 +877,7 @@ mod tests {
                 ty: RustType::Local("CustomData".to_string()),
                 optional: true,
                 description: None,
+                constraints: Constraints::default(),
             }],
         };
 
@@ -897,6 +914,7 @@ mod tests {
                 ty: RustType::Vec(Box::new(RustType::Local("MeterValue".to_string())), 4),
                 optional: false,
                 description: None,
+                constraints: Constraints::default(),
             }],
         };
 
@@ -917,6 +935,7 @@ mod tests {
                     ty: RustType::BoundedString(255),
                     optional: false,
                     description: None,
+                    constraints: Constraints::default(),
                 }],
             }),
             GeneratedType::Enum(RustEnum {
@@ -975,6 +994,7 @@ mod tests {
                 ty: RustType::BoundedString(20),
                 optional: false,
                 description: None,
+                constraints: Constraints::default(),
             }],
         }));
 

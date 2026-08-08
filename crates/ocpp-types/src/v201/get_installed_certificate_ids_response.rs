@@ -24,6 +24,29 @@ impl<CustomDataType> crate::Action
 for GetInstalledCertificateIdsResponse<CustomDataType> {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetInstalledCertificateIdsResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_hash_data_chain {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("certificateHashDataChain"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("certificateHashDataChain")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -57,4 +80,33 @@ for GetInstalledCertificateIdsResponse<
     GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP,
 > {
     const ACTION: &'static str = "GetInstalledCertificateIds";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP: usize,
+> crate::validate::Validate
+for GetInstalledCertificateIdsResponse<
+    CustomDataType,
+    GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CHAIN_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_hash_data_chain {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("certificateHashDataChain"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("certificateHashDataChain")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

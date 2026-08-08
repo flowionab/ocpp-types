@@ -11,3 +11,10 @@ pub struct GetLocalListVersionRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetLocalListVersionRequest<CustomDataType> {
     const ACTION: &'static str = "GetLocalListVersion";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetLocalListVersionRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

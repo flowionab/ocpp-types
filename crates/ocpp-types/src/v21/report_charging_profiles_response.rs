@@ -11,3 +11,10 @@ pub struct ReportChargingProfilesResponse<CustomDataType = crate::NoCustomData> 
 impl<CustomDataType> crate::Action for ReportChargingProfilesResponse<CustomDataType> {
     const ACTION: &'static str = "ReportChargingProfiles";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ReportChargingProfilesResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

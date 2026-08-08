@@ -25,6 +25,19 @@ pub struct NotifyDERStartStopRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyDERStartStopRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyDERStartStop";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyDERStartStopRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.superseded_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -63,4 +76,23 @@ for NotifyDERStartStopRequest<
     NOTIFY_D_E_R_START_STOP_REQUEST_SUPERSEDED_IDS_CAP,
 > {
     const ACTION: &'static str = "NotifyDERStartStop";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_D_E_R_START_STOP_REQUEST_SUPERSEDED_IDS_CAP: usize,
+> crate::validate::Validate
+for NotifyDERStartStopRequest<
+    CustomDataType,
+    NOTIFY_D_E_R_START_STOP_REQUEST_SUPERSEDED_IDS_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.superseded_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+        }
+        Ok(())
+    }
 }

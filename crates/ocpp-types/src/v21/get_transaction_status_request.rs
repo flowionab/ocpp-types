@@ -15,3 +15,10 @@ pub struct GetTransactionStatusRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetTransactionStatusRequest<CustomDataType> {
     const ACTION: &'static str = "GetTransactionStatus";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetTransactionStatusRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

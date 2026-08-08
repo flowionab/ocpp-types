@@ -16,6 +16,19 @@ pub struct SetVariableMonitoringResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetVariableMonitoringResponse<CustomDataType> {
     const ACTION: &'static str = "SetVariableMonitoring";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetVariableMonitoringResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_monitoring_result.len(), 1usize)
+            .map_err(|error| error.in_field("setMonitoringResult"))?;
+        for (index, item) in self.set_monitoring_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setMonitoringResult"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +58,25 @@ for SetVariableMonitoringResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "SetVariableMonitoring";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for SetVariableMonitoringResponse<
+    CustomDataType,
+    SET_VARIABLE_MONITORING_RESPONSE_SET_MONITORING_RESULT_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_monitoring_result.len(), 1usize)
+            .map_err(|error| error.in_field("setMonitoringResult"))?;
+        for (index, item) in self.set_monitoring_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setMonitoringResult"))?;
+        }
+        Ok(())
+    }
 }

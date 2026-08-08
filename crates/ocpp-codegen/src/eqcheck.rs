@@ -68,6 +68,7 @@ fn type_is_eq(ty: &RustType, eq_by_name: &HashMap<String, bool>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::Constraints;
     use crate::model::RustStruct;
 
     fn struct_with_field(name: &str, ty: RustType) -> GeneratedType {
@@ -80,6 +81,7 @@ mod tests {
                 ty,
                 optional: false,
                 description: None,
+                constraints: Constraints::default(),
             }],
         })
     }

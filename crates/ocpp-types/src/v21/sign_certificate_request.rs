@@ -26,6 +26,23 @@ pub struct SignCertificateRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SignCertificateRequest<CustomDataType> {
     const ACTION: &'static str = "SignCertificate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SignCertificateRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateType"))?;
+        }
+        crate::validate::check_max_length(&self.csr, 5500usize)
+            .map_err(|error| error.in_field("csr"))?;
+        if let Some(value) = &self.hash_root_certificate {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("hashRootCertificate"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -53,4 +70,24 @@ pub struct SignCertificateRequest<
 impl<CustomDataType, const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize> crate::Action
 for SignCertificateRequest<CustomDataType, SIGN_CERTIFICATE_REQUEST_CSR_CAP> {
     const ACTION: &'static str = "SignCertificate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SIGN_CERTIFICATE_REQUEST_CSR_CAP: usize,
+> crate::validate::Validate
+for SignCertificateRequest<CustomDataType, SIGN_CERTIFICATE_REQUEST_CSR_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateType"))?;
+        }
+        crate::validate::check_max_length(&self.csr, 5500usize)
+            .map_err(|error| error.in_field("csr"))?;
+        if let Some(value) = &self.hash_root_certificate {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("hashRootCertificate"))?;
+        }
+        Ok(())
+    }
 }

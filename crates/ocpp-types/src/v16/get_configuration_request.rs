@@ -12,6 +12,12 @@ pub struct GetConfigurationRequest {
 impl crate::Action for GetConfigurationRequest {
     const ACTION: &'static str = "GetConfiguration";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for GetConfigurationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -27,4 +33,11 @@ pub struct GetConfigurationRequest<
 impl<const GET_CONFIGURATION_REQUEST_KEY_CAP: usize> crate::Action
 for GetConfigurationRequest<GET_CONFIGURATION_REQUEST_KEY_CAP> {
     const ACTION: &'static str = "GetConfiguration";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const GET_CONFIGURATION_REQUEST_KEY_CAP: usize> crate::validate::Validate
+for GetConfigurationRequest<GET_CONFIGURATION_REQUEST_KEY_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }

@@ -10,3 +10,11 @@ pub struct SignedUpdateFirmwareResponse {
 impl crate::Action for SignedUpdateFirmwareResponse {
     const ACTION: &'static str = "SignedUpdateFirmware";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SignedUpdateFirmwareResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

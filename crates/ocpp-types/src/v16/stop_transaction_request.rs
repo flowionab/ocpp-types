@@ -24,6 +24,22 @@ pub struct StopTransactionRequest {
 impl crate::Action for StopTransactionRequest {
     const ACTION: &'static str = "StopTransaction";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for StopTransactionRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.reason {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("reason"))?;
+        }
+        if let Some(value) = &self.transaction_data {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("transactionData"))?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -66,4 +82,29 @@ for StopTransactionRequest<
     SAMPLED_VALUE_ITEM_VALUE_CAP,
 > {
     const ACTION: &'static str = "StopTransaction";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP: usize,
+    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize,
+    const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
+> crate::validate::Validate
+for StopTransactionRequest<
+    STOP_TRANSACTION_REQUEST_TRANSACTION_DATA_CAP,
+    TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP,
+    SAMPLED_VALUE_ITEM_VALUE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.reason {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("reason"))?;
+        }
+        if let Some(value) = &self.transaction_data {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("transactionData"))?;
+            }
+        }
+        Ok(())
+    }
 }

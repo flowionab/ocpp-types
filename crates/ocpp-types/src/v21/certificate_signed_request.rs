@@ -26,6 +26,19 @@ pub struct CertificateSignedRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for CertificateSignedRequest<CustomDataType> {
     const ACTION: &'static str = "CertificateSigned";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for CertificateSignedRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.certificate_chain, 10000usize)
+            .map_err(|error| error.in_field("certificateChain"))?;
+        if let Some(value) = &self.certificate_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateType"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -61,4 +74,23 @@ for CertificateSignedRequest<
     CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP,
 > {
     const ACTION: &'static str = "CertificateSigned";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP: usize,
+> crate::validate::Validate
+for CertificateSignedRequest<
+    CustomDataType,
+    CERTIFICATE_SIGNED_REQUEST_CERTIFICATE_CHAIN_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.certificate_chain, 10000usize)
+            .map_err(|error| error.in_field("certificateChain"))?;
+        if let Some(value) = &self.certificate_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateType"))?;
+        }
+        Ok(())
+    }
 }

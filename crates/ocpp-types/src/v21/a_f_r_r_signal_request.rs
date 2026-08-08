@@ -15,3 +15,9 @@ pub struct AFRRSignalRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for AFRRSignalRequest<CustomDataType> {
     const ACTION: &'static str = "AFRRSignal";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for AFRRSignalRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

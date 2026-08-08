@@ -15,6 +15,15 @@ pub struct ClearVariableMonitoringRequest<CustomDataType = crate::NoCustomData> 
 impl<CustomDataType> crate::Action for ClearVariableMonitoringRequest<CustomDataType> {
     const ACTION: &'static str = "ClearVariableMonitoring";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for ClearVariableMonitoringRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.id.len(), 1usize)
+            .map_err(|error| error.in_field("id"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -35,4 +44,19 @@ for ClearVariableMonitoringRequest<
     CLEAR_VARIABLE_MONITORING_REQUEST_ID_CAP,
 > {
     const ACTION: &'static str = "ClearVariableMonitoring";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CLEAR_VARIABLE_MONITORING_REQUEST_ID_CAP: usize,
+> crate::validate::Validate
+for ClearVariableMonitoringRequest<
+    CustomDataType,
+    CLEAR_VARIABLE_MONITORING_REQUEST_ID_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.id.len(), 1usize)
+            .map_err(|error| error.in_field("id"))?;
+        Ok(())
+    }
 }

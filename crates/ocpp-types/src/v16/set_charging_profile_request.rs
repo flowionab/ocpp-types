@@ -15,6 +15,14 @@ pub struct SetChargingProfileRequest {
 impl crate::Action for SetChargingProfileRequest {
     const ACTION: &'static str = "SetChargingProfile";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for SetChargingProfileRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.cs_charging_profiles)
+            .map_err(|error| error.in_field("csChargingProfiles"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -32,4 +40,15 @@ pub struct SetChargingProfileRequest<
 impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
 for SetChargingProfileRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "SetChargingProfile";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for SetChargingProfileRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.cs_charging_profiles)
+            .map_err(|error| error.in_field("csChargingProfiles"))?;
+        Ok(())
+    }
 }

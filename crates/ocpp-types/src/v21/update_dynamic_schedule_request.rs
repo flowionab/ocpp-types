@@ -18,3 +18,12 @@ pub struct UpdateDynamicScheduleRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for UpdateDynamicScheduleRequest<CustomDataType> {
     const ACTION: &'static str = "UpdateDynamicSchedule";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for UpdateDynamicScheduleRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.schedule_update)
+            .map_err(|error| error.in_field("scheduleUpdate"))?;
+        Ok(())
+    }
+}

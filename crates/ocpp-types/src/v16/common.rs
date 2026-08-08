@@ -10,6 +10,12 @@ pub enum IdTagInfoStatus {
     Invalid,
     ConcurrentTx,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for IdTagInfoStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdTagInfo {
@@ -21,6 +27,14 @@ pub struct IdTagInfo {
     pub parent_id_tag: Option<heapless::String<20usize>>,
     pub status: IdTagInfoStatus,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for IdTagInfo {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum BootNotificationResponseStatus {
@@ -28,11 +42,23 @@ pub enum BootNotificationResponseStatus {
     Pending,
     Rejected,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for BootNotificationResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CancelReservationResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CancelReservationResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -40,11 +66,23 @@ pub enum CertificateSignedResponseStatus {
     Accepted,
     Rejected,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateSignedResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChangeAvailabilityRequestType {
     Inoperative,
     Operative,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChangeAvailabilityRequestType {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -52,6 +90,12 @@ pub enum ChangeAvailabilityResponseStatus {
     Accepted,
     Rejected,
     Scheduled,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChangeAvailabilityResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -61,11 +105,23 @@ pub enum ChangeConfigurationResponseStatus {
     RebootRequired,
     NotSupported,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChangeConfigurationResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClearCacheResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearCacheResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -74,11 +130,23 @@ pub enum ChargingProfilePurpose {
     TxDefaultProfile,
     TxProfile,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingProfilePurpose {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClearChargingProfileResponseStatus {
     Accepted,
     Unknown,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearChargingProfileResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -88,12 +156,24 @@ pub enum DataTransferResponseStatus {
     UnknownMessageId,
     UnknownVendorId,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DataTransferResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum HashAlgorithm {
     SHA256,
     SHA384,
     SHA512,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for HashAlgorithm {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -107,12 +187,26 @@ pub struct CertificateHashData {
     #[cfg_attr(feature = "serde", serde(rename = "serialNumber"))]
     pub serial_number: heapless::String<40usize>,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateHashData {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.hash_algorithm)
+            .map_err(|error| error.in_field("hashAlgorithm"))?;
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeleteCertificateResponseStatus {
     Accepted,
     Failed,
     NotFound,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DeleteCertificateResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -121,6 +215,12 @@ pub enum DiagnosticsStatusNotificationRequestStatus {
     Uploaded,
     UploadFailed,
     Uploading,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DiagnosticsStatusNotificationRequestStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -133,12 +233,24 @@ pub enum ExtendedTriggerMessageRequestRequestedMessage {
     SignChargePointCertificate,
     StatusNotification,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ExtendedTriggerMessageRequestRequestedMessage {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExtendedTriggerMessageResponseStatus {
     Accepted,
     Rejected,
     NotImplemented,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ExtendedTriggerMessageResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -151,11 +263,23 @@ pub enum FirmwareStatusNotificationRequestStatus {
     Installing,
     Installed,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for FirmwareStatusNotificationRequestStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChargingRateUnit {
     A,
     W,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingRateUnit {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -166,6 +290,14 @@ pub struct ChargingSchedulePeriodItem {
     pub number_phases: Option<i64>,
     #[cfg_attr(feature = "serde", serde(rename = "startPeriod"))]
     pub start_period: i64,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingSchedulePeriodItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_multiple_of(self.limit, 0.1f64)
+            .map_err(|error| error.in_field("limit"))?;
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
@@ -183,6 +315,24 @@ pub struct ChargingSchedule {
     #[cfg_attr(feature = "serde", serde(rename = "startSchedule"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub start_schedule: Option<crate::OcppTimestamp>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for ChargingSchedule {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        if let Some(value) = self.min_charging_rate {
+            crate::validate::check_multiple_of(value, 0.1f64)
+                .map_err(|error| error.in_field("minChargingRate"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
@@ -206,11 +356,38 @@ pub struct ChargingSchedule<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub start_schedule: Option<crate::OcppTimestamp>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for ChargingSchedule<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_rate_unit)
+            .map_err(|error| error.in_field("chargingRateUnit"))?;
+        for (index, item) in self.charging_schedule_period.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("chargingSchedulePeriod")
+                })?;
+        }
+        if let Some(value) = self.min_charging_rate {
+            crate::validate::check_multiple_of(value, 0.1f64)
+                .map_err(|error| error.in_field("minChargingRate"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetCompositeScheduleResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetCompositeScheduleResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -220,17 +397,35 @@ pub struct ConfigurationKeyItem {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub value: Option<heapless::String<500usize>>,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ConfigurationKeyItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CertificateType {
     CentralSystemRootCertificate,
     ManufacturerRootCertificate,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for CertificateType {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetInstalledCertificateIdsResponseStatus {
     Accepted,
     NotFound,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetInstalledCertificateIdsResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -244,11 +439,23 @@ pub struct Log {
     #[cfg_attr(feature = "serde", serde(rename = "remoteLocation"))]
     pub remote_location: heapless::String<512usize>,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Log {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LogType {
     DiagnosticsLog,
     SecurityLog,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LogType {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -257,12 +464,24 @@ pub enum GetLogResponseStatus {
     Rejected,
     AcceptedCanceled,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetLogResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum InstallCertificateResponseStatus {
     Accepted,
     Failed,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for InstallCertificateResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -274,6 +493,12 @@ pub enum LogStatusNotificationRequestStatus {
     Uploaded,
     UploadFailure,
     Uploading,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LogStatusNotificationRequestStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -293,11 +518,23 @@ pub enum Context {
     Trigger,
     Other,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Context {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Format {
     Raw,
     SignedData,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Format {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -307,6 +544,12 @@ pub enum Location {
     Inlet,
     Outlet,
     Body,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Location {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -351,6 +594,12 @@ pub enum Measurand {
     SoC,
     RPM,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Measurand {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Phase {
@@ -370,6 +619,12 @@ pub enum Phase {
     L2L3,
     #[cfg_attr(feature = "serde", serde(rename = "L3-L1"))]
     L3L1,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Phase {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -399,6 +654,12 @@ pub enum SampledValueItemUnit {
     Fahrenheit,
     Percent,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SampledValueItemUnit {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -416,6 +677,36 @@ pub struct SampledValueItem {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub unit: Option<SampledValueItemUnit>,
     pub value: alloc::string::String,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for SampledValueItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.context {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("context"))?;
+        }
+        if let Some(value) = &self.format {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("format"))?;
+        }
+        if let Some(value) = &self.location {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("location"))?;
+        }
+        if let Some(value) = &self.measurand {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("measurand"))?;
+        }
+        if let Some(value) = &self.phase {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("phase"))?;
+        }
+        if let Some(value) = &self.unit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("unit"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -435,6 +726,37 @@ pub struct SampledValueItem<const SAMPLED_VALUE_ITEM_VALUE_CAP: usize = 1024usiz
     pub unit: Option<SampledValueItemUnit>,
     pub value: heapless::String<SAMPLED_VALUE_ITEM_VALUE_CAP>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const SAMPLED_VALUE_ITEM_VALUE_CAP: usize> crate::validate::Validate
+for SampledValueItem<SAMPLED_VALUE_ITEM_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.context {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("context"))?;
+        }
+        if let Some(value) = &self.format {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("format"))?;
+        }
+        if let Some(value) = &self.location {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("location"))?;
+        }
+        if let Some(value) = &self.measurand {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("measurand"))?;
+        }
+        if let Some(value) = &self.phase {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("phase"))?;
+        }
+        if let Some(value) = &self.unit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("unit"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -442,6 +764,16 @@ pub struct MeterValueItem {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: alloc::vec::Vec<SampledValueItem>,
     pub timestamp: crate::OcppTimestamp,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for MeterValueItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -457,6 +789,20 @@ pub struct MeterValueItem<
     >,
     pub timestamp: crate::OcppTimestamp,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize,
+    const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
+> crate::validate::Validate
+for MeterValueItem<METER_VALUE_ITEM_SAMPLED_VALUE_CAP, SAMPLED_VALUE_ITEM_VALUE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChargingProfileKind {
@@ -464,11 +810,23 @@ pub enum ChargingProfileKind {
     Recurring,
     Relative,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ChargingProfileKind {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RecurrencyKind {
     Daily,
     Weekly,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RecurrencyKind {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
@@ -496,6 +854,22 @@ pub struct ChargingProfile {
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for ChargingProfile {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
@@ -528,17 +902,48 @@ pub struct ChargingProfile<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for ChargingProfile<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RemoteStartTransactionResponseStatus {
     Accepted,
     Rejected,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RemoteStartTransactionResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RemoteStopTransactionResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RemoteStopTransactionResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -549,17 +954,35 @@ pub enum ReserveNowResponseStatus {
     Rejected,
     Unavailable,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReserveNowResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ResetRequestType {
     Hard,
     Soft,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ResetRequestType {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ResetResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ResetResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -570,11 +993,27 @@ pub struct LocalAuthorizationListItem {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub id_tag_info: Option<IdTagInfo>,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LocalAuthorizationListItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_tag_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTagInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum UpdateType {
     Differential,
     Full,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UpdateType {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -583,6 +1022,12 @@ pub enum SendLocalListResponseStatus {
     Failed,
     NotSupported,
     VersionMismatch,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SendLocalListResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq)]
@@ -610,6 +1055,22 @@ pub struct CsChargingProfiles {
     #[cfg_attr(feature = "serde", serde(rename = "validTo"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for CsChargingProfiles {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
@@ -642,6 +1103,25 @@ pub struct CsChargingProfiles<
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub valid_to: Option<crate::OcppTimestamp>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for CsChargingProfiles<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile_kind)
+            .map_err(|error| error.in_field("chargingProfileKind"))?;
+        crate::validate::Validate::validate(&self.charging_profile_purpose)
+            .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        crate::validate::Validate::validate(&self.charging_schedule)
+            .map_err(|error| error.in_field("chargingSchedule"))?;
+        if let Some(value) = &self.recurrency_kind {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("recurrencyKind"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SetChargingProfileResponseStatus {
@@ -649,11 +1129,23 @@ pub enum SetChargingProfileResponseStatus {
     Rejected,
     NotSupported,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SetChargingProfileResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SignCertificateResponseStatus {
     Accepted,
     Rejected,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SignCertificateResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -673,6 +1165,12 @@ pub enum SignedFirmwareStatusNotificationRequestStatus {
     InvalidSignature,
     SignatureVerified,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SignedFirmwareStatusNotificationRequestStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -686,6 +1184,16 @@ pub struct Firmware {
     pub signature: alloc::string::String,
     #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
     pub signing_certificate: alloc::string::String,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for Firmware {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.signature, 800usize)
+            .map_err(|error| error.in_field("signature"))?;
+        crate::validate::check_max_length(&self.signing_certificate, 5500usize)
+            .map_err(|error| error.in_field("signingCertificate"))?;
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -704,6 +1212,20 @@ pub struct Firmware<
     #[cfg_attr(feature = "serde", serde(rename = "signingCertificate"))]
     pub signing_certificate: heapless::String<FIRMWARE_SIGNING_CERTIFICATE_CAP>,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const FIRMWARE_SIGNATURE_CAP: usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize,
+> crate::validate::Validate
+for Firmware<FIRMWARE_SIGNATURE_CAP, FIRMWARE_SIGNING_CERTIFICATE_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.signature, 800usize)
+            .map_err(|error| error.in_field("signature"))?;
+        crate::validate::check_max_length(&self.signing_certificate, 5500usize)
+            .map_err(|error| error.in_field("signingCertificate"))?;
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SignedUpdateFirmwareResponseStatus {
@@ -712,6 +1234,12 @@ pub enum SignedUpdateFirmwareResponseStatus {
     AcceptedCanceled,
     InvalidCertificate,
     RevokedCertificate,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SignedUpdateFirmwareResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -733,6 +1261,12 @@ pub enum ErrorCode {
     OverVoltage,
     WeakSignal,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ErrorCode {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StatusNotificationRequestStatus {
@@ -745,6 +1279,12 @@ pub enum StatusNotificationRequestStatus {
     Reserved,
     Unavailable,
     Faulted,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StatusNotificationRequestStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -761,6 +1301,12 @@ pub enum Reason {
     UnlockCommand,
     DeAuthorized,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for Reason {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -768,6 +1314,16 @@ pub struct TransactionDataItem {
     #[cfg_attr(feature = "serde", serde(rename = "sampledValue"))]
     pub sampled_value: alloc::vec::Vec<SampledValueItem>,
     pub timestamp: crate::OcppTimestamp,
+}
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for TransactionDataItem {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
 }
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -783,6 +1339,23 @@ pub struct TransactionDataItem<
     >,
     pub timestamp: crate::OcppTimestamp,
 }
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP: usize,
+    const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
+> crate::validate::Validate
+for TransactionDataItem<
+    TRANSACTION_DATA_ITEM_SAMPLED_VALUE_CAP,
+    SAMPLED_VALUE_ITEM_VALUE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.sampled_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("sampledValue"))?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TriggerMessageRequestRequestedMessage {
@@ -793,6 +1366,12 @@ pub enum TriggerMessageRequestRequestedMessage {
     MeterValues,
     StatusNotification,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerMessageRequestRequestedMessage {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TriggerMessageResponseStatus {
@@ -800,10 +1379,22 @@ pub enum TriggerMessageResponseStatus {
     Rejected,
     NotImplemented,
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerMessageResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum UnlockConnectorResponseStatus {
     Unlocked,
     UnlockFailed,
     NotSupported,
+}
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UnlockConnectorResponseStatus {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }

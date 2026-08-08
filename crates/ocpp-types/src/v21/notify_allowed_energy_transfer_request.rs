@@ -21,6 +21,21 @@ impl<CustomDataType> crate::Action
 for NotifyAllowedEnergyTransferRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyAllowedEnergyTransfer";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyAllowedEnergyTransferRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.allowed_energy_transfer.len(), 1usize)
+            .map_err(|error| error.in_field("allowedEnergyTransfer"))?;
+        for (index, item) in self.allowed_energy_transfer.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("allowedEnergyTransfer")
+                })?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -51,4 +66,25 @@ for NotifyAllowedEnergyTransferRequest<
     NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP,
 > {
     const ACTION: &'static str = "NotifyAllowedEnergyTransfer";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP: usize,
+> crate::validate::Validate
+for NotifyAllowedEnergyTransferRequest<
+    CustomDataType,
+    NOTIFY_ALLOWED_ENERGY_TRANSFER_REQUEST_ALLOWED_ENERGY_TRANSFER_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.allowed_energy_transfer.len(), 1usize)
+            .map_err(|error| error.in_field("allowedEnergyTransfer"))?;
+        for (index, item) in self.allowed_energy_transfer.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("allowedEnergyTransfer")
+                })?;
+        }
+        Ok(())
+    }
 }

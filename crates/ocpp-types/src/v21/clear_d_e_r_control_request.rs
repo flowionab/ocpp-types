@@ -22,3 +22,14 @@ pub struct ClearDERControlRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "ClearDERControl";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClearDERControlRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.control_type {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("controlType"))?;
+        }
+        Ok(())
+    }
+}

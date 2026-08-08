@@ -29,6 +29,27 @@ pub struct RequestStartTransactionRequest<CustomDataType = crate::NoCustomData> 
 impl<CustomDataType> crate::Action for RequestStartTransactionRequest<CustomDataType> {
     const ACTION: &'static str = "RequestStartTransaction";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for RequestStartTransactionRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 1i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -97,4 +118,45 @@ for RequestStartTransactionRequest<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "RequestStartTransaction";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for RequestStartTransactionRequest<
+    CustomDataType,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    ABSOLUTE_PRICE_SCHEDULE_PRICE_RULE_STACKS_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    PRICE_LEVEL_SCHEDULE_PRICE_LEVEL_SCHEDULE_ENTRIES_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 1i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
 }

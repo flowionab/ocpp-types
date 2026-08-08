@@ -11,3 +11,11 @@ pub struct AuthorizeResponse {
 impl crate::Action for AuthorizeResponse {
     const ACTION: &'static str = "Authorize";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for AuthorizeResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.id_tag_info)
+            .map_err(|error| error.in_field("idTagInfo"))?;
+        Ok(())
+    }
+}

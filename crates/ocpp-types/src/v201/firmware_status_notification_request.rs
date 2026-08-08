@@ -20,3 +20,12 @@ impl<CustomDataType> crate::Action
 for FirmwareStatusNotificationRequest<CustomDataType> {
     const ACTION: &'static str = "FirmwareStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for FirmwareStatusNotificationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

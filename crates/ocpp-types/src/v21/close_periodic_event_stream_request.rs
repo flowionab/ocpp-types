@@ -13,3 +13,12 @@ pub struct ClosePeriodicEventStreamRequest<CustomDataType = crate::NoCustomData>
 impl<CustomDataType> crate::Action for ClosePeriodicEventStreamRequest<CustomDataType> {
     const ACTION: &'static str = "ClosePeriodicEventStream";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClosePeriodicEventStreamRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_i64(self.id, 0i64)
+            .map_err(|error| error.in_field("id"))?;
+        Ok(())
+    }
+}

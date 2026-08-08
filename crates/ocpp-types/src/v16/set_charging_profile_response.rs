@@ -10,3 +10,11 @@ pub struct SetChargingProfileResponse {
 impl crate::Action for SetChargingProfileResponse {
     const ACTION: &'static str = "SetChargingProfile";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SetChargingProfileResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

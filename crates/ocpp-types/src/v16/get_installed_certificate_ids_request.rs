@@ -11,3 +11,11 @@ pub struct GetInstalledCertificateIdsRequest {
 impl crate::Action for GetInstalledCertificateIdsRequest {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetInstalledCertificateIdsRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.certificate_type)
+            .map_err(|error| error.in_field("certificateType"))?;
+        Ok(())
+    }
+}

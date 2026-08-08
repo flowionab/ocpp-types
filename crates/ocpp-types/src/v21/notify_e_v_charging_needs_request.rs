@@ -29,6 +29,21 @@ pub struct NotifyEVChargingNeedsRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyEVChargingNeedsRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyEVChargingNeedsRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_needs)
+            .map_err(|error| error.in_field("chargingNeeds"))?;
+        crate::validate::check_min_i64(self.evse_id, 1i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        if let Some(value) = self.max_schedule_tuples {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("maxScheduleTuples"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -88,4 +103,35 @@ for NotifyEVChargingNeedsRequest<
     E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP,
 > {
     const ACTION: &'static str = "NotifyEVChargingNeeds";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP: usize,
+    const D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP: usize,
+    const D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP: usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP: usize,
+    const E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP: usize,
+    const E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP: usize,
+> crate::validate::Validate
+for NotifyEVChargingNeedsRequest<
+    CustomDataType,
+    CHARGING_NEEDS_AVAILABLE_ENERGY_TRANSFER_CAP,
+    D_E_R_CHARGING_PARAMETERS_EV_ISLANDING_DETECTION_METHOD_CAP,
+    D_E_R_CHARGING_PARAMETERS_EV_SUPPORTED_D_E_R_CONTROL_CAP,
+    E_V_ABSOLUTE_PRICE_SCHEDULE_EV_ABSOLUTE_PRICE_SCHEDULE_ENTRIES_CAP,
+    E_V_ABSOLUTE_PRICE_SCHEDULE_PRICE_ALGORITHM_CAP,
+    E_V_POWER_SCHEDULE_EV_POWER_SCHEDULE_ENTRIES_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_needs)
+            .map_err(|error| error.in_field("chargingNeeds"))?;
+        crate::validate::check_min_i64(self.evse_id, 1i64)
+            .map_err(|error| error.in_field("evseId"))?;
+        if let Some(value) = self.max_schedule_tuples {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("maxScheduleTuples"))?;
+        }
+        Ok(())
+    }
 }

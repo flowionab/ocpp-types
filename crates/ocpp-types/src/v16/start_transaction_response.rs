@@ -13,3 +13,11 @@ pub struct StartTransactionResponse {
 impl crate::Action for StartTransactionResponse {
     const ACTION: &'static str = "StartTransaction";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StartTransactionResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.id_tag_info)
+            .map_err(|error| error.in_field("idTagInfo"))?;
+        Ok(())
+    }
+}

@@ -10,3 +10,11 @@ pub struct ResetResponse {
 impl crate::Action for ResetResponse {
     const ACTION: &'static str = "Reset";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ResetResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

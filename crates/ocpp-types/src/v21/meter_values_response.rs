@@ -11,3 +11,9 @@ pub struct MeterValuesResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for MeterValuesResponse<CustomDataType> {
     const ACTION: &'static str = "MeterValues";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for MeterValuesResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

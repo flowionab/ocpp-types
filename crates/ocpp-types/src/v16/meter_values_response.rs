@@ -7,3 +7,9 @@ pub struct MeterValuesResponse {}
 impl crate::Action for MeterValuesResponse {
     const ACTION: &'static str = "MeterValues";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for MeterValuesResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

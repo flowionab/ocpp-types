@@ -28,3 +28,16 @@ pub struct NotifyDERAlarmRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyDERAlarmRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyDERAlarm";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyDERAlarmRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.control_type)
+            .map_err(|error| error.in_field("controlType"))?;
+        if let Some(value) = &self.grid_event_fault {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("gridEventFault"))?;
+        }
+        Ok(())
+    }
+}

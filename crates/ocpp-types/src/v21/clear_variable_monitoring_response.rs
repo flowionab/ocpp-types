@@ -16,6 +16,21 @@ pub struct ClearVariableMonitoringResponse<CustomDataType = crate::NoCustomData>
 impl<CustomDataType> crate::Action for ClearVariableMonitoringResponse<CustomDataType> {
     const ACTION: &'static str = "ClearVariableMonitoring";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for ClearVariableMonitoringResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.clear_monitoring_result.len(), 1usize)
+            .map_err(|error| error.in_field("clearMonitoringResult"))?;
+        for (index, item) in self.clear_monitoring_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("clearMonitoringResult")
+                })?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +60,27 @@ for ClearVariableMonitoringResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "ClearVariableMonitoring";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for ClearVariableMonitoringResponse<
+    CustomDataType,
+    CLEAR_VARIABLE_MONITORING_RESPONSE_CLEAR_MONITORING_RESULT_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.clear_monitoring_result.len(), 1usize)
+            .map_err(|error| error.in_field("clearMonitoringResult"))?;
+        for (index, item) in self.clear_monitoring_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| {
+                    error.in_index(index).in_field("clearMonitoringResult")
+                })?;
+        }
+        Ok(())
+    }
 }

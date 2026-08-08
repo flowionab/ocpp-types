@@ -33,3 +33,10 @@ pub struct PublishFirmwareRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for PublishFirmwareRequest<CustomDataType> {
     const ACTION: &'static str = "PublishFirmware";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for PublishFirmwareRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

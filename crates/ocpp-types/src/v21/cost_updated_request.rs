@@ -17,3 +17,9 @@ pub struct CostUpdatedRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for CostUpdatedRequest<CustomDataType> {
     const ACTION: &'static str = "CostUpdated";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for CostUpdatedRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

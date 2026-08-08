@@ -16,6 +16,19 @@ pub struct SetVariableMonitoringRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetVariableMonitoringRequest<CustomDataType> {
     const ACTION: &'static str = "SetVariableMonitoring";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetVariableMonitoringRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_monitoring_data.len(), 1usize)
+            .map_err(|error| error.in_field("setMonitoringData"))?;
+        for (index, item) in self.set_monitoring_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setMonitoringData"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -42,4 +55,23 @@ for SetVariableMonitoringRequest<
     SET_VARIABLE_MONITORING_REQUEST_SET_MONITORING_DATA_CAP,
 > {
     const ACTION: &'static str = "SetVariableMonitoring";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SET_VARIABLE_MONITORING_REQUEST_SET_MONITORING_DATA_CAP: usize,
+> crate::validate::Validate
+for SetVariableMonitoringRequest<
+    CustomDataType,
+    SET_VARIABLE_MONITORING_REQUEST_SET_MONITORING_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_monitoring_data.len(), 1usize)
+            .map_err(|error| error.in_field("setMonitoringData"))?;
+        for (index, item) in self.set_monitoring_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setMonitoringData"))?;
+        }
+        Ok(())
+    }
 }

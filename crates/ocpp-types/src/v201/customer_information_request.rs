@@ -32,6 +32,21 @@ pub struct CustomerInformationRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for CustomerInformationRequest<CustomDataType> {
     const ACTION: &'static str = "CustomerInformation";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for CustomerInformationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.customer_certificate {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("customerCertificate"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -65,4 +80,19 @@ pub struct CustomerInformationRequest<
 impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::Action
 for CustomerInformationRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "CustomerInformation";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const ID_TOKEN_ADDITIONAL_INFO_CAP: usize> crate::validate::Validate
+for CustomerInformationRequest<CustomDataType, ID_TOKEN_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.customer_certificate {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("customerCertificate"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        Ok(())
+    }
 }

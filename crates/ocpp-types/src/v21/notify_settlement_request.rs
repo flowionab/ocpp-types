@@ -46,6 +46,23 @@ pub struct NotifySettlementRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifySettlementRequest<CustomDataType> {
     const ACTION: &'static str = "NotifySettlement";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifySettlementRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.receipt_url {
+            crate::validate::check_max_length(value, 2000usize)
+                .map_err(|error| error.in_field("receiptUrl"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.vat_company {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("vatCompany"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -96,4 +113,24 @@ impl<
 > crate::Action
 for NotifySettlementRequest<CustomDataType, NOTIFY_SETTLEMENT_REQUEST_RECEIPT_URL_CAP> {
     const ACTION: &'static str = "NotifySettlement";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_SETTLEMENT_REQUEST_RECEIPT_URL_CAP: usize,
+> crate::validate::Validate
+for NotifySettlementRequest<CustomDataType, NOTIFY_SETTLEMENT_REQUEST_RECEIPT_URL_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.receipt_url {
+            crate::validate::check_max_length(value, 2000usize)
+                .map_err(|error| error.in_field("receiptUrl"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.vat_company {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("vatCompany"))?;
+        }
+        Ok(())
+    }
 }

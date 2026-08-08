@@ -17,3 +17,15 @@ pub struct ResetRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ResetRequest<CustomDataType> {
     const ACTION: &'static str = "Reset";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ResetRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        crate::validate::Validate::validate(&self.r#type)
+            .map_err(|error| error.in_field("type"))?;
+        Ok(())
+    }
+}

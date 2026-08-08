@@ -21,6 +21,17 @@ pub struct NotifySettlementResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifySettlementResponse<CustomDataType> {
     const ACTION: &'static str = "NotifySettlement";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifySettlementResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.receipt_url {
+            crate::validate::check_max_length(value, 2000usize)
+                .map_err(|error| error.in_field("receiptUrl"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -52,4 +63,21 @@ for NotifySettlementResponse<
     NOTIFY_SETTLEMENT_RESPONSE_RECEIPT_URL_CAP,
 > {
     const ACTION: &'static str = "NotifySettlement";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_SETTLEMENT_RESPONSE_RECEIPT_URL_CAP: usize,
+> crate::validate::Validate
+for NotifySettlementResponse<
+    CustomDataType,
+    NOTIFY_SETTLEMENT_RESPONSE_RECEIPT_URL_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.receipt_url {
+            crate::validate::check_max_length(value, 2000usize)
+                .map_err(|error| error.in_field("receiptUrl"))?;
+        }
+        Ok(())
+    }
 }

@@ -23,6 +23,25 @@ pub struct NotifyChargingLimitRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyChargingLimitRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyChargingLimit";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyChargingLimitRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_limit)
+            .map_err(|error| error.in_field("chargingLimit"))?;
+        if let Some(value) = &self.charging_schedule {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingSchedule"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("chargingSchedule")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -68,4 +87,33 @@ for NotifyChargingLimitRequest<
     SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
 > {
     const ACTION: &'static str = "NotifyChargingLimit";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP: usize,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+> crate::validate::Validate
+for NotifyChargingLimitRequest<
+    CustomDataType,
+    NOTIFY_CHARGING_LIMIT_REQUEST_CHARGING_SCHEDULE_CAP,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_limit)
+            .map_err(|error| error.in_field("chargingLimit"))?;
+        if let Some(value) = &self.charging_schedule {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("chargingSchedule"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("chargingSchedule")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

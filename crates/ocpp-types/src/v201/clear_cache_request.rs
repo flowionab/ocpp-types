@@ -11,3 +11,9 @@ pub struct ClearCacheRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearCacheRequest<CustomDataType> {
     const ACTION: &'static str = "ClearCache";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for ClearCacheRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

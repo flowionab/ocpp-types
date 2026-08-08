@@ -22,6 +22,25 @@ pub struct SetDERControlResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetDERControlResponse<CustomDataType> {
     const ACTION: &'static str = "SetDERControl";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetDERControlResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        if let Some(value) = &self.superseded_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -59,4 +78,31 @@ for SetDERControlResponse<
     SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP,
 > {
     const ACTION: &'static str = "SetDERControl";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+    const SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP: usize,
+> crate::validate::Validate
+for SetDERControlResponse<
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+    SET_D_E_R_CONTROL_RESPONSE_SUPERSEDED_IDS_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        if let Some(value) = &self.superseded_ids {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("supersededIds"))?;
+        }
+        Ok(())
+    }
 }

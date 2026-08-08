@@ -14,3 +14,12 @@ pub struct SetMonitoringBaseRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetMonitoringBaseRequest<CustomDataType> {
     const ACTION: &'static str = "SetMonitoringBase";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for SetMonitoringBaseRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.monitoring_base)
+            .map_err(|error| error.in_field("monitoringBase"))?;
+        Ok(())
+    }
+}

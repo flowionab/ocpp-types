@@ -29,6 +29,23 @@ pub struct RequestStartTransactionRequest<CustomDataType = crate::NoCustomData> 
 impl<CustomDataType> crate::Action for RequestStartTransactionRequest<CustomDataType> {
     const ACTION: &'static str = "RequestStartTransaction";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for RequestStartTransactionRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -77,4 +94,31 @@ for RequestStartTransactionRequest<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "RequestStartTransaction";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const SALES_TARIFF_SALES_TARIFF_ENTRY_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for RequestStartTransactionRequest<
+    CustomDataType,
+    CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    SALES_TARIFF_SALES_TARIFF_ENTRY_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        if let Some(value) = &self.group_id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("groupIdToken"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token)
+            .map_err(|error| error.in_field("idToken"))?;
+        Ok(())
+    }
 }

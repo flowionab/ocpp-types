@@ -48,6 +48,35 @@ pub struct TransactionEventRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for TransactionEventRequest<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for TransactionEventRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        if let Some(value) = &self.meter_value {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("meterValue"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+            }
+        }
+        crate::validate::Validate::validate(&self.transaction_info)
+            .map_err(|error| error.in_field("transactionInfo"))?;
+        crate::validate::Validate::validate(&self.trigger_reason)
+            .map_err(|error| error.in_field("triggerReason"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -125,4 +154,47 @@ for TransactionEventRequest<
     SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP: usize,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for TransactionEventRequest<
+    CustomDataType,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP,
+    METER_VALUE_SAMPLED_VALUE_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        if let Some(value) = &self.meter_value {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("meterValue"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+            }
+        }
+        crate::validate::Validate::validate(&self.transaction_info)
+            .map_err(|error| error.in_field("transactionInfo"))?;
+        crate::validate::Validate::validate(&self.trigger_reason)
+            .map_err(|error| error.in_field("triggerReason"))?;
+        Ok(())
+    }
 }

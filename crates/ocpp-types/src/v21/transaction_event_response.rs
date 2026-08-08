@@ -36,6 +36,35 @@ pub struct TransactionEventResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for TransactionEventResponse<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for TransactionEventResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        if let Some(value) = &self.transaction_limit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("transactionLimit"))?;
+        }
+        if let Some(value) = &self.updated_personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("updatedPersonalMessage"))?;
+        }
+        if let Some(value) = &self.updated_personal_message_extra {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("updatedPersonalMessageExtra"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("updatedPersonalMessageExtra")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -97,4 +126,43 @@ for TransactionEventResponse<
     MESSAGE_CONTENT_CONTENT_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
+> crate::validate::Validate
+for TransactionEventResponse<
+    CustomDataType,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_token_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTokenInfo"))?;
+        }
+        if let Some(value) = &self.transaction_limit {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("transactionLimit"))?;
+        }
+        if let Some(value) = &self.updated_personal_message {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("updatedPersonalMessage"))?;
+        }
+        if let Some(value) = &self.updated_personal_message_extra {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("updatedPersonalMessageExtra"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("updatedPersonalMessageExtra")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

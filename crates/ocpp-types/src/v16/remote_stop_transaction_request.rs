@@ -10,3 +10,9 @@ pub struct RemoteStopTransactionRequest {
 impl crate::Action for RemoteStopTransactionRequest {
     const ACTION: &'static str = "RemoteStopTransaction";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RemoteStopTransactionRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

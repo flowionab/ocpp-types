@@ -24,3 +24,13 @@ pub struct StatusNotificationRequest {
 impl crate::Action for StatusNotificationRequest {
     const ACTION: &'static str = "StatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StatusNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.error_code)
+            .map_err(|error| error.in_field("errorCode"))?;
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

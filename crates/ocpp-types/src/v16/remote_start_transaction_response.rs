@@ -10,3 +10,11 @@ pub struct RemoteStartTransactionResponse {
 impl crate::Action for RemoteStartTransactionResponse {
     const ACTION: &'static str = "RemoteStartTransaction";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for RemoteStartTransactionResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

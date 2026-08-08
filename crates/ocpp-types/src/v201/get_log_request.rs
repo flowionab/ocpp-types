@@ -25,3 +25,13 @@ pub struct GetLogRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetLogRequest<CustomDataType> {
     const ACTION: &'static str = "GetLog";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for GetLogRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.log)
+            .map_err(|error| error.in_field("log"))?;
+        crate::validate::Validate::validate(&self.log_type)
+            .map_err(|error| error.in_field("logType"))?;
+        Ok(())
+    }
+}

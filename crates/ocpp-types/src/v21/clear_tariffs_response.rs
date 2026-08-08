@@ -16,6 +16,18 @@ pub struct ClearTariffsResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearTariffsResponse<CustomDataType> {
     const ACTION: &'static str = "ClearTariffs";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for ClearTariffsResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.clear_tariffs_result.len(), 1usize)
+            .map_err(|error| error.in_field("clearTariffsResult"))?;
+        for (index, item) in self.clear_tariffs_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("clearTariffsResult"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +57,25 @@ for ClearTariffsResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "ClearTariffs";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for ClearTariffsResponse<
+    CustomDataType,
+    CLEAR_TARIFFS_RESPONSE_CLEAR_TARIFFS_RESULT_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.clear_tariffs_result.len(), 1usize)
+            .map_err(|error| error.in_field("clearTariffsResult"))?;
+        for (index, item) in self.clear_tariffs_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("clearTariffsResult"))?;
+        }
+        Ok(())
+    }
 }

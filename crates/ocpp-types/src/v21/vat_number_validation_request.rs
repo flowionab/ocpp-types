@@ -18,3 +18,14 @@ pub struct VatNumberValidationRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for VatNumberValidationRequest<CustomDataType> {
     const ACTION: &'static str = "VatNumberValidation";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for VatNumberValidationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        Ok(())
+    }
+}

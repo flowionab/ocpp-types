@@ -10,3 +10,11 @@ pub struct FirmwareStatusNotificationRequest {
 impl crate::Action for FirmwareStatusNotificationRequest {
     const ACTION: &'static str = "FirmwareStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for FirmwareStatusNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

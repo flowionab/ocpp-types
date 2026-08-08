@@ -10,3 +10,11 @@ pub struct InstallCertificateResponse {
 impl crate::Action for InstallCertificateResponse {
     const ACTION: &'static str = "InstallCertificate";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for InstallCertificateResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

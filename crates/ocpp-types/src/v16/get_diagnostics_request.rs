@@ -22,6 +22,12 @@ pub struct GetDiagnosticsRequest {
 impl crate::Action for GetDiagnosticsRequest {
     const ACTION: &'static str = "GetDiagnostics";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for GetDiagnosticsRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +51,11 @@ pub struct GetDiagnosticsRequest<
 impl<const GET_DIAGNOSTICS_REQUEST_LOCATION_CAP: usize> crate::Action
 for GetDiagnosticsRequest<GET_DIAGNOSTICS_REQUEST_LOCATION_CAP> {
     const ACTION: &'static str = "GetDiagnostics";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const GET_DIAGNOSTICS_REQUEST_LOCATION_CAP: usize> crate::validate::Validate
+for GetDiagnosticsRequest<GET_DIAGNOSTICS_REQUEST_LOCATION_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }

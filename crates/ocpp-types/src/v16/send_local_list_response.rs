@@ -10,3 +10,11 @@ pub struct SendLocalListResponse {
 impl crate::Action for SendLocalListResponse {
     const ACTION: &'static str = "SendLocalList";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SendLocalListResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

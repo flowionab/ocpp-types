@@ -10,3 +10,9 @@ pub struct HeartbeatResponse {
 impl crate::Action for HeartbeatResponse {
     const ACTION: &'static str = "Heartbeat";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for HeartbeatResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

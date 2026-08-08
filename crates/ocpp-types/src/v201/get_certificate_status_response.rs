@@ -22,6 +22,23 @@ pub struct GetCertificateStatusResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetCertificateStatusResponse<CustomDataType> {
     const ACTION: &'static str = "GetCertificateStatus";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetCertificateStatusResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.ocsp_result {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("ocspResult"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -53,4 +70,27 @@ for GetCertificateStatusResponse<
     GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP,
 > {
     const ACTION: &'static str = "GetCertificateStatus";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP: usize,
+> crate::validate::Validate
+for GetCertificateStatusResponse<
+    CustomDataType,
+    GET_CERTIFICATE_STATUS_RESPONSE_OCSP_RESULT_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.ocsp_result {
+            crate::validate::check_max_length(value, 5500usize)
+                .map_err(|error| error.in_field("ocspResult"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

@@ -15,6 +15,22 @@ pub struct GetInstalledCertificateIdsResponse {
 impl crate::Action for GetInstalledCertificateIdsResponse {
     const ACTION: &'static str = "GetInstalledCertificateIds";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for GetInstalledCertificateIdsResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_hash_data {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("certificateHashData")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -39,4 +55,25 @@ for GetInstalledCertificateIdsResponse<
     GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CAP,
 > {
     const ACTION: &'static str = "GetInstalledCertificateIds";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CAP: usize,
+> crate::validate::Validate
+for GetInstalledCertificateIdsResponse<
+    GET_INSTALLED_CERTIFICATE_IDS_RESPONSE_CERTIFICATE_HASH_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_hash_data {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("certificateHashData")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
 }

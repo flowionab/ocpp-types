@@ -20,6 +20,23 @@ pub struct GetCompositeScheduleResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetCompositeScheduleResponse<CustomDataType> {
     const ACTION: &'static str = "GetCompositeSchedule";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetCompositeScheduleResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.schedule {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("schedule"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -63,4 +80,33 @@ for GetCompositeScheduleResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "GetCompositeSchedule";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP: usize,
+    const CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for GetCompositeScheduleResponse<
+    CustomDataType,
+    COMPOSITE_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_FREQ_WATT_CURVE_CAP,
+    CHARGING_SCHEDULE_PERIOD_V2X_SIGNAL_WATT_CURVE_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.schedule {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("schedule"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

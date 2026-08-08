@@ -13,3 +13,11 @@ pub struct LogStatusNotificationRequest {
 impl crate::Action for LogStatusNotificationRequest {
     const ACTION: &'static str = "LogStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for LogStatusNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

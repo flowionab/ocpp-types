@@ -25,3 +25,14 @@ pub struct NotifyCustomerInformationRequest<CustomDataType = crate::NoCustomData
 impl<CustomDataType> crate::Action for NotifyCustomerInformationRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyCustomerInformation";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyCustomerInformationRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_i64(self.request_id, 0i64)
+            .map_err(|error| error.in_field("requestId"))?;
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        Ok(())
+    }
+}

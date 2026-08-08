@@ -7,3 +7,9 @@ pub struct SignedFirmwareStatusNotificationResponse {}
 impl crate::Action for SignedFirmwareStatusNotificationResponse {
     const ACTION: &'static str = "SignedFirmwareStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for SignedFirmwareStatusNotificationResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

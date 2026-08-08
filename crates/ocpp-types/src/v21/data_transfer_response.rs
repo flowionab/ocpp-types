@@ -25,6 +25,19 @@ impl<DataTransferResponseData, CustomDataType> crate::Action
 for DataTransferResponse<DataTransferResponseData, CustomDataType> {
     const ACTION: &'static str = "DataTransfer";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<DataTransferResponseData, CustomDataType> crate::validate::Validate
+for DataTransferResponse<DataTransferResponseData, CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -56,4 +69,25 @@ for DataTransferResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "DataTransfer";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    DataTransferResponseData,
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for DataTransferResponse<
+    DataTransferResponseData,
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

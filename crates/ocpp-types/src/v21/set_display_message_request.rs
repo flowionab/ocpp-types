@@ -15,6 +15,15 @@ pub struct SetDisplayMessageRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetDisplayMessageRequest<CustomDataType> {
     const ACTION: &'static str = "SetDisplayMessage";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetDisplayMessageRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.message)
+            .map_err(|error| error.in_field("message"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -31,4 +40,13 @@ pub struct SetDisplayMessageRequest<
 impl<CustomDataType, const MESSAGE_CONTENT_CONTENT_CAP: usize> crate::Action
 for SetDisplayMessageRequest<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP> {
     const ACTION: &'static str = "SetDisplayMessage";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<CustomDataType, const MESSAGE_CONTENT_CONTENT_CAP: usize> crate::validate::Validate
+for SetDisplayMessageRequest<CustomDataType, MESSAGE_CONTENT_CONTENT_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.message)
+            .map_err(|error| error.in_field("message"))?;
+        Ok(())
+    }
 }

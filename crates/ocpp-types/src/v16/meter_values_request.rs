@@ -18,6 +18,16 @@ pub struct MeterValuesRequest {
 impl crate::Action for MeterValuesRequest {
     const ACTION: &'static str = "MeterValues";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for MeterValuesRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.meter_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -49,4 +59,23 @@ for MeterValuesRequest<
     SAMPLED_VALUE_ITEM_VALUE_CAP,
 > {
     const ACTION: &'static str = "MeterValues";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const METER_VALUES_REQUEST_METER_VALUE_CAP: usize,
+    const METER_VALUE_ITEM_SAMPLED_VALUE_CAP: usize,
+    const SAMPLED_VALUE_ITEM_VALUE_CAP: usize,
+> crate::validate::Validate
+for MeterValuesRequest<
+    METER_VALUES_REQUEST_METER_VALUE_CAP,
+    METER_VALUE_ITEM_SAMPLED_VALUE_CAP,
+    SAMPLED_VALUE_ITEM_VALUE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        for (index, item) in self.meter_value.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+        }
+        Ok(())
+    }
 }

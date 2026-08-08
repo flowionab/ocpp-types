@@ -12,3 +12,11 @@ pub struct GetLogResponse {
 impl crate::Action for GetLogResponse {
     const ACTION: &'static str = "GetLog";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetLogResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

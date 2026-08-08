@@ -22,6 +22,19 @@ pub struct RequestStartTransactionResponse<CustomDataType = crate::NoCustomData>
 impl<CustomDataType> crate::Action for RequestStartTransactionResponse<CustomDataType> {
     const ACTION: &'static str = "RequestStartTransaction";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for RequestStartTransactionResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +58,20 @@ pub struct RequestStartTransactionResponse<
 impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
 for RequestStartTransactionResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "RequestStartTransaction";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for RequestStartTransactionResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

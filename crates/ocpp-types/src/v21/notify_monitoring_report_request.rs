@@ -28,6 +28,23 @@ pub struct NotifyMonitoringReportRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyMonitoringReportRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyMonitoringReport";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyMonitoringReportRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.monitor {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("monitor"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("monitor"))?;
+            }
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -71,4 +88,29 @@ for NotifyMonitoringReportRequest<
     MONITORING_DATA_VARIABLE_MONITORING_CAP,
 > {
     const ACTION: &'static str = "NotifyMonitoringReport";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP: usize,
+    const MONITORING_DATA_VARIABLE_MONITORING_CAP: usize,
+> crate::validate::Validate
+for NotifyMonitoringReportRequest<
+    CustomDataType,
+    NOTIFY_MONITORING_REPORT_REQUEST_MONITOR_CAP,
+    MONITORING_DATA_VARIABLE_MONITORING_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.monitor {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("monitor"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("monitor"))?;
+            }
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        Ok(())
+    }
 }

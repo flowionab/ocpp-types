@@ -18,3 +18,12 @@ pub struct ClearedChargingLimitRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ClearedChargingLimitRequest<CustomDataType> {
     const ACTION: &'static str = "ClearedChargingLimit";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ClearedChargingLimitRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_limit_source)
+            .map_err(|error| error.in_field("chargingLimitSource"))?;
+        Ok(())
+    }
+}

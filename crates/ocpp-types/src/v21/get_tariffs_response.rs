@@ -21,6 +21,28 @@ pub struct GetTariffsResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetTariffsResponse<CustomDataType> {
     const ACTION: &'static str = "GetTariffs";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for GetTariffsResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        if let Some(value) = &self.tariff_assignments {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("tariffAssignments"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("tariffAssignments")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -67,4 +89,39 @@ for GetTariffsResponse<
     TARIFF_ASSIGNMENT_ID_TOKENS_CAP,
 > {
     const ACTION: &'static str = "GetTariffs";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+    const GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP: usize,
+    const TARIFF_ASSIGNMENT_EVSE_IDS_CAP: usize,
+    const TARIFF_ASSIGNMENT_ID_TOKENS_CAP: usize,
+> crate::validate::Validate
+for GetTariffsResponse<
+    CustomDataType,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+    GET_TARIFFS_RESPONSE_TARIFF_ASSIGNMENTS_CAP,
+    TARIFF_ASSIGNMENT_EVSE_IDS_CAP,
+    TARIFF_ASSIGNMENT_ID_TOKENS_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        if let Some(value) = &self.tariff_assignments {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("tariffAssignments"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("tariffAssignments")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

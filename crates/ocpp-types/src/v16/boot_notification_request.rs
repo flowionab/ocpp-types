@@ -31,3 +31,9 @@ pub struct BootNotificationRequest {
 impl crate::Action for BootNotificationRequest {
     const ACTION: &'static str = "BootNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for BootNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

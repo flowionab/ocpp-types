@@ -44,6 +44,40 @@ pub struct RustField {
     /// The property schema's `description`, if any, rendered as a doc
     /// comment.
     pub description: Option<String>,
+    /// The property schema's value constraints, for the generated
+    /// `Validate` impl (see [`crate::validate`]). Kept separate from
+    /// [`RustType`] because the two answer different questions: the type is
+    /// how the value is *stored* (and a large `maxLength` deliberately
+    /// isn't stored at its ceiling), while this is what the specification
+    /// says a conformant value may be.
+    pub constraints: Constraints,
+}
+
+/// The value constraints a schema property states, whether or not the
+/// generated type happens to enforce them.
+///
+/// Every field is `None` when the schema is silent, which is the common
+/// case -- most properties state nothing beyond their type.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Constraints {
+    /// `maxLength`, in characters.
+    pub max_length: Option<usize>,
+    pub min_items: Option<usize>,
+    pub max_items: Option<usize>,
+    pub minimum: Option<f64>,
+    pub maximum: Option<f64>,
+    pub multiple_of: Option<f64>,
+    /// Constraints on this array's *items*, when the property is an array.
+    /// `None` for anything else, and for arrays whose items state nothing.
+    pub item: Option<Box<Constraints>>,
+}
+
+impl Constraints {
+    /// Whether the schema stated anything at all here (including about
+    /// this array's items).
+    pub fn is_empty(&self) -> bool {
+        *self == Self::default()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

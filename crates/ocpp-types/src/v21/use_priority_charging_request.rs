@@ -17,3 +17,10 @@ pub struct UsePriorityChargingRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for UsePriorityChargingRequest<CustomDataType> {
     const ACTION: &'static str = "UsePriorityCharging";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for UsePriorityChargingRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

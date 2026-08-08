@@ -109,6 +109,40 @@
 //! advertise is conformant; reserving the protocol ceiling you will never
 //! accept is merely large.
 //!
+//! # Checking a payload against the spec
+//!
+//! Most spec limits are in the types, so a violation cannot be built: a
+//! property bounded at `maxLength: 20` is a `heapless::String<20>`. What is
+//! left over is what the `validate` feature covers — the bounds too large
+//! to store inline (see the sizing table above: those fields are a growable
+//! `String`/`Vec` under `alloc`, and a caller-chosen capacity without it),
+//! plus every `minItems`, `minimum`, `maximum` and `multipleOf` in the
+//! schemas, which no collection type can express at all.
+//!
+//! ```
+//! # #[cfg(all(feature = "validate", feature = "alloc"))] {
+//! use ocpp_types::v21::CancelReservationRequest;
+//! use ocpp_types::validate::{Validate, ValidationErrorKind};
+//!
+//! let request: CancelReservationRequest = CancelReservationRequest {
+//!     custom_data: None,
+//!     reservation_id: -1, // the schema states `minimum: 0`
+//! };
+//!
+//! let error = request.validate().unwrap_err();
+//! assert_eq!(
+//!     error.kind(),
+//!     ValidationErrorKind::BelowMinimum { value: -1.0, min: 0.0 },
+//! );
+//! # }
+//! ```
+//!
+//! This matters most on the sending side, and most of all for a CSMS: an
+//! over-long field that the type accepted comes back from the peer as a
+//! `CALLERROR` with no indication of which field caused it, while
+//! [`validate::ValidationError`] names the path to it. Nothing calls it for
+//! you — see the [`validate`] module.
+//!
 //! # Fields the spec leaves untyped
 //!
 //! 2.0.1 and 2.1's `DataTransfer` carries a `data` field the specification
@@ -201,6 +235,14 @@ mod action;
 mod custom_data;
 mod envelope;
 mod timestamp;
+// `ValidationError` carries the JSON path to the failing value inline --
+// there is no allocator to box it into, and a path that names the field is
+// the whole point of the error. That makes it larger than clippy's
+// threshold, deliberately; see `validate::MAX_PATH_DEPTH`, and the size
+// test that pins it.
+#[cfg_attr(feature = "validate", allow(clippy::result_large_err))]
+#[cfg(feature = "validate")]
+pub mod validate;
 
 #[cfg(test)]
 mod generics_test;
@@ -213,6 +255,9 @@ mod standard_test;
 
 #[cfg(test)]
 mod untyped_data_test;
+
+#[cfg(all(test, feature = "validate"))]
+mod validate_test;
 
 #[cfg(test)]
 mod v16_security_test;

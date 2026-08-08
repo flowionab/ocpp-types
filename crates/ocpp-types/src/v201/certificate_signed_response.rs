@@ -16,3 +16,16 @@ pub struct CertificateSignedResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for CertificateSignedResponse<CustomDataType> {
     const ACTION: &'static str = "CertificateSigned";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for CertificateSignedResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}

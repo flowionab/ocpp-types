@@ -17,6 +17,12 @@ pub struct DataTransferRequest {
 impl crate::Action for DataTransferRequest {
     const ACTION: &'static str = "DataTransfer";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for DataTransferRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -33,4 +39,11 @@ pub struct DataTransferRequest<const DATA_TRANSFER_REQUEST_DATA_CAP: usize = 102
 impl<const DATA_TRANSFER_REQUEST_DATA_CAP: usize> crate::Action
 for DataTransferRequest<DATA_TRANSFER_REQUEST_DATA_CAP> {
     const ACTION: &'static str = "DataTransfer";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const DATA_TRANSFER_REQUEST_DATA_CAP: usize> crate::validate::Validate
+for DataTransferRequest<DATA_TRANSFER_REQUEST_DATA_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
 }

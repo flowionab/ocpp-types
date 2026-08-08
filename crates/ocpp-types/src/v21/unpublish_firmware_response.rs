@@ -13,3 +13,12 @@ pub struct UnpublishFirmwareResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for UnpublishFirmwareResponse<CustomDataType> {
     const ACTION: &'static str = "UnpublishFirmware";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for UnpublishFirmwareResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

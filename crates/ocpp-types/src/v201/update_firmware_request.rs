@@ -25,6 +25,15 @@ pub struct UpdateFirmwareRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for UpdateFirmwareRequest<CustomDataType> {
     const ACTION: &'static str = "UpdateFirmware";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for UpdateFirmwareRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.firmware)
+            .map_err(|error| error.in_field("firmware"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -64,4 +73,21 @@ for UpdateFirmwareRequest<
     FIRMWARE_SIGNING_CERTIFICATE_CAP,
 > {
     const ACTION: &'static str = "UpdateFirmware";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const FIRMWARE_SIGNATURE_CAP: usize,
+    const FIRMWARE_SIGNING_CERTIFICATE_CAP: usize,
+> crate::validate::Validate
+for UpdateFirmwareRequest<
+    CustomDataType,
+    FIRMWARE_SIGNATURE_CAP,
+    FIRMWARE_SIGNING_CERTIFICATE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.firmware)
+            .map_err(|error| error.in_field("firmware"))?;
+        Ok(())
+    }
 }

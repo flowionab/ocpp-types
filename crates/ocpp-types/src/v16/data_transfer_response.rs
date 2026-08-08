@@ -14,6 +14,14 @@ pub struct DataTransferResponse {
 impl crate::Action for DataTransferResponse {
     const ACTION: &'static str = "DataTransfer";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for DataTransferResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -28,4 +36,13 @@ pub struct DataTransferResponse<
 impl<const DATA_TRANSFER_RESPONSE_DATA_CAP: usize> crate::Action
 for DataTransferResponse<DATA_TRANSFER_RESPONSE_DATA_CAP> {
     const ACTION: &'static str = "DataTransfer";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<const DATA_TRANSFER_RESPONSE_DATA_CAP: usize> crate::validate::Validate
+for DataTransferResponse<DATA_TRANSFER_RESPONSE_DATA_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
 }

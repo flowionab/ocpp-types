@@ -14,3 +14,12 @@ pub struct DeleteCertificateRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for DeleteCertificateRequest<CustomDataType> {
     const ACTION: &'static str = "DeleteCertificate";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for DeleteCertificateRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.certificate_hash_data)
+            .map_err(|error| error.in_field("certificateHashData"))?;
+        Ok(())
+    }
+}

@@ -7,3 +7,9 @@ pub struct ClearCacheRequest {}
 impl crate::Action for ClearCacheRequest {
     const ACTION: &'static str = "ClearCache";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearCacheRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

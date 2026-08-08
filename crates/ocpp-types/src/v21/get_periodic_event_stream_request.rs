@@ -12,3 +12,10 @@ pub struct GetPeriodicEventStreamRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetPeriodicEventStreamRequest<CustomDataType> {
     const ACTION: &'static str = "GetPeriodicEventStream";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for GetPeriodicEventStreamRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

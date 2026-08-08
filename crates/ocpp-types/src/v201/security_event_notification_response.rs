@@ -12,3 +12,10 @@ impl<CustomDataType> crate::Action
 for SecurityEventNotificationResponse<CustomDataType> {
     const ACTION: &'static str = "SecurityEventNotification";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for SecurityEventNotificationResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

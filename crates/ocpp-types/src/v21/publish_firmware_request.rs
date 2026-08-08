@@ -36,6 +36,25 @@ pub struct PublishFirmwareRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for PublishFirmwareRequest<CustomDataType> {
     const ACTION: &'static str = "PublishFirmware";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for PublishFirmwareRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.location, 2000usize)
+            .map_err(|error| error.in_field("location"))?;
+        crate::validate::check_min_i64(self.request_id, 0i64)
+            .map_err(|error| error.in_field("requestId"))?;
+        if let Some(value) = self.retries {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("retries"))?;
+        }
+        if let Some(value) = self.retry_interval {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("retryInterval"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -74,4 +93,26 @@ pub struct PublishFirmwareRequest<
 impl<CustomDataType, const PUBLISH_FIRMWARE_REQUEST_LOCATION_CAP: usize> crate::Action
 for PublishFirmwareRequest<CustomDataType, PUBLISH_FIRMWARE_REQUEST_LOCATION_CAP> {
     const ACTION: &'static str = "PublishFirmware";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const PUBLISH_FIRMWARE_REQUEST_LOCATION_CAP: usize,
+> crate::validate::Validate
+for PublishFirmwareRequest<CustomDataType, PUBLISH_FIRMWARE_REQUEST_LOCATION_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.location, 2000usize)
+            .map_err(|error| error.in_field("location"))?;
+        crate::validate::check_min_i64(self.request_id, 0i64)
+            .map_err(|error| error.in_field("requestId"))?;
+        if let Some(value) = self.retries {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("retries"))?;
+        }
+        if let Some(value) = self.retry_interval {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("retryInterval"))?;
+        }
+        Ok(())
+    }
 }

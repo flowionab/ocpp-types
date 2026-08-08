@@ -12,3 +12,9 @@ pub struct BatterySwapResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for BatterySwapResponse<CustomDataType> {
     const ACTION: &'static str = "BatterySwap";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for BatterySwapResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

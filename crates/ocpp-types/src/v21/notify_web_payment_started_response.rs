@@ -11,3 +11,10 @@ pub struct NotifyWebPaymentStartedResponse<CustomDataType = crate::NoCustomData>
 impl<CustomDataType> crate::Action for NotifyWebPaymentStartedResponse<CustomDataType> {
     const ACTION: &'static str = "NotifyWebPaymentStarted";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyWebPaymentStartedResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

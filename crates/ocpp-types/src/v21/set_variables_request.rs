@@ -16,6 +16,18 @@ pub struct SetVariablesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetVariablesRequest<CustomDataType> {
     const ACTION: &'static str = "SetVariables";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SetVariablesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_variable_data.len(), 1usize)
+            .map_err(|error| error.in_field("setVariableData"))?;
+        for (index, item) in self.set_variable_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setVariableData"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -45,4 +57,25 @@ for SetVariablesRequest<
     SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP,
 > {
     const ACTION: &'static str = "SetVariables";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SET_VARIABLES_REQUEST_SET_VARIABLE_DATA_CAP: usize,
+    const SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP: usize,
+> crate::validate::Validate
+for SetVariablesRequest<
+    CustomDataType,
+    SET_VARIABLES_REQUEST_SET_VARIABLE_DATA_CAP,
+    SET_VARIABLE_DATA_ATTRIBUTE_VALUE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_variable_data.len(), 1usize)
+            .map_err(|error| error.in_field("setVariableData"))?;
+        for (index, item) in self.set_variable_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setVariableData"))?;
+        }
+        Ok(())
+    }
 }

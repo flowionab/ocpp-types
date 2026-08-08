@@ -11,3 +11,10 @@ pub struct StatusNotificationResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for StatusNotificationResponse<CustomDataType> {
     const ACTION: &'static str = "StatusNotification";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for StatusNotificationResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

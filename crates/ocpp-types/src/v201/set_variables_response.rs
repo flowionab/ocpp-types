@@ -16,6 +16,18 @@ pub struct SetVariablesResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetVariablesResponse<CustomDataType> {
     const ACTION: &'static str = "SetVariables";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SetVariablesResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_variable_result.len(), 1usize)
+            .map_err(|error| error.in_field("setVariableResult"))?;
+        for (index, item) in self.set_variable_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setVariableResult"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -42,4 +54,23 @@ for SetVariablesResponse<
     SET_VARIABLES_RESPONSE_SET_VARIABLE_RESULT_CAP,
 > {
     const ACTION: &'static str = "SetVariables";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SET_VARIABLES_RESPONSE_SET_VARIABLE_RESULT_CAP: usize,
+> crate::validate::Validate
+for SetVariablesResponse<
+    CustomDataType,
+    SET_VARIABLES_RESPONSE_SET_VARIABLE_RESULT_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.set_variable_result.len(), 1usize)
+            .map_err(|error| error.in_field("setVariableResult"))?;
+        for (index, item) in self.set_variable_result.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("setVariableResult"))?;
+        }
+        Ok(())
+    }
 }

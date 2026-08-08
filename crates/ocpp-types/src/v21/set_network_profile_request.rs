@@ -19,6 +19,15 @@ pub struct SetNetworkProfileRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetNetworkProfileRequest<CustomDataType> {
     const ACTION: &'static str = "SetNetworkProfile";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetNetworkProfileRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.connection_data)
+            .map_err(|error| error.in_field("connectionData"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -56,4 +65,23 @@ for SetNetworkProfileRequest<
     V_P_N_SERVER_CAP,
 > {
     const ACTION: &'static str = "SetNetworkProfile";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const A_P_N_APN_CAP: usize,
+    const NETWORK_CONNECTION_PROFILE_OCPP_CSMS_URL_CAP: usize,
+    const V_P_N_SERVER_CAP: usize,
+> crate::validate::Validate
+for SetNetworkProfileRequest<
+    CustomDataType,
+    A_P_N_APN_CAP,
+    NETWORK_CONNECTION_PROFILE_OCPP_CSMS_URL_CAP,
+    V_P_N_SERVER_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.connection_data)
+            .map_err(|error| error.in_field("connectionData"))?;
+        Ok(())
+    }
 }

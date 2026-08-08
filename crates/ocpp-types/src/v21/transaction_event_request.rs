@@ -61,6 +61,55 @@ pub struct TransactionEventRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for TransactionEventRequest<CustomDataType> {
     const ACTION: &'static str = "TransactionEvent";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for TransactionEventRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.cost_details {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("costDetails"))?;
+        }
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        if let Some(value) = &self.meter_value {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("meterValue"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+            }
+        }
+        if let Some(value) = self.number_of_phases_used {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("numberOfPhasesUsed"))?;
+            crate::validate::check_max_i64(value, 3i64)
+                .map_err(|error| error.in_field("numberOfPhasesUsed"))?;
+        }
+        if let Some(value) = &self.preconditioning_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("preconditioningStatus"))?;
+        }
+        if let Some(value) = self.reservation_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("reservationId"))?;
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        crate::validate::Validate::validate(&self.transaction_info)
+            .map_err(|error| error.in_field("transactionInfo"))?;
+        crate::validate::Validate::validate(&self.trigger_reason)
+            .map_err(|error| error.in_field("triggerReason"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -163,4 +212,71 @@ for TransactionEventRequest<
     SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
 > {
     const ACTION: &'static str = "TransactionEvent";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const COST_DETAILS_CHARGING_PERIODS_CAP: usize,
+    const CHARGING_PERIOD_DIMENSIONS_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP: usize,
+    const METER_VALUE_SAMPLED_VALUE_CAP: usize,
+    const SIGNED_METER_VALUE_PUBLIC_KEY_CAP: usize,
+    const SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP: usize,
+> crate::validate::Validate
+for TransactionEventRequest<
+    CustomDataType,
+    COST_DETAILS_CHARGING_PERIODS_CAP,
+    CHARGING_PERIOD_DIMENSIONS_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    TRANSACTION_EVENT_REQUEST_METER_VALUE_CAP,
+    METER_VALUE_SAMPLED_VALUE_CAP,
+    SIGNED_METER_VALUE_PUBLIC_KEY_CAP,
+    SIGNED_METER_VALUE_SIGNED_METER_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.cost_details {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("costDetails"))?;
+        }
+        crate::validate::Validate::validate(&self.event_type)
+            .map_err(|error| error.in_field("eventType"))?;
+        if let Some(value) = &self.evse {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("evse"))?;
+        }
+        if let Some(value) = &self.id_token {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idToken"))?;
+        }
+        if let Some(value) = &self.meter_value {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("meterValue"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("meterValue"))?;
+            }
+        }
+        if let Some(value) = self.number_of_phases_used {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("numberOfPhasesUsed"))?;
+            crate::validate::check_max_i64(value, 3i64)
+                .map_err(|error| error.in_field("numberOfPhasesUsed"))?;
+        }
+        if let Some(value) = &self.preconditioning_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("preconditioningStatus"))?;
+        }
+        if let Some(value) = self.reservation_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("reservationId"))?;
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        crate::validate::Validate::validate(&self.transaction_info)
+            .map_err(|error| error.in_field("transactionInfo"))?;
+        crate::validate::Validate::validate(&self.trigger_reason)
+            .map_err(|error| error.in_field("triggerReason"))?;
+        Ok(())
+    }
 }

@@ -18,6 +18,19 @@ pub struct SetMonitoringBaseResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetMonitoringBaseResponse<CustomDataType> {
     const ACTION: &'static str = "SetMonitoringBase";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for SetMonitoringBaseResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -37,4 +50,20 @@ pub struct SetMonitoringBaseResponse<
 impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
 for SetMonitoringBaseResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "SetMonitoringBase";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for SetMonitoringBaseResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

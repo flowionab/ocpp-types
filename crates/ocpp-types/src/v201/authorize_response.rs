@@ -19,6 +19,18 @@ pub struct AuthorizeResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for AuthorizeResponse<CustomDataType> {
     const ACTION: &'static str = "Authorize";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for AuthorizeResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateStatus"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token_info)
+            .map_err(|error| error.in_field("idTokenInfo"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -52,4 +64,25 @@ for AuthorizeResponse<
     ID_TOKEN_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "Authorize";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for AuthorizeResponse<
+    CustomDataType,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.certificate_status {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("certificateStatus"))?;
+        }
+        crate::validate::Validate::validate(&self.id_token_info)
+            .map_err(|error| error.in_field("idTokenInfo"))?;
+        Ok(())
+    }
 }

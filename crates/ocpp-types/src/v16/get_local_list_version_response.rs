@@ -10,3 +10,9 @@ pub struct GetLocalListVersionResponse {
 impl crate::Action for GetLocalListVersionResponse {
     const ACTION: &'static str = "GetLocalListVersion";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetLocalListVersionResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

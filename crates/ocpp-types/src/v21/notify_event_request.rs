@@ -25,6 +25,20 @@ pub struct NotifyEventRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyEventRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyEvent";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for NotifyEventRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.event_data.len(), 1usize)
+            .map_err(|error| error.in_field("eventData"))?;
+        for (index, item) in self.event_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("eventData"))?;
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -63,4 +77,27 @@ for NotifyEventRequest<
     EVENT_DATA_ACTUAL_VALUE_CAP,
 > {
     const ACTION: &'static str = "NotifyEvent";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP: usize,
+    const EVENT_DATA_ACTUAL_VALUE_CAP: usize,
+> crate::validate::Validate
+for NotifyEventRequest<
+    CustomDataType,
+    NOTIFY_EVENT_REQUEST_EVENT_DATA_CAP,
+    EVENT_DATA_ACTUAL_VALUE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_min_items(self.event_data.len(), 1usize)
+            .map_err(|error| error.in_field("eventData"))?;
+        for (index, item) in self.event_data.iter().enumerate() {
+            crate::validate::Validate::validate(item)
+                .map_err(|error| error.in_index(index).in_field("eventData"))?;
+        }
+        crate::validate::check_min_i64(self.seq_no, 0i64)
+            .map_err(|error| error.in_field("seqNo"))?;
+        Ok(())
+    }
 }

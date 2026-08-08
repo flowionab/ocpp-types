@@ -10,3 +10,11 @@ pub struct DiagnosticsStatusNotificationRequest {
 impl crate::Action for DiagnosticsStatusNotificationRequest {
     const ACTION: &'static str = "DiagnosticsStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for DiagnosticsStatusNotificationRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

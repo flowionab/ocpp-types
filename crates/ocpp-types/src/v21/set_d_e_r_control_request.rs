@@ -42,3 +42,43 @@ pub struct SetDERControlRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "SetDERControl";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate for SetDERControlRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.control_type)
+            .map_err(|error| error.in_field("controlType"))?;
+        if let Some(value) = &self.curve {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("curve"))?;
+        }
+        if let Some(value) = &self.enter_service {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("enterService"))?;
+        }
+        if let Some(value) = &self.fixed_p_f_absorb {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("fixedPFAbsorb"))?;
+        }
+        if let Some(value) = &self.fixed_p_f_inject {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("fixedPFInject"))?;
+        }
+        if let Some(value) = &self.fixed_var {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("fixedVar"))?;
+        }
+        if let Some(value) = &self.freq_droop {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("freqDroop"))?;
+        }
+        if let Some(value) = &self.gradient {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("gradient"))?;
+        }
+        if let Some(value) = &self.limit_max_discharge {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("limitMaxDischarge"))?;
+        }
+        Ok(())
+    }
+}

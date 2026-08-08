@@ -19,3 +19,9 @@ pub struct ReserveNowRequest {
 impl crate::Action for ReserveNowRequest {
     const ACTION: &'static str = "ReserveNow";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ReserveNowRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

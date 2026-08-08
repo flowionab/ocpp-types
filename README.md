@@ -66,6 +66,7 @@ cargo run -p ocpp-types --example rpc_error_codes
 cargo run -p ocpp-types --example unbounded_fields              # const-generic capacity
 cargo run -p ocpp-types --example unbounded_fields --features alloc  # alloc collections instead
 cargo run -p ocpp-types --example envelope --features serde
+cargo run -p ocpp-types --example validate --features validate
 ```
 
 ---
@@ -113,6 +114,41 @@ let response: HeartbeatResponse<64> = HeartbeatResponse {
 With the `alloc` feature enabled instead, these fields become plain `alloc::string::String` /
 `alloc::vec::Vec<T>`, and the const generic disappears entirely — useful on targets with a real
 allocator (a CSMS backend, a simulator) that would rather not pick a bound at all.
+
+---
+
+## Validating a payload
+
+Most of the specification is already in the types: a property the schema bounds at
+`maxLength: 20` is a `heapless::String<20>`, so an over-long value cannot be constructed, let alone
+sent. Two categories escape that, and the `validate` feature covers them:
+
+- **Bounds too large to store inline.** A string bounded above 512 characters, or an array above 16
+  elements, is not held at the spec's ceiling — that would make every message containing it
+  enormous by value. Under `alloc` those fields are a growable `String`/`Vec` with no bound at all;
+  without `alloc` they are `heapless` collections at a capacity *you* pick, which may sit either
+  side of the spec's. `AuthorizeRequest::certificate` is one: `maxLength: 5500` in the schema, a
+  plain `String` in the default build.
+- **Constraints no collection type expresses.** `minItems` (usually `1`, i.e. "must not be empty"),
+  `minimum`/`maximum` on numbers, and 1.6J's `multipleOf` on charging limits.
+
+```rust
+use ocpp_types::validate::{Validate, ValidationErrorKind};
+
+request.certificate = Some("-".repeat(6000));
+
+let error = request.validate().unwrap_err();
+assert_eq!(error.kind(), ValidationErrorKind::TooLong { len: 6000, max: 5500 });
+assert_eq!(error.to_string(), "certificate: expected at most 5500 characters, got 6000");
+```
+
+Errors report the JSON path to the value, through nested structs and array indices
+(`csChargingProfiles.chargingSchedule.chargingSchedulePeriod[1].limit`), and classify as either a
+property or an occurrence constraint — the two `CALLERROR` codes OCPP answers these with.
+
+This is worth reaching for on the sending side, and most of all in a CSMS, where the unbounded
+fields live: an over-long payload otherwise comes back as a `CALLERROR` that names no field.
+Nothing calls it for you — validation never runs on the serialize path.
 
 ---
 
@@ -195,7 +231,8 @@ message types. See [`crates/ocpp-types/examples/envelope.rs`](crates/ocpp-types/
 | Feature | Default | Effect                                                                             |
 | ------- | ------- | ----------------------------------------------------------------------------------- |
 | `serde` | off     | `Serialize`/`Deserialize` on every type, plus [`Action`]'s JSON helpers.             |
-| `alloc` | off     | Fields with no spec-given bound become `alloc` collections instead of const-generic `heapless` ones. Combine with `serde` to also serialize them. |
+| `alloc` | **on**  | Fields with no spec-given bound become `alloc` collections instead of const-generic `heapless` ones. Combine with `serde` to also serialize them. |
+| `validate` | off | `Validate` on every message: checks the schema constraints the types can't carry (see [Validating a payload](#validating-a-payload)). |
 
 Without any features, the crate has exactly one dependency: [`heapless`](https://docs.rs/heapless).
 

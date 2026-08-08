@@ -5,6 +5,30 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- A `validate` feature (off by default): `Validate` on every generated message and nested type,
+  checking a payload against the schema constraints the types themselves cannot carry.
+
+  Two kinds. First, bounds the types deliberately do not hold: a string bounded above 512
+  characters, or an array above 16 elements, is not stored at the spec's ceiling — under `alloc` it
+  is a growable `String`/`Vec` with no bound at all, and without `alloc` it is a `heapless`
+  collection at a caller-chosen capacity that may sit either side of the spec's. 53 string fields
+  and 20 arrays across the three versions are in this position; `AuthorizeRequest::certificate` is
+  the obvious one, `maxLength: 5500` in the schema and a plain `String` in the default build.
+  Second, constraints no collection type can express: `minItems` (40 in 2.0.1, 93 in 2.1, nearly
+  all of them `1`), `minimum`/`maximum`, and 1.6J's `multipleOf` on charging limits.
+
+  `ValidationError` reports the first violation with the JSON path that reaches it — through nested
+  structs and array indices — and classifies it as a property or an occurrence constraint, the two
+  `CALLERROR` codes OCPP answers these with. Allocation-free and `no_std`, like the rest of the
+  crate. Nothing calls it implicitly: the serialize path is unchanged.
+
+  Fields the types already bound emit no check, so the feature costs only what it can actually
+  catch. See the `validate` module and `examples/validate.rs`.
+
 ## [0.2.0] - 2026-08-08
 
 ### Added

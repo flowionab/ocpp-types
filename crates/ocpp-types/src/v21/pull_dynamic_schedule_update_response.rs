@@ -22,6 +22,23 @@ impl<CustomDataType> crate::Action
 for PullDynamicScheduleUpdateResponse<CustomDataType> {
     const ACTION: &'static str = "PullDynamicScheduleUpdate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for PullDynamicScheduleUpdateResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.schedule_update {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("scheduleUpdate"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -44,4 +61,24 @@ pub struct PullDynamicScheduleUpdateResponse<
 impl<CustomDataType, const STATUS_INFO_ADDITIONAL_INFO_CAP: usize> crate::Action
 for PullDynamicScheduleUpdateResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
     const ACTION: &'static str = "PullDynamicScheduleUpdate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for PullDynamicScheduleUpdateResponse<CustomDataType, STATUS_INFO_ADDITIONAL_INFO_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.schedule_update {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("scheduleUpdate"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

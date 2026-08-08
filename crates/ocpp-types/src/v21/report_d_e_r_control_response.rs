@@ -12,3 +12,10 @@ pub struct ReportDERControlResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ReportDERControlResponse<CustomDataType> {
     const ACTION: &'static str = "ReportDERControl";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for ReportDERControlResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

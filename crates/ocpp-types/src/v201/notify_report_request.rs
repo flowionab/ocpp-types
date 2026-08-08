@@ -29,6 +29,20 @@ pub struct NotifyReportRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyReportRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyReport";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for NotifyReportRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.report_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("reportData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("reportData"))?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -80,4 +94,29 @@ for NotifyReportRequest<
     VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP,
 > {
     const ACTION: &'static str = "NotifyReport";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP: usize,
+    const VARIABLE_ATTRIBUTE_VALUE_CAP: usize,
+    const VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP: usize,
+> crate::validate::Validate
+for NotifyReportRequest<
+    CustomDataType,
+    NOTIFY_REPORT_REQUEST_REPORT_DATA_CAP,
+    VARIABLE_ATTRIBUTE_VALUE_CAP,
+    VARIABLE_CHARACTERISTICS_VALUES_LIST_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.report_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("reportData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("reportData"))?;
+            }
+        }
+        Ok(())
+    }
 }

@@ -7,3 +7,9 @@ pub struct UpdateFirmwareResponse {}
 impl crate::Action for UpdateFirmwareResponse {
     const ACTION: &'static str = "UpdateFirmware";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UpdateFirmwareResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

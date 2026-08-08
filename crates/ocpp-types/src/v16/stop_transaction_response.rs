@@ -12,3 +12,13 @@ pub struct StopTransactionResponse {
 impl crate::Action for StopTransactionResponse {
     const ACTION: &'static str = "StopTransaction";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StopTransactionResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id_tag_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("idTagInfo"))?;
+        }
+        Ok(())
+    }
+}

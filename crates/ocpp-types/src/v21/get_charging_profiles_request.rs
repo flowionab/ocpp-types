@@ -24,6 +24,19 @@ pub struct GetChargingProfilesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetChargingProfilesRequest<CustomDataType> {
     const ACTION: &'static str = "GetChargingProfiles";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetChargingProfilesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile)
+            .map_err(|error| error.in_field("chargingProfile"))?;
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -58,4 +71,23 @@ for GetChargingProfilesRequest<
     CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP,
 > {
     const ACTION: &'static str = "GetChargingProfiles";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP: usize,
+> crate::validate::Validate
+for GetChargingProfilesRequest<
+    CustomDataType,
+    CHARGING_PROFILE_CRITERION_CHARGING_PROFILE_ID_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.charging_profile)
+            .map_err(|error| error.in_field("chargingProfile"))?;
+        if let Some(value) = self.evse_id {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("evseId"))?;
+        }
+        Ok(())
+    }
 }

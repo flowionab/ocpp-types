@@ -45,6 +45,95 @@ pub struct ReportDERControlRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for ReportDERControlRequest<CustomDataType> {
     const ACTION: &'static str = "ReportDERControl";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for ReportDERControlRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.curve {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("curve"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("curve"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("curve"))?;
+            }
+        }
+        if let Some(value) = &self.enter_service {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("enterService"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("enterService"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("enterService"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_p_f_absorb {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedPFAbsorb"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedPFAbsorb"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedPFAbsorb"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_p_f_inject {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedPFInject"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedPFInject"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedPFInject"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_var {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedVar"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedVar"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedVar"))?;
+            }
+        }
+        if let Some(value) = &self.freq_droop {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("freqDroop"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("freqDroop"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("freqDroop"))?;
+            }
+        }
+        if let Some(value) = &self.gradient {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("gradient"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("gradient"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("gradient"))?;
+            }
+        }
+        if let Some(value) = &self.limit_max_discharge {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("limitMaxDischarge"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("limitMaxDischarge"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("limitMaxDischarge")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -156,4 +245,113 @@ for ReportDERControlRequest<
     REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP,
 > {
     const ACTION: &'static str = "ReportDERControl";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP: usize,
+    const REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP: usize,
+> crate::validate::Validate
+for ReportDERControlRequest<
+    CustomDataType,
+    REPORT_D_E_R_CONTROL_REQUEST_CURVE_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_ENTER_SERVICE_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_ABSORB_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_P_F_INJECT_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FIXED_VAR_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_FREQ_DROOP_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_GRADIENT_CAP,
+    REPORT_D_E_R_CONTROL_REQUEST_LIMIT_MAX_DISCHARGE_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.curve {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("curve"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("curve"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("curve"))?;
+            }
+        }
+        if let Some(value) = &self.enter_service {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("enterService"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("enterService"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("enterService"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_p_f_absorb {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedPFAbsorb"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedPFAbsorb"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedPFAbsorb"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_p_f_inject {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedPFInject"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedPFInject"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedPFInject"))?;
+            }
+        }
+        if let Some(value) = &self.fixed_var {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("fixedVar"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("fixedVar"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("fixedVar"))?;
+            }
+        }
+        if let Some(value) = &self.freq_droop {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("freqDroop"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("freqDroop"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("freqDroop"))?;
+            }
+        }
+        if let Some(value) = &self.gradient {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("gradient"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("gradient"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("gradient"))?;
+            }
+        }
+        if let Some(value) = &self.limit_max_discharge {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("limitMaxDischarge"))?;
+            crate::validate::check_max_items(value.len(), 24usize)
+                .map_err(|error| error.in_field("limitMaxDischarge"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("limitMaxDischarge")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

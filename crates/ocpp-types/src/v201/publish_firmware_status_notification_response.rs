@@ -14,3 +14,10 @@ impl<CustomDataType> crate::Action
 for PublishFirmwareStatusNotificationResponse<CustomDataType> {
     const ACTION: &'static str = "PublishFirmwareStatusNotification";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for PublishFirmwareStatusNotificationResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

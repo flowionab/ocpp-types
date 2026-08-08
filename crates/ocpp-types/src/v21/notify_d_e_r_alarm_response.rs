@@ -11,3 +11,10 @@ pub struct NotifyDERAlarmResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyDERAlarmResponse<CustomDataType> {
     const ACTION: &'static str = "NotifyDERAlarm";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyDERAlarmResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

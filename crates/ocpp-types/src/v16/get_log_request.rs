@@ -19,3 +19,13 @@ pub struct GetLogRequest {
 impl crate::Action for GetLogRequest {
     const ACTION: &'static str = "GetLog";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for GetLogRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.log)
+            .map_err(|error| error.in_field("log"))?;
+        crate::validate::Validate::validate(&self.log_type)
+            .map_err(|error| error.in_field("logType"))?;
+        Ok(())
+    }
+}

@@ -10,3 +10,11 @@ pub struct UnlockConnectorResponse {
 impl crate::Action for UnlockConnectorResponse {
     const ACTION: &'static str = "UnlockConnector";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for UnlockConnectorResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

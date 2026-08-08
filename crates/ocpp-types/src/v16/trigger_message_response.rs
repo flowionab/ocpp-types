@@ -10,3 +10,11 @@ pub struct TriggerMessageResponse {
 impl crate::Action for TriggerMessageResponse {
     const ACTION: &'static str = "TriggerMessage";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerMessageResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

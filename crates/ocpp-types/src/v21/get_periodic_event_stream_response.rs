@@ -19,6 +19,23 @@ pub struct GetPeriodicEventStreamResponse<CustomDataType = crate::NoCustomData> 
 impl<CustomDataType> crate::Action for GetPeriodicEventStreamResponse<CustomDataType> {
     const ACTION: &'static str = "GetPeriodicEventStream";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetPeriodicEventStreamResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.constant_stream_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("constantStreamData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("constantStreamData")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -48,4 +65,27 @@ for GetPeriodicEventStreamResponse<
     GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP,
 > {
     const ACTION: &'static str = "GetPeriodicEventStream";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP: usize,
+> crate::validate::Validate
+for GetPeriodicEventStreamResponse<
+    CustomDataType,
+    GET_PERIODIC_EVENT_STREAM_RESPONSE_CONSTANT_STREAM_DATA_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.constant_stream_data {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("constantStreamData"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("constantStreamData")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }

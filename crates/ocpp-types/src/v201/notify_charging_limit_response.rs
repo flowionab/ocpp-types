@@ -11,3 +11,10 @@ pub struct NotifyChargingLimitResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyChargingLimitResponse<CustomDataType> {
     const ACTION: &'static str = "NotifyChargingLimit";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for NotifyChargingLimitResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

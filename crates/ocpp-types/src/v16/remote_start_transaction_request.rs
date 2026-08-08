@@ -19,6 +19,16 @@ pub struct RemoteStartTransactionRequest {
 impl crate::Action for RemoteStartTransactionRequest {
     const ACTION: &'static str = "RemoteStartTransaction";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for RemoteStartTransactionRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -40,4 +50,17 @@ pub struct RemoteStartTransactionRequest<
 impl<const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize> crate::Action
 for RemoteStartTransactionRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
     const ACTION: &'static str = "RemoteStartTransaction";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP: usize,
+> crate::validate::Validate
+for RemoteStartTransactionRequest<CHARGING_SCHEDULE_CHARGING_SCHEDULE_PERIOD_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfile"))?;
+        }
+        Ok(())
+    }
 }

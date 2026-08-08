@@ -24,6 +24,29 @@ pub struct GetDisplayMessagesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for GetDisplayMessagesRequest<CustomDataType> {
     const ACTION: &'static str = "GetDisplayMessages";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for GetDisplayMessagesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("id"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::check_min_i64(*item, 0i64)
+                    .map_err(|error| error.in_index(index).in_field("id"))?;
+            }
+        }
+        if let Some(value) = &self.priority {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("priority"))?;
+        }
+        if let Some(value) = &self.state {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("state"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -49,4 +72,30 @@ pub struct GetDisplayMessagesRequest<
 impl<CustomDataType, const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize> crate::Action
 for GetDisplayMessagesRequest<CustomDataType, GET_DISPLAY_MESSAGES_REQUEST_ID_CAP> {
     const ACTION: &'static str = "GetDisplayMessages";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET_DISPLAY_MESSAGES_REQUEST_ID_CAP: usize,
+> crate::validate::Validate
+for GetDisplayMessagesRequest<CustomDataType, GET_DISPLAY_MESSAGES_REQUEST_ID_CAP> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.id {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("id"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::check_min_i64(*item, 0i64)
+                    .map_err(|error| error.in_index(index).in_field("id"))?;
+            }
+        }
+        if let Some(value) = &self.priority {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("priority"))?;
+        }
+        if let Some(value) = &self.state {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("state"))?;
+        }
+        Ok(())
+    }
 }

@@ -7,3 +7,9 @@ pub struct StatusNotificationResponse {}
 impl crate::Action for StatusNotificationResponse {
     const ACTION: &'static str = "StatusNotification";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for StatusNotificationResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

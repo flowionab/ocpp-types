@@ -24,6 +24,24 @@ pub struct SendLocalListRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SendLocalListRequest<CustomDataType> {
     const ACTION: &'static str = "SendLocalList";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate for SendLocalListRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.local_authorization_list {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("localAuthorizationList"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("localAuthorizationList")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.update_type)
+            .map_err(|error| error.in_field("updateType"))?;
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -68,4 +86,33 @@ for SendLocalListRequest<
     ID_TOKEN_INFO_EVSE_ID_CAP,
 > {
     const ACTION: &'static str = "SendLocalList";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP: usize,
+    const ID_TOKEN_ADDITIONAL_INFO_CAP: usize,
+    const ID_TOKEN_INFO_EVSE_ID_CAP: usize,
+> crate::validate::Validate
+for SendLocalListRequest<
+    CustomDataType,
+    SEND_LOCAL_LIST_REQUEST_LOCAL_AUTHORIZATION_LIST_CAP,
+    ID_TOKEN_ADDITIONAL_INFO_CAP,
+    ID_TOKEN_INFO_EVSE_ID_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.local_authorization_list {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("localAuthorizationList"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("localAuthorizationList")
+                    })?;
+            }
+        }
+        crate::validate::Validate::validate(&self.update_type)
+            .map_err(|error| error.in_field("updateType"))?;
+        Ok(())
+    }
 }

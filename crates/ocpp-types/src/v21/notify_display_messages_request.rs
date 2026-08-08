@@ -23,6 +23,21 @@ pub struct NotifyDisplayMessagesRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for NotifyDisplayMessagesRequest<CustomDataType> {
     const ACTION: &'static str = "NotifyDisplayMessages";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for NotifyDisplayMessagesRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.message_info {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("messageInfo"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("messageInfo"))?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -61,4 +76,27 @@ for NotifyDisplayMessagesRequest<
     MESSAGE_CONTENT_CONTENT_CAP,
 > {
     const ACTION: &'static str = "NotifyDisplayMessages";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP: usize,
+    const MESSAGE_CONTENT_CONTENT_CAP: usize,
+> crate::validate::Validate
+for NotifyDisplayMessagesRequest<
+    CustomDataType,
+    NOTIFY_DISPLAY_MESSAGES_REQUEST_MESSAGE_INFO_CAP,
+    MESSAGE_CONTENT_CONTENT_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.message_info {
+            crate::validate::check_min_items(value.len(), 1usize)
+                .map_err(|error| error.in_field("messageInfo"))?;
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| error.in_index(index).in_field("messageInfo"))?;
+            }
+        }
+        Ok(())
+    }
 }

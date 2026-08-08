@@ -10,3 +10,11 @@ pub struct ClearChargingProfileResponse {
 impl crate::Action for ClearChargingProfileResponse {
     const ACTION: &'static str = "ClearChargingProfile";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearChargingProfileResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        Ok(())
+    }
+}

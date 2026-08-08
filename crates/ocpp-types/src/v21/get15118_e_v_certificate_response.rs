@@ -26,6 +26,25 @@ pub struct Get15118EVCertificateResponse<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for Get15118EVCertificateResponse<CustomDataType> {
     const ACTION: &'static str = "Get15118EVCertificate";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl<CustomDataType> crate::validate::Validate
+for Get15118EVCertificateResponse<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.exi_response, 17000usize)
+            .map_err(|error| error.in_field("exiResponse"))?;
+        if let Some(value) = self.remaining_contracts {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("remainingContracts"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -64,4 +83,31 @@ for Get15118EVCertificateResponse<
     STATUS_INFO_ADDITIONAL_INFO_CAP,
 > {
     const ACTION: &'static str = "Get15118EVCertificate";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    CustomDataType,
+    const GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP: usize,
+    const STATUS_INFO_ADDITIONAL_INFO_CAP: usize,
+> crate::validate::Validate
+for Get15118EVCertificateResponse<
+    CustomDataType,
+    GET15118_E_V_CERTIFICATE_RESPONSE_EXI_RESPONSE_CAP,
+    STATUS_INFO_ADDITIONAL_INFO_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::check_max_length(&self.exi_response, 17000usize)
+            .map_err(|error| error.in_field("exiResponse"))?;
+        if let Some(value) = self.remaining_contracts {
+            crate::validate::check_min_i64(value, 0i64)
+                .map_err(|error| error.in_field("remainingContracts"))?;
+        }
+        crate::validate::Validate::validate(&self.status)
+            .map_err(|error| error.in_field("status"))?;
+        if let Some(value) = &self.status_info {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("statusInfo"))?;
+        }
+        Ok(())
+    }
 }

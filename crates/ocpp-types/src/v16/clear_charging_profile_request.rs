@@ -20,3 +20,13 @@ pub struct ClearChargingProfileRequest {
 impl crate::Action for ClearChargingProfileRequest {
     const ACTION: &'static str = "ClearChargingProfile";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for ClearChargingProfileRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.charging_profile_purpose {
+            crate::validate::Validate::validate(value)
+                .map_err(|error| error.in_field("chargingProfilePurpose"))?;
+        }
+        Ok(())
+    }
+}

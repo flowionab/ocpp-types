@@ -36,3 +36,10 @@ pub struct SetMonitoringLevelRequest<CustomDataType = crate::NoCustomData> {
 impl<CustomDataType> crate::Action for SetMonitoringLevelRequest<CustomDataType> {
     const ACTION: &'static str = "SetMonitoringLevel";
 }
+#[cfg(feature = "validate")]
+impl<CustomDataType> crate::validate::Validate
+for SetMonitoringLevelRequest<CustomDataType> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        Ok(())
+    }
+}

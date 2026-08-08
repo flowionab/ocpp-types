@@ -14,3 +14,11 @@ pub struct TriggerMessageRequest {
 impl crate::Action for TriggerMessageRequest {
     const ACTION: &'static str = "TriggerMessage";
 }
+#[cfg(feature = "validate")]
+impl crate::validate::Validate for TriggerMessageRequest {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        crate::validate::Validate::validate(&self.requested_message)
+            .map_err(|error| error.in_field("requestedMessage"))?;
+        Ok(())
+    }
+}

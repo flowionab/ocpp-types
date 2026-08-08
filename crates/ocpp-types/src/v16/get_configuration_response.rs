@@ -17,6 +17,20 @@ pub struct GetConfigurationResponse {
 impl crate::Action for GetConfigurationResponse {
     const ACTION: &'static str = "GetConfiguration";
 }
+#[cfg(all(feature = "validate", feature = "alloc"))]
+impl crate::validate::Validate for GetConfigurationResponse {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.configuration_key {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("configurationKey")
+                    })?;
+            }
+        }
+        Ok(())
+    }
+}
 #[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -51,4 +65,25 @@ for GetConfigurationResponse<
     GET_CONFIGURATION_RESPONSE_UNKNOWN_KEY_CAP,
 > {
     const ACTION: &'static str = "GetConfiguration";
+}
+#[cfg(all(feature = "validate", not(feature = "alloc")))]
+impl<
+    const GET_CONFIGURATION_RESPONSE_CONFIGURATION_KEY_CAP: usize,
+    const GET_CONFIGURATION_RESPONSE_UNKNOWN_KEY_CAP: usize,
+> crate::validate::Validate
+for GetConfigurationResponse<
+    GET_CONFIGURATION_RESPONSE_CONFIGURATION_KEY_CAP,
+    GET_CONFIGURATION_RESPONSE_UNKNOWN_KEY_CAP,
+> {
+    fn validate(&self) -> Result<(), crate::validate::ValidationError> {
+        if let Some(value) = &self.configuration_key {
+            for (index, item) in value.iter().enumerate() {
+                crate::validate::Validate::validate(item)
+                    .map_err(|error| {
+                        error.in_index(index).in_field("configurationKey")
+                    })?;
+            }
+        }
+        Ok(())
+    }
 }
