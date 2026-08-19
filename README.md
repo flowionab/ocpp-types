@@ -1,3 +1,9 @@
+<a href="https://flowion.io">
+  <img src="https://flowion.io/brand/github-banner.png"
+       alt="Flowion — charging infrastructure, made easy. Open source from the team behind flowion.io."
+       width="100%">
+</a>
+
 # OCPP Types
 
 [![CI](https://github.com/flowionab/ocpp-types/actions/workflows/ci.yml/badge.svg)](https://github.com/flowionab/ocpp-types/actions/workflows/ci.yml)
