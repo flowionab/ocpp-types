@@ -25,7 +25,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 # whose point is embedded/no-alloc. Bump this once serde-json-core follows;
 # the wrapper types' `TryFrom` impls already handle 0.9's `CapacityError`, so
 # it should be a one-line change.
-heapless = "0.8"
+heapless = "0.9"
 serde = { version = "1", default-features = false, features = ["derive"], optional = true }
 serde-json-core = { version = "0.6", optional = true }
 # Interop only, never the representation: `OcppTimestamp` stays the crate's
