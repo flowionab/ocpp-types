@@ -27,7 +27,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 # it should be a one-line change.
 heapless = "0.9"
 serde = { version = "1", default-features = false, features = ["derive"], optional = true }
-serde-json-core = { version = "0.6", optional = true }
+serde-json-core = { version = "0.7", optional = true }
 # Interop only, never the representation: `OcppTimestamp` stays the crate's
 # own 16-byte type, and this adds conversions for callers already using
 # chrono. `default-features = false` keeps it off the `std` path.
